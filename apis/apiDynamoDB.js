@@ -23,13 +23,21 @@ dotenv.config();
 
 const dynamoDBClient = new DynamoDBClient({
     region: 'us-east-2', // Reemplaza con tu región deseada
-    credentials: fromIni({ profile: "zing-zang-main" }),
+    credentials: fromEnv(),
 });
+
+  // Utiliza el cliente de DynamoDB para realizar operaciones en la base de datos
+const dynamoDB = new DynamoDB({ client: dynamoDBClient });
+
+/*const dynamoDBClient = new DynamoDBClient({
+    region: 'us-east-2', // Reemplaza con tu región deseada
+    credentials: fromIni({ profile: "zing-zang-main" }),
+});*/
 
 const docClient = DynamoDBDocumentClient.from(dynamoDBClient);
 
   // Utiliza el cliente de DynamoDB para realizar operaciones en la base de datos
-const dynamoDB = new DynamoDB({ client: dynamoDBClient });
+//const dynamoDB = new DynamoDB({ client: dynamoDBClient });
 
 //main();
 
