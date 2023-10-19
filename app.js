@@ -26,10 +26,9 @@ const options = {
         './routes/SingIn.js',
         './routes/edits.js',
         './routes/payments.js',
-        './routes/security.js',
-        "./routes/mubert.js",
-        "./routes/tiktok.js",
-        "./routes/IAsongs.js",
+        "./routes/courses.js",
+        "./routes/lessons.js",
+        "./routes/quizzes.js"
     ],
 };
 
@@ -51,10 +50,9 @@ app.use('/api/singup', require('./routes/SingUp'));
 app.use('/api/singin', require('./routes/SingIn'));
 app.use('/api/edits', require('./routes/edits'));
 app.use('/api/payments', require('./routes/payments'));
-app.use('/api/security', require('./routes/security'));
-app.use("/api/Spotify", require("./routes/mubert.js"));
-app.use("/api/tiktok", require("./routes/tiktok.js"));
-app.use("/api/IAsongs/", require("./routes/IAsongs.js"));
+app.use("/api/courses", require("./routes/courses"));
+app.use("/api/lessons", require("./routes/lessons"));
+app.use("/api/quizzes", require("./routes/quizzes"));
 
 app.use((req, res, next) => {
     res.setHeader('Access-Control-Allow-Origin', '*');
@@ -71,5 +69,5 @@ function getRouteFiles() {
     .map(file => path.join(routeDir, file));
 }
 
-const PORT = process.env.PORT || 8282;
+const PORT = process.env.PORT || 4242;
 app.listen(PORT, () => console.log("server up en", PORT));

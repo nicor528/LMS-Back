@@ -124,11 +124,8 @@ function verifyKey (id, key) {
             })
             docClient.send(command).then(result => {
                 const lastKey = result.Item.key
-                if(lastKey == key){
-                    res(newCode)
-                }else{
-                    rej(1)
-                }
+                console.log(lastKey, key)
+                lastKey == key ? res(newCode) : rej(1)
             }).catch(error => {
                 console.log(error);
                 rej(error)
