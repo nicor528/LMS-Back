@@ -31,7 +31,7 @@ function createCourse () {
 function getCourses () {
     return(
         new Promise (async (res, rej) => {
-            fetch("http://127.0.0.1:1337/api/courses", {
+            fetch("http://3.145.119.21:1337/api/courses", {
                 method: "GET",
                 headers: {
                     Authorization: `Bearer ${process.env.STRAPI_TOKEN}`,
