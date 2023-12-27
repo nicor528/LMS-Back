@@ -2,8 +2,8 @@ const express = require('express');
 const { getCourseLessons, getCourses } = require('../apis/apiStrapi');
 const router = express.Router();
 
-router.post("/getCourseLessons", async (req,res) => {
-    const course_ID = req.body.course_ID;
+router.get("/getCourseLessons", async (req,res) => {
+    const course_ID = req.query.course_ID;
     if(course_ID){
         /*
         getCourseLessons(courseID).then(async (lessons) => {
