@@ -30,8 +30,6 @@ const options = {
     apis: [
         './routes/SingUp.js',
         './routes/SingIn.js',
-        './routes/edits.js',
-        './routes/payments.js',
         "./routes/courses.js",
         "./routes/lessons.js",
         "./routes/quizzes.js"
@@ -54,8 +52,6 @@ app.use(secu);*/
 
 app.use('/api/singup', require('./routes/SingUp'));
 app.use('/api/singin', require('./routes/SingIn'));
-app.use('/api/edits', require('./routes/edits'));
-app.use('/api/payments', require('./routes/payments'));
 app.use("/api/courses", require("./routes/courses"));
 app.use("/api/lessons", require("./routes/lessons"));
 app.use("/api/quizzes", require("./routes/quizzes"));
