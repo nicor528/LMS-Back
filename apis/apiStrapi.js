@@ -93,7 +93,7 @@ function getCourses () {
             }).then(async (result) => {
                 //console.log(result)
                 const data = await result.json();
-                //console.log(data)
+                console.log(data)
                 res(data)
             }).catch(error => {
                 console.log(error)
