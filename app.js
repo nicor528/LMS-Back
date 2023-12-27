@@ -13,6 +13,11 @@ const secu = require("./routes/security");*/
 
 const app = express();
 
+const privateKey = fs.readFileSync('clave-privada.pem', 'utf8');
+const certificate = fs.readFileSync('certificado-autofirmado.pem', 'utf8');
+const credentials = { key: privateKey, cert: certificate };
+const httpsServer = https.createServer(credentials, app);
+
 const options = {
     swaggerDefinition: {
       info: {
@@ -69,5 +74,9 @@ function getRouteFiles() {
     .map(file => path.join(routeDir, file));
 }
 
-const PORT = process.env.PORT || 4242;
+httpsServer.listen(4242, () => {
+  console.log('Servidor HTTPS en ejecución en el puerto 443');
+});
+
+const PORT = process.env.PORT || 4243;
 app.listen(PORT, () => console.log("server up en", PORT));
