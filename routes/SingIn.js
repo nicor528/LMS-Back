@@ -6,7 +6,6 @@
  */
 
 const express = require('express');
-const { createUser, createID, getUser, getID, getKey } = require('../apis/apiDynamoDB');
 const { SingInPass, resetPass } = require('../apis/apiAuth');
 const { getUser2 } = require('../apis/apiStrapi');
 const router = express.Router();

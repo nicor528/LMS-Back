@@ -1,7 +1,17 @@
 const dotenv = require('dotenv');
 const { default: fetch } = require('node-fetch');
-const { generateAlphanumericCode } = require('./apiDynamoDB');
 dotenv.config();
+
+function generateAlphanumericCode() {
+    const characters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
+    let code = '';
+
+    for (let i = 0; i < 16; i++) {
+      const randomIndex = Math.floor(Math.random() * characters.length);
+      code += characters.charAt(randomIndex);
+    }
+    return code;
+}
 
 //${process.env.STRAPI_TOKEN}
 function createCourse () {

@@ -5,7 +5,6 @@
  *   description: SingUp operations
  */
 const express = require('express');
-const { createUser, createID, setNewKey, generateAlphanumericCode, setPat, getID } = require('../apis/apiDynamoDB');
 const router = express.Router();
 const { SingUpEmail1 } = require('../apis/apiAuth');
 const { createUser2 } = require('../apis/apiStrapi');

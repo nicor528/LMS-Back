@@ -1,6 +1,5 @@
 const express = require('express');
 const { createCourse, getCourses, vinculateCourse, finishCourse, getAllUserCourses, finishLesson } = require('../apis/apiStrapi');
-const { verifyKey, setNewKey } = require('../apis/apiDynamoDB');
 const router = express.Router();
 
 router.post("/createCourse", async (req, res) => {
