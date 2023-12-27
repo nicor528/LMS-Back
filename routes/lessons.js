@@ -10,8 +10,8 @@ router.get("/getCourseLessons", async (req,res) => {
             res.status(200).send({data: lessons, status: true})
         })*/
         getCourses().then(async (data) => {
-            const course = await data.data.filter(item => item.attributes.course_ID === course_ID)
-            console.log(course[0])
+            const course = await data.data.filter(item => item.attributes.courseID === course_ID)
+            //console.log(course[0])
             res.status(200).send({data: course[0].attributes.lms_lessons.data, status: true})
         }).catch(error => {res.status(400).send({error, status: false})})
     }else{
