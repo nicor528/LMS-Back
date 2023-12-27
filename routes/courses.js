@@ -1,5 +1,5 @@
 const express = require('express');
-const { createCourse, getCourses, vinculateCourse, finishCourse } = require('../apis/apiStrapi');
+const { createCourse, getCourses, vinculateCourse, finishCourse, getAllUserCourses, finishLesson } = require('../apis/apiStrapi');
 const { verifyKey, setNewKey } = require('../apis/apiDynamoDB');
 const router = express.Router();
 
@@ -22,49 +22,73 @@ router.get("/getCourses", async (req, res) => {
 })
 
 router.post("/addCourseToUser", async (req, res) => {
-    const userID = req.body.userID;
-    const courseID = req.body.courseID;
-    const key = req.body.key;
-    if(userID && courseID && key){
-        verifyKey(userID, key).then(newKey => {
-            //setNewKey(userID, newKey).then(data => {
-                vinculateCourse(userID, courseID).then(data => {
-                    const response = {
-                        ...data.data
-                    }
-                    res.status(200).send({data: response, status: true})
-                }).catch(error => {res.status(400).send({error, status: false})})
-            //}).catch(error => {res.status(400).send({error, status: false})})
-        }).catch(error => {
-            console.log(error)
-            if(error == 1){
-                res.status(400).send({message: "bad key", error, status: false})
-            }else{
-                res.status(400).send({error, status: false})
+    const user_ID = req.body.user_ID;
+    const course_ID = req.body.course_ID.toString();
+    const course_title = req.body.course_title;
+    //const key = req.body.key;
+    if(user_ID && course_ID && course_title){
+        vinculateCourse(user_ID, course_ID).then(data => {
+            const response = {
+                ...data.data
             }
-        })
+            res.status(200).send({data: response, status: true})
+        }).catch(error => {res.status(400).send({error, status: false})})
     }else{
         res.status(401).send({message: "Missing data in the body", status: false})
     }
 })
 
 router.post("/finishCourse", async (req, res) => {
-    const userID = req.body.userID;
-    const id = req.body.id;
-    const key = req.body.key;
-    if(userID && id && key){
-        verifyKey(userID, key).then(newKey => {
-            finishCourse(id, userID).then(data => {
+    const user_ID = req.body.user_ID;
+    const course_ID = req.body.course_ID.toString();
+    //const id = req.body.id;
+    //const key = req.body.key;
+    if(user_ID && course_ID){
+        getAllUserCourses().then(data => {
+            const allCourses = data.data.filter(data => data.attributes.user_ID === user_ID && data.attributes.course_ID === course_ID);
+            finishLesson(allCourses[0].id, "finish").then(data => {
                 res.status(200).send({data: data.data, status: true})
             }).catch(error => {res.status(400).send({error, status: false})})
-        }).catch(error => {
-            console.log(error)
-            if(error == 1){
-                res.status(400).send({message: "bad key", error, status: false})
-            }else{
-                res.status(400).send({error, status: false})
-            }
-        })
+        }).catch(error => {res.status(400).send({error, status: false})})
+    }else{
+        res.status(401).send({message: "Missing data in the body", status: false})
+    }
+})
+
+router.get("/get-user-courses", (req, res) => {
+    const user_ID = req.body.user_ID;
+    if(user_ID){
+        getAllUserCourses().then(data => {
+            const allCourses = data.data.filter(data => data.attributes.user_ID === user_ID)
+            getCourses().then(data => {
+                let newCourses = []
+                const courses = data.data;
+                allCourses.map(item => {
+                    const course = courses.find(course => course.attributes.courseID === item.attributes.course_ID)
+                    item.attributes.course_name = course.attributes.technology;
+                    item.attributes.level = course.attributes.level;
+                    newCourses.push(item);
+                })
+                res.status(200).send({data: newCourses, status: true})
+            }).catch(error => console.log(error))
+        }).catch(error => {res.status(400).send({error, status: false})})
+    }else{
+        res.status(401).send({message: "Missing ID", status: false})
+    }
+})
+
+router.post("/finish-lesson", (req, res) => {
+    const user_ID = req.body.user_ID;
+    const course_ID = req.body.course_ID;
+    const lesson_number = req.body.lesson_number.toString();
+    if(user_ID && course_ID && lesson_number){
+        getAllUserCourses().then(data => {
+            const allCourses = data.data.filter(data => data.attributes.user_ID === user_ID && data.attributes.course_ID === course_ID);
+            //const user_course = allCourses.find(item => item.attributes.courseID === course_ID);
+            finishLesson(allCourses[0].id, lesson_number).then(data => {
+                res.status(200).send({data: data.data, status: true})
+            }).catch(error => {res.status(400).send({error, status: false})})
+        }).catch(error => {res.status(400).send({error, status: false})})
     }else{
         res.status(401).send({message: "Missing data in the body", status: false})
     }

@@ -8,6 +8,7 @@
 const express = require('express');
 const { createUser, createID, getUser, getID, getKey } = require('../apis/apiDynamoDB');
 const { SingInPass, resetPass } = require('../apis/apiAuth');
+const { getUser2 } = require('../apis/apiStrapi');
 const router = express.Router();
 
 /**
@@ -48,17 +49,9 @@ router.post("/singInEmail", async (req, res) => {
     const pass = req.body.pass;
     if(email && pass){
         SingInPass(email, pass).then(user => {
-            getID(user.uid).then(id => {
-                getKey(id).then(key => {
-                    getUser(id).then(async (user) => {
-                        const data = await {
-                            user,
-                            key
-                        }
-                        res.status(200).send({data, status: true, message: "succefull singIn"})
-                    }).catch(error => {res.status(400).send({error, status: false})})
-                }).catch(error => {res.status(400).send({error, status: false})})
-            }).catch(error => {res.status(400).send({error, status: false})})
+            getUser2(user.uid).then(user => {
+                res.status(200).send({user, status: true, message: "login succefull"})
+            }).catch(error => {res.status(400).send({message: "Wrong email or password", status: false})})
         }).catch(error => {res.status(400).send({message: "Wrong email or password", status: false})})
     }else{
         res.status(401).send({message: "Missing data in the body", status: false})
@@ -99,23 +92,9 @@ router.post("/singInEmail", async (req, res) => {
 router.post("/singInWithId", async (req, res) => {
     const uid = req.body.uid;
     if(uid){
-        getID(uid).then(id => {
-            getKey(id).then(key => {
-                getUser(id).then(async (user) => {
-                    const data = await {
-                        user,
-                        key
-                    }
-                    res.status(200).send({data, status:true, message: "succesfull singIn"})
-                }).catch(error => {res.status(400).send({error, status:false})})
-            }).catch(error => {res.status(400).send({error, status:false})})
-        }).catch(error => {
-            if(error == 1){
-                res.status(400).send({message: "No User find", status: false})
-            }else{
-                res.status(400).send({error, status: false})
-            }
-        })
+        getUser2(user.uid).then(user => {
+            res.status(200).send({user, status: true, message: "login succefull"})
+        }).catch(error => {res.status(400).send({message: "Wrong email or password", status: false})})
     }else{
         res.status(401).send({message: "missing uid", status: false})
     }
