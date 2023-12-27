@@ -92,7 +92,7 @@ router.post("/singInEmail", async (req, res) => {
 router.post("/singInWithId", async (req, res) => {
     const uid = req.body.uid;
     if(uid){
-        getUser2(user.uid).then(user => {
+        getUser2(uid).then(user => {
             res.status(200).send({user, status: true, message: "login succefull"})
         }).catch(error => {res.status(400).send({message: "Wrong email or password", status: false})})
     }else{
