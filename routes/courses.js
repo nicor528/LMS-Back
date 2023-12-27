@@ -56,7 +56,7 @@ router.post("/finishCourse", async (req, res) => {
 })
 
 router.get("/get-user-courses", (req, res) => {
-    const user_ID = req.body.user_ID;
+    const user_ID = req.query.user_ID;
     if(user_ID){
         getAllUserCourses().then(data => {
             const allCourses = data.data.filter(data => data.attributes.user_ID === user_ID)
