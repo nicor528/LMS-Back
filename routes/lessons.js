@@ -3,7 +3,7 @@ const { getCourseLessons, getCourses } = require('../apis/apiStrapi');
 const router = express.Router();
 
 router.get("/getCourseLessons", async (req,res) => {
-    const course_ID = req.query.course_ID;
+    const course_ID = req.query.course_ID.toString();
     if(course_ID){
         /*
         getCourseLessons(courseID).then(async (lessons) => {
