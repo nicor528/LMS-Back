@@ -24,9 +24,9 @@ router.get("/getCourses", async (req, res) => {
 router.post("/addCourseToUser", async (req, res) => {
     const user_ID = req.body.user_ID;
     const course_ID = req.body.course_ID.toString();
-    const course_title = req.body.course_title;
+    //const course_title = req.body.course_title;
     //const key = req.body.key;
-    if(user_ID && course_ID && course_title){
+    if(user_ID && course_ID){
         vinculateCourse(user_ID, course_ID).then(data => {
             const response = {
                 ...data.data
