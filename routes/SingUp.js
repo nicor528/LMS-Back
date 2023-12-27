@@ -70,24 +70,18 @@ router.post("/singUpGoogle", async (req, res) => {
     const lastName = req.body.lastName;
     const email = req.body.email;
     if(uid && lastName && email && name){
-        if(error == 1){
-            createUser2(name, email, uid, lastName).then(async (user) => {
-                const data = await {
-                    ...user.data
-                }
-                res.status(200).send({data, status: true, message: "registration succefull"})
-            }).catch(error => {
-                console.log(error)
-                res.status(400).send({error, status:false})
-            })
-        }else{
-            res.status(401).send({error, status:false})
-        }
+        createUser2(name, email, uid, lastName).then(async (user) => {
+            const data = await {
+                ...user.data
+            }
+            res.status(200).send({data, status: true, message: "registration succefull"})
+        }).catch(error => {
+            console.log(error)
+            res.status(400).send({error, status:false})
+        })
     }else{
         res.status(401).send({message: "Missing data in the body", status:false})
     }
-
-
 })
 
 /**
@@ -126,7 +120,7 @@ router.post("/singUpGoogle", async (req, res) => {
  *               error: Bad connection with DB
  */
 router.post("/singUpEmail", async (req, res) => {
-    console.log(req.body)
+    //console.log(req.body)
     const name = req.body.name;
     //const uid = req.body.uid;
     const email = req.body.email;
