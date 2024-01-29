@@ -72,7 +72,7 @@ function getRouteFiles() {
 }
 
 httpsServer.listen(4242, () => {
-  console.log('Servidor HTTPS en ejecución en el puerto 443');
+  console.log('Servidor HTTPS en ejecución en el puerto 4242');
 });
 
 const PORT = process.env.PORT || 4243;

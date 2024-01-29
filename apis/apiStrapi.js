@@ -18,7 +18,7 @@ function createCourse () {
     const base64Image = 'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABAAAAAQCAIAAACQkWg2AAABJ0lEQVR42mL8//8/AyMjI4cBQFJ1DwMBgZkWj42Nze3b29vQ6tBC9jy3s7OyWAZqAVoBP4zqys7MjJgUFTgrVABWC2Ezgkai+7gN4Ap1YDqsHAkBmzRABPlDMOpmOgDqA4AGY7gNwn5nGwBrK9wXIAkAqN6OvB1NgM6dNwAG1AGghDsAEIepngLUwDPo0/AhaCEzUL3AqOjNqAzaBBwA3G4V8wIAqjqLzTegN4AGgDLXrOvDawmYX9gAmAqNMb1ACMAKjOcbwAqNqzdgGuK4AG+gN4Adgp6EgAHXanAdIN4AkAzqwbkD5AeB1dYPX9ggRAzgAC1yA3eABzXsAma+EM9L7Aa+A7Jv8CzXuAa4TqwpzgApDAAe1ACrMHoCpyH4AwA6gNzTuawCgCwAikA8BCO8wN9wZwA1CHkAImA6S7c0GAEA8gXgAyBVsBaZoByAwA1AGghbgA2gAImAjAgwNAgZgB3GfAGZmBgA5pIGAC3ZAoCdFBYAY4ACy3fAubgAVwAw0IBPACbLdYABWU0wNAvW7Aa7v8wRZqRzCgxwAAAABJRU5ErkJggg==';
     return(
         new Promise(async (res, rej) => {
-            fetch('https://cms.pragra.io/api/courses', {
+            fetch(`${process.env.url}/courses`, {
                 method: "POST",
                 headers: {
                     Authorization: `Bearer ${process.env.STRAPI_TOKEN}`,
@@ -39,12 +39,12 @@ function createCourse () {
     )
 }
 
-function createUser2 (name, email, uid, lastName) {
+function createUser2(name, email, uid, lastName, birth, postal_code, city, country, province, phone, street_name) {
     //const id = generateAlphanumericCode();
     const key = generateAlphanumericCode();
     return(
         new Promise (async (res, rej) => {
-            fetch('https://cms.pragra.io/api/lms-users', {
+            fetch(`${process.env.url}/lms-users`, {
                 method: "POST",
                 headers: {
                     Authorization: `Bearer ${process.env.STRAPI_TOKEN}`,
@@ -56,14 +56,22 @@ function createUser2 (name, email, uid, lastName) {
                         name: name,
                         email: email,
                         last_name: lastName,
-                        test: key
+                        test: key,
+                        points: 0,
+                        birth: birth,
+                        postal_code: postal_code,
+                        city: city,
+                        country: country,
+                        province: province,
+                        phone: phone,
+                        street_name : street_name,
                     }
                 })
             }).then(async (response) => {
-                const data =  await response.json()
-                console.log(data)
-                console.log(response)
-                res(data)
+                const user =  await response.json()
+                //console.log(data)
+                //console.log(response)
+                res(user)
             }).catch(error => {
                 console.log(error)
                 rej(error)
@@ -75,7 +83,7 @@ function createUser2 (name, email, uid, lastName) {
 function getUser2(id) {
     return(
         new Promise ((res, rej) => {
-            fetch(`https://cms.pragra.io/api/lms-users?user_ID=${id}`,{
+            fetch(`${process.env.url}/lms-users?populate=*`,{
                 method: "GET",
                 headers: {
                     Authorization: `Bearer ${process.env.STRAPI_TOKEN}`
@@ -94,7 +102,29 @@ function getUser2(id) {
 function getCourses () {
     return(
         new Promise (async (res, rej) => {
-            fetch("https://cms.pragra.io/api/lms-courses?populate=*", {
+            fetch(`${process.env.url}/lms-courses?populate=*`, {
+                method: "GET",
+                headers: {
+                    Authorization: `Bearer ${process.env.STRAPI_TOKEN}`,
+                    "Content-Type": 'application/json',
+                },
+            }).then(async (result) => {
+                //console.log(result)
+                const data = await result.json();
+                console.log(data)
+                res(data)
+            }).catch(error => {
+                console.log(error)
+                rej(error)
+            })
+        })
+    )
+}
+
+function getOneCourse (id) {
+    return(
+        new Promise (async (res, rej) => {
+            fetch(`${process.env.url}/lms-courses/${id}?populate[lms_modules][populate]=*`, {
                 method: "GET",
                 headers: {
                     Authorization: `Bearer ${process.env.STRAPI_TOKEN}`,
@@ -116,7 +146,7 @@ function getCourses () {
 function getAllUserCourses () {
     return(
         new Promise (async (res, rej) => {
-            fetch("https://cms.pragra.io/api/lms-user-courses", {
+            fetch(`${process.env.url}/lms-user-courses?populate[lms_course][populate]=*`, {
                 method: "GET",
                 headers: {
                     Authorization: `Bearer ${process.env.STRAPI_TOKEN}`,
@@ -135,10 +165,11 @@ function getAllUserCourses () {
     )
 }
 
+
 function getQuizz (courseID) {
     return(
         new Promise (async (res, rej) => {
-            fetch("https://cms.pragra.io/api/quizzes?populate=*", {
+            fetch(`${process.env.url}/quizzes?populate=*`, {
                 method: "GET",
                 headers: {
                     Authorization: `Bearer ${process.env.STRAPI_TOKEN}`,
@@ -172,10 +203,31 @@ function getQuizz (courseID) {
     )
 }
 
-function vinculateCourse (userID, courseID) {
+function getOneUserCourse (id) {
+    return(
+        new Promise( (res, rej) => {
+            fetch(`${process.env.url}/lms-user-courses/${id}?populate=*`, {
+                method: "GET",
+                headers: {
+                    Authorization: `Bearer ${process.env.STRAPI_TOKEN}`,
+                    "Content-Type": 'application/json',
+                }
+            }).then(async (response) => {
+                const data = await response.json();
+                console.log(data);
+                res(data)
+            }).catch(error => {
+                console.log(error);
+                rej(error)
+            })
+        })
+    )
+}
+
+function vinculateCourse (userID, courseID, course, n_lessons) {
     return(
         new Promise (async (res, rej) => {
-            fetch("https://cms.pragra.io/api/lms-user-courses", {
+            fetch(`${process.env.url}/lms-user-courses`, {
                 method: "POST",
                 headers: {
                     Authorization: `Bearer ${process.env.STRAPI_TOKEN}`,
@@ -184,7 +236,8 @@ function vinculateCourse (userID, courseID) {
                 body: await JSON.stringify({
                     data: {
                         user_ID: userID,
-                        course_ID: courseID,
+                        //courseID: courseID,
+                        /*
                         lesson1: false,
                         lesson2: false,
                         lesson3: false,
@@ -195,7 +248,14 @@ function vinculateCourse (userID, courseID) {
                         lesson8: false,
                         lesson9: false,
                         lesson10: false,
-                        finish: false
+                        finish: false,*/
+                        start_date: course.attributes.start_date,
+                        end_date: course.attributes.end_date,
+                        lms_course: {
+                            connect: [course.id]
+                        },
+                        total_lessons: n_lessons,
+                        percentage: 0
                     }
                 })
             }).then(async (result) => {
@@ -211,10 +271,64 @@ function vinculateCourse (userID, courseID) {
     )
 }
 
+function relationCourseWithUser(userid, user_course_id){
+    return(
+        new Promise ((res,rej) => {
+            fetch(`${process.env.url}/lms-users/${userid}`, {
+                method: "PUT",
+                headers: {
+                    Authorization: `Bearer ${process.env.STRAPI_TOKEN}`,
+                    "Content-Type": 'application/json',
+                },
+                body: JSON.stringify({
+                    data: {
+                        lms_user_courses: {
+                            connect: [parseInt(user_course_id)]
+                        }
+                    }
+                })
+            }).then(async (response) => {
+                const data = await response.json();
+                console.log(data);
+                res(data)
+            }).catch(error => {
+                console.log(error);
+                rej(error)
+            })
+        })
+    )
+}
+
+function updatePercentage (newper, id){
+    return(
+        new Promise((res, rej) => {
+            fetch(`${process.env.url}/lms-user-courses/${id}`, {
+                method: "PUT",
+                headers: {
+                    Authorization: `Bearer ${process.env.STRAPI_TOKEN}`,
+                    "Content-Type": 'application/json',
+                },
+                body: JSON.stringify({
+                    data: {
+                        percentage: newper
+                    }
+                })
+            }).then(async (result) => {
+                console.log(result);
+                const data = await result.json();
+                res(data)
+            }).catch(error => {
+                console.log(error);
+                rej(error)
+            })
+        })
+    )
+}
+
 function finishCourse(id, userID) {
     return(
         new Promise (async (res, rej) => {
-            fetch(`https://cms.pragra.io/api/lms-user-courses/${id}`, {
+            fetch(`${process.env.url}/lms-user-courses/${id}`, {
                 method: "PUT",
                 headers: {
                     Authorization: `Bearer ${process.env.STRAPI_TOKEN}`,
@@ -223,6 +337,62 @@ function finishCourse(id, userID) {
                 body: await JSON.stringify({
                     data: {
                         finish: true
+                    }
+                })
+            }).then(async (result) => {
+                console.log(result);
+                const data = await result.json();
+                res(data)
+            }).catch(error => {
+                console.log(error);
+                rej(error)
+            })
+        })
+    )
+}
+
+function vinculateLesson(user_ID, lesson_ID) {
+    return(
+        new Promise (async (res, rej) => {
+            fetch(`${process.env.url}/lms-lessons/${lesson_ID}`, {
+                method: "PUT",
+                headers: {
+                    Authorization: `Bearer ${process.env.STRAPI_TOKEN}`,
+                    "Content-Type": 'application/json',
+                },
+                body: await JSON.stringify({
+                    data: {
+                        lms_users: {
+                            connect: [parseInt(user_ID)]
+                        }
+                    }
+                })
+            }).then(async (result) => {
+                console.log(result);
+                const data = await result.json();
+                res(data)
+            }).catch(error => {
+                console.log(error);
+                rej(error)
+            })
+        })
+    )
+}
+
+function vinculateModule(user_ID, module_ID) {
+    return(
+        new Promise (async (res, rej) => {
+            fetch(`${process.env.url}/lms-modules/${module_ID}`, {
+                method: "PUT",
+                headers: {
+                    Authorization: `Bearer ${process.env.STRAPI_TOKEN}`,
+                    "Content-Type": 'application/json',
+                },
+                body: await JSON.stringify({
+                    data: {
+                        lms_users: {
+                            connect: [parseInt(user_ID)]
+                        }
                     }
                 })
             }).then(async (result) => {
@@ -285,7 +455,7 @@ function finishLesson(id, lesson) {
     return(
         new Promise (async (res, rej) => {
             const data = await selectLesson(lesson)
-            fetch(`https://cms.pragra.io/api/lms-user-courses/${id}`, {
+            fetch(`${process.env.url}/lms-user-courses/${id}`, {
                 method: "PUT",
                 headers: {
                     Authorization: `Bearer ${process.env.STRAPI_TOKEN}`,
@@ -309,7 +479,7 @@ function finishLesson(id, lesson) {
 function getCourseLessons (courseID) {
     return(
         new Promise (async (res, rej) => {
-            fetch("https://cms.pragra.io/api/lms-lessons?populate=*", {
+            fetch(`${process.env.url}/lms-lessons?populate=*`, {
                 method: "GET",
                 headers: {
                     Authorization: `Bearer ${process.env.STRAPI_TOKEN}`,
@@ -345,6 +515,27 @@ function getCourseLessons (courseID) {
     )
 }
 
+function getModule(id){
+    return(
+        new Promise ((res,rej) => {
+            fetch(`${process.env.url}/lms-modules/${id}?populate=*`, {
+                method: "GET",
+                headers: {
+                    Authorization: `Bearer ${process.env.STRAPI_TOKEN}`,
+                    "Content-Type": 'application/json',
+                }
+            }).then(async (response) => {
+                const data = await response.json();
+                console.log(data);
+                res(data)
+            }).catch(error => {
+                console.log(error);
+                rej(error)
+            })
+        })
+    )
+}
+
 
 
 
@@ -358,7 +549,14 @@ module.exports = {
     createUser2,
     getUser2,
     getAllUserCourses,
-    finishLesson
+    finishLesson,
+    relationCourseWithUser,
+    getModule,
+    getOneCourse,
+    vinculateLesson,
+    vinculateModule,
+    getOneUserCourse,
+    updatePercentage
 
 
 }

@@ -7,7 +7,7 @@
 const express = require('express');
 const router = express.Router();
 const { SingUpEmail1 } = require('../apis/apiAuth');
-const { createUser2 } = require('../apis/apiStrapi');
+const { createUser2, getUser2 } = require('../apis/apiStrapi');
 
 /**
  * @swagger
@@ -68,12 +68,23 @@ router.post("/singUpGoogle", async (req, res) => {
     const name = req.body.name;
     const lastName = req.body.lastName;
     const email = req.body.email;
-    if(uid && lastName && email && name){
-        createUser2(name, email, uid, lastName).then(async (user) => {
-            const data = await {
+    const birth = req.body.birth;
+    const postal_code  = req.body.postal_code;
+    const city = req.body.country;
+    const province = req.body.province;
+    const phone = req.body.phone;
+    const street_name = req.body.street_name;
+    if(uid && lastName && email && name && birth && postal_code && city && province && phone && street_name){
+        createUser2(name, email, uid, lastName, birth, postal_code, city, province, phone, street_name).then(async (user) => {
+            /*const data = await {
                 ...user.data
-            }
-            res.status(200).send({data, status: true, message: "registration succefull"})
+            }*/
+            getUser2(uid).then(user => {
+                res.status(200).send({data: user, status: true, message: "registration succefull"})
+            }).catch(error => {
+                console.log(error)
+                res.status(400).send({error, status:false})
+            })
         }).catch(error => {
             console.log(error)
             res.status(400).send({error, status:false})
@@ -125,13 +136,23 @@ router.post("/singUpEmail", async (req, res) => {
     const email = req.body.email;
     const lastName = req.body.lastName;
     const pass = req.body.pass;
-    if(name && email && pass && lastName){
+    const birth = req.body.birth;
+    const postal_code  = req.body.postal_code;
+    const city = req.body.country;
+    const province = req.body.province;
+    const phone = req.body.phone;
+    const street_name = req.body.street_name;
+    if(name && email && pass && lastName && birth && postal_code && city && province && phone && street_name){
         SingUpEmail1(email, pass).then(user1 => {
-            createUser2(name, email, user1.uid, lastName).then(async (user) => {
-                const data = await {
+            createUser2(name, email, user1.uid, lastName, birth, postal_code, city, province, phone, street_name).then(async (user) => {
+                /*const data = await {
                     ...user.data
-                }
-                res.status(200).send({data, status: true, message: "Success"})
+                }*/
+                getUser2(user1.uid).then(user => {
+                    res.status(200).send({data: user, status: true, message: "Success"})
+                }).catch(error => {
+                    res.status(400).send({error, status: false})
+                })
             }).catch(error => {
                 res.status(400).send({error, status: false})
             })
@@ -148,6 +169,8 @@ router.post("/singUpEmail", async (req, res) => {
         res.status(401).send({message: "Missing data in the body", status: false})
     }
 })
+
+
 
 router.post("/singUpFace")
 
