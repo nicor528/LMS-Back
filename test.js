@@ -113,11 +113,6 @@ getCourses().then(courses => {
             })
         })
         console.log(n_lessons)
-        /*course.map(item => {
-            item.attributes.lms_modules.data.map(item => {
-                console.log(item)
-            })
-        })*/
     }).catch(error => console.log(error))
 
 }).catch(error => console.log(error))

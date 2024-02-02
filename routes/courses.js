@@ -123,7 +123,7 @@ router.get("/get-ongoing-courses", (req, res) => {
     }
 })
 
-router.get("/get-fnished-courses", (req, res) => {
+router.get("/get-finished-courses", (req, res) => {
     const user_ID = req.query.user_ID;
     if(user_ID){
         getAllUserCourses().then(async (data) => {
@@ -134,12 +134,12 @@ router.get("/get-fnished-courses", (req, res) => {
         res.status(401).send({message: "Missing data", status: false})
     }
 })
-
+/*
 router.get("/get-all-courses", (req, res) => {
     getCourses().then(courses => {
         res.status(200).send({data: courses, status: true})
     }).catch(error => {res.status(400).send({error, status: false})})
-})
+})*/
 
 /*
 router.post("/finish-lesson", (req, res) => {
@@ -159,24 +159,6 @@ router.post("/finish-lesson", (req, res) => {
     }
 })*/
 
-router.post("/finish-lesson", (req, res) => {
-    const user_course_ID = req.body.user_course_ID;
-    const user_ID = req.body.user_ID;
-    const lesson_ID = parseInt(req.body.lesson_ID);
-    if(user_ID && lesson_ID && user_course_ID){
-        vinculateLesson(user_ID, lesson_ID).then(response => {
-            getOneUserCourse(data => {
-                let completed_porcent = 100/data.data.attributes.total_lessons;
-                completed_porcent = completed_porcent + data.data.attributes.percentage;
-                updatePercentage(completed_porcent, user_course_ID).then(response => {
-                    res.status(200).send({data: response.data, status: true})
-                }).catch(error => {res.status(400).send({error, status: false})})
-            }).catch(error => {res.status(400).send({error, status: false})})
-        }).catch(error => {res.status(400).send({error, status: false})})
-    }else{
-        res.status(400).send({message: "Missing data", status: false})
-    }
-})
 
 
 

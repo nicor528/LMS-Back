@@ -67,7 +67,7 @@ router.post("/singUpGoogle", async (req, res) => {
     const uid = req.body.uid;
     const name = req.body.name;
     const lastName = req.body.lastName;
-    const email = req.body.email;
+    const email = req.body.email; 
     const birth = req.body.birth;
     const postal_code  = req.body.postal_code;
     const city = req.body.country;
@@ -80,7 +80,7 @@ router.post("/singUpGoogle", async (req, res) => {
                 ...user.data
             }*/
             getUser2(uid).then(user => {
-                res.status(200).send({data: user, status: true, message: "registration succefull"})
+                res.status(200).send({data: user.data, status: true, message: "registration succefull"})
             }).catch(error => {
                 console.log(error)
                 res.status(400).send({error, status:false})
@@ -149,7 +149,7 @@ router.post("/singUpEmail", async (req, res) => {
                     ...user.data
                 }*/
                 getUser2(user1.uid).then(user => {
-                    res.status(200).send({data: user, status: true, message: "Success"})
+                    res.status(200).send({data: user.data, status: true, message: "Success"})
                 }).catch(error => {
                     res.status(400).send({error, status: false})
                 })

@@ -13,11 +13,11 @@ const pay = require("./routes/payments");
 const secu = require("./routes/security");*/
 
 const app = express();
-
+/*
 const privateKey = fs.readFileSync('clave-privada.pem', 'utf8');
 const certificate = fs.readFileSync('certificado-autofirmado.pem', 'utf8');
 const credentials = { key: privateKey, cert: certificate };
-const httpsServer = https.createServer(credentials, app);
+const httpsServer = https.createServer(credentials, app);*/
 
 const options = {
     swaggerDefinition: {
@@ -32,7 +32,8 @@ const options = {
         './routes/SingIn.js',
         "./routes/courses.js",
         "./routes/lessons.js",
-        "./routes/quizzes.js"
+        "./routes/quizzes.js",
+        "./routes/certificate.js"
     ],
 };
 
@@ -55,6 +56,7 @@ app.use('/api/singin', require('./routes/SingIn'));
 app.use("/api/courses", require("./routes/courses"));
 app.use("/api/lessons", require("./routes/lessons"));
 app.use("/api/quizzes", require("./routes/quizzes"));
+app.use("/api/certificates", require("./routes/certificate"));
 
 app.use((req, res, next) => {
     res.setHeader('Access-Control-Allow-Origin', '*');
@@ -70,10 +72,10 @@ function getRouteFiles() {
     .filter(file => file.endsWith('.js'))
     .map(file => path.join(routeDir, file));
 }
-
+/*
 httpsServer.listen(4242, () => {
   console.log('Servidor HTTPS en ejecución en el puerto 4242');
-});
+});*/
 
 const PORT = process.env.PORT || 4243;
 app.listen(PORT, () => console.log("server up en", PORT));

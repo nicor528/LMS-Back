@@ -165,6 +165,26 @@ function getAllUserCourses () {
     )
 }
 
+function getQuiz1 (id) {
+    return(
+        new Promise (async (res, rej) => {
+            fetch(`${process.env.url}/quizzes/${id}?populate=*`, {
+                method: "GET",
+                headers: {
+                    Authorization: `Bearer ${process.env.STRAPI_TOKEN}`,
+                    "Content-Type": 'application/json',
+                }
+            }).then(async (result) => {
+                const data = await result.json();
+                res(data)
+            }).catch(error => {
+                console.log(error);
+                rej(error)
+            })
+        })
+    )
+}
+
 
 function getQuizz (courseID) {
     return(
@@ -476,6 +496,48 @@ function finishLesson(id, lesson) {
     )
 }
 
+function getLesson(id){
+    return(
+        new Promise((res, rej) => {
+            fetch(`${process.env.url}/lms-lessons/${id}?populate=*`, {
+                method: "GET",
+                headers: {
+                    Authorization: `Bearer ${process.env.STRAPI_TOKEN}`,
+                    "Content-Type": 'application/json',
+                }
+            }).then(async (result) => {
+                const data = await result.json();
+                console.log(data)
+                res(data)
+            }).catch(error => {
+                console.log(error)
+                rej(error)
+            })
+        })
+    )
+}
+
+function getCertificate(id){
+    return(
+        new Promise((res, rej) => {
+            fetch(`${process.env.url}/lms-certificates/${id}?populate=*`, {
+                method: "GET",
+                headers: {
+                    Authorization: `Bearer ${process.env.STRAPI_TOKEN}`,
+                    "Content-Type": 'application/json',
+                }
+            }).then(async (result) => {
+                const data = await result.json();
+                console.log(data)
+                res(data)
+            }).catch(error => {
+                console.log(error)
+                rej(error)
+            })
+        })
+    )
+}
+
 function getCourseLessons (courseID) {
     return(
         new Promise (async (res, rej) => {
@@ -556,7 +618,10 @@ module.exports = {
     vinculateLesson,
     vinculateModule,
     getOneUserCourse,
-    updatePercentage
+    updatePercentage,
+    getLesson,
+    getQuiz1,
+    getCertificate
 
 
 }
