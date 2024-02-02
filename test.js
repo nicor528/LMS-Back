@@ -1,5 +1,5 @@
 const { SingUpEmail1 } = require("./apis/apiAuth");
-const { createUser2, getUser2, getCourses, vinculateCourse, getAllUserCourses, finishLesson, relationCourseWithUser, getModule, getOneCourse } = require("./apis/apiStrapi");
+const { createUser2, getUser2, getCourses, vinculateCourse, getAllUserCourses, finishLesson, relationCourseWithUser, getModule, getOneCourse, getQuiz1 } = require("./apis/apiStrapi");
 /*
 createUser2("nicolas", "test23@gmail.com").then(data => {
     console.log(data.data.attributes)
@@ -91,16 +91,16 @@ getAllUserCourses().then(data => {
     const allCourses = data.data.filter(data => data.attributes.user_ID === "TcAvjO1vpccuj1pT7ALwmGQdk342")
     console.log(allCourses[2].attributes.lms_course.data)
 })*/
-
+/*
 getCourses().then(courses => {
     console.log(courses.data[3].attributes.lms_modules)
-})
+})*/
 /*
 getModule(1).then(module => {
     console.log(module.data.attributes.lms_lessons)
 }).catch(error => console.log(error))
 */
-
+/*
 getCourses().then(courses => {
     const course = courses.data.filter(item => item.id === 6);
     let n_lessons = 0;
@@ -115,4 +115,22 @@ getCourses().then(courses => {
         console.log(n_lessons)
     }).catch(error => console.log(error))
 
-}).catch(error => console.log(error))
+}).catch(error => console.log(error))*/
+
+getQuiz1(1).then(quizz => {
+    const answers = [{question: "what is a variable?", answer: "i dont know"}, {question: "what is a function", answer: "asdsad"}]
+    console.log(quizz.data.attributes.lms_questions.data[0])
+    const right_answers = quizz.data.attributes.lms_questions.data.map(question => {
+        return {correct_answer: question.attributes.correct_answer_1, question: question.attributes.question}
+    })
+    const questions_N = quizz.data.attributes.lms_questions.data.length
+    let correct_answers = 0;
+    answers.map(answer => {
+        const correct = right_answers.find(data => data.question === answer.question && data.correct_answer === answer.answer)
+        if(correct){
+            correct_answers ++
+        }
+    })
+    const total_score = (correct_answers * 100)/questions_N
+    console.log(total_score)
+})
