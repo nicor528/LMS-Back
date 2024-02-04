@@ -26,7 +26,7 @@ router.get("/get-single-course", (req, res) => {
         getCourses().then(courses => {
             const course = courses.data.filter(item => item.id === course_ID);
             res.status(200).send({data: course, status: true})
-        })
+        }).catch(error => {res.status(400).send({error, status: false})})
     }else{
         res.status(401).send({message: "Missing data in the body", status: false})
     }
