@@ -136,15 +136,15 @@ router.post("/singUpEmail", async (req, res) => {
     const email = req.body.email;
     const lastName = req.body.lastName;
     const pass = req.body.pass;
-    const birth = req.body.birth;
-    const postal_code  = req.body.postal_code;
-    const city = req.body.country;
-    const province = req.body.province;
-    const phone = req.body.phone;
-    const street_name = req.body.street_name;
-    if(name && email && pass && lastName && birth && postal_code && city && province && phone && street_name){
+    // const birth = req.body.birth;
+    // const postal_code  = req.body.postal_code;
+    // const city = req.body.country;
+    // const province = req.body.province;
+    // const phone = req.body.phone;
+    // const street_name = req.body.street_name;
+    if(name && email && pass && lastName ){
         SingUpEmail1(email, pass).then(user1 => {
-            createUser2(name, email, user1.uid, lastName, birth, postal_code, city, province, phone, street_name).then(async (user) => {
+            createUser2(name, email, user1.uid, lastName).then(async (user) => {
                 /*const data = await {
                     ...user.data
                 }*/
