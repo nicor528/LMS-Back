@@ -20,7 +20,7 @@ router.post("/get-quizz-result", (req, res) => {
     const user_ID = req.body.user_ID;
     if(answers && quiz_ID && user_ID){
         getQuiz1(quiz_ID).then(quizz => {
-            const answers = [{question: "what is a variable?", answer: "i dont know"}, {question: "what is a function", answer: "asdsad"}]
+            //const answers = [{question: "what is a variable?", answer: "i dont know"}, {question: "what is a function", answer: "asdsad"}]
             console.log(quizz.data.attributes.lms_questions.data[0])
             const right_answers = quizz.data.attributes.lms_questions.data.map(question => {
                 return {correct_answer: question.attributes.correct_answer_1, question: question.attributes.question}
