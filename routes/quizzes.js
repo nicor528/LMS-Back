@@ -16,7 +16,7 @@ router.post("/get-quizz", async (req, res) => {
 
 router.post("/get-quizz-result", (req, res) => {
     const answers = req.body.answers;
-    const quiz_ID = req.body.quizz;
+    const quiz_ID = req.body.quizz_ID;
     const user_ID = req.body.user_ID;
     if(answers && quiz_ID && user_ID){
         getQuiz1(quiz_ID).then(quizz => {
