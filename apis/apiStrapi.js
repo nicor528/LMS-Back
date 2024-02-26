@@ -598,6 +598,26 @@ function getModule(id){
     )
 }
 
+function getUsers(){
+    return(
+        new Promise ((res,rej) => {
+            fetch(`${process.env.url}/lms-users`, {
+                method: "GET",
+                headers: {
+                    Authorization: `Bearer ${process.env.STRAPI_TOKEN}`,
+                    "Content-Type": 'application/json',
+                }
+            }).then(async (response) => {
+                const data = await response.json();
+                console.log(data);
+                res(data)
+            }).catch(error => {
+                console.log(error);
+                rej(error)
+            })
+        })
+    )
+}
 
 
 
@@ -621,7 +641,8 @@ module.exports = {
     updatePercentage,
     getLesson,
     getQuiz1,
-    getCertificate
+    getCertificate,
+    getUsers
 
 
 }

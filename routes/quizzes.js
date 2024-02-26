@@ -17,7 +17,7 @@ router.post("/get-quizz", async (req, res) => {
 router.post("/get-quizz-result", (req, res) => {
     const answers = req.body.answers;
     const quiz_ID = req.body.quizz;
-    const user_ID = req.body.quiz_ID;
+    const user_ID = req.body.user_ID;
     if(answers && quiz_ID && user_ID){
         getQuiz1(quiz_ID).then(quizz => {
             const answers = [{question: "what is a variable?", answer: "i dont know"}, {question: "what is a function", answer: "asdsad"}]
