@@ -37,7 +37,7 @@ router.post("/get-quizz-result", (req, res) => {
             console.log(total_score)
             const pass = total_score > 50 ? true : false
             saveScore(user_ID, quiz_ID, total_score).then((score) => { // to do
-                vinculateQuizzWithUser(quiz_ID, user_ID).then(result => { //to do
+                vinculateQuizzWithUser(user_ID, quiz_ID).then(result => { //to do
                     createTries(user_ID, quiz_ID).then(result => {
                         res.status(200).send({data: {score: total_score, aproved: pass}, status: true})
                     }).catch(error => {res.status(400).send({error, status: false})})
