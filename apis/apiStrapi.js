@@ -652,7 +652,7 @@ function saveScore(user_ID, quiz_ID, score) {
 }
 
 function vinculateQuizzWithUser(user_ID, quiz_ID) {
-    return(
+    return(//
         new Promise (async (res, rej) => {
             fetch(`${process.env.url}/quizzes/${quiz_ID}`, {
                 method: "PUT",
