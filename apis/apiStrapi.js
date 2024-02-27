@@ -662,7 +662,7 @@ function vinculateQuizzWithUser(user_ID, quiz_ID) {
                 },
                 body: await JSON.stringify({
                     data: {
-                        lms_users: {
+                        lms_user: {
                             connect: [user_ID]
                         }
                     }
