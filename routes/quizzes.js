@@ -1,5 +1,5 @@
 const express = require('express');
-const { getQuizz, getQuiz1 } = require('../apis/apiStrapi');
+const { getQuizz, getQuiz1, saveScore, vinculateQuizzWithUser, createTries } = require('../apis/apiStrapi');
 const router = express.Router();
 
 
@@ -36,9 +36,11 @@ router.post("/get-quizz-result", (req, res) => {
             const total_score = (correct_answers * 100)/questions_N
             console.log(total_score)
             const pass = total_score > 50 ? true : false
-            saveScore("data", "data", total_score).then((score) => { // to do
+            saveScore(user_ID, quiz_ID, total_score).then((score) => { // to do
                 vinculateQuizzWithUser(quiz_ID, user_ID).then(result => { //to do
-                    res.status(200).send({data: {score: total_score, aproved: pass}, status: true})
+                    createTries(user_ID, quiz_ID).then(result => {
+                        res.status(200).send({data: {score: total_score, aproved: pass}, status: true})
+                    }).catch(error => {res.status(400).send({error, status: false})})
                 }).catch(error => {res.status(400).send({error, status: false})})
             }).catch(error => {res.status(400).send({error, status: false})})
         }).catch(error => {res.status(400).send({error, status: false})})

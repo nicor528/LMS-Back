@@ -619,7 +619,96 @@ function getUsers(){
     )
 }
 
+function saveScore(user_ID, quiz_ID, score) {
+    return(
+        new Promise (async (res, rej) => {
+            fetch(`${process.env.url}/lms-quizz-scores/`, {
+                method: "POST",
+                headers: {
+                    Authorization: `Bearer ${process.env.STRAPI_TOKEN}`,
+                    "Content-Type": 'application/json',
+                },
+                body: await JSON.stringify({
+                    data: {
+                        lms_users: {
+                            connect: [user_ID]
+                        },
+                        lms_quizzes: {
+                            connect: [quiz_ID]
+                        },
+                        score: score
+                    }
+                })
+            }).then(async (result) => {
+                console.log(result);
+                const data = await result.json();
+                res(data)
+            }).catch(error => {
+                console.log(error);
+                rej(error)
+            })
+        })
+    )
+}
 
+function vinculateQuizzWithUser(user_ID, quiz_ID) {
+    return(
+        new Promise (async (res, rej) => {
+            fetch(`${process.env.url}/lms-quizzes/${quiz_ID}`, {
+                method: "PUT",
+                headers: {
+                    Authorization: `Bearer ${process.env.STRAPI_TOKEN}`,
+                    "Content-Type": 'application/json',
+                },
+                body: await JSON.stringify({
+                    data: {
+                        lms_users: {
+                            connect: [user_ID]
+                        }
+                    }
+                })
+            }).then(async (result) => {
+                console.log(result);
+                const data = await result.json();
+                res(data)
+            }).catch(error => {
+                console.log(error);
+                rej(error)
+            })
+        })
+    )
+}
+
+function createTries(user_ID, quiz_ID) {
+    return(
+        new Promise (async (res, rej) => {
+            fetch(`${process.env.url}/lms-quizz-tries/`, {
+                method: "POST",
+                headers: {
+                    Authorization: `Bearer ${process.env.STRAPI_TOKEN}`,
+                    "Content-Type": 'application/json',
+                },
+                body: await JSON.stringify({
+                    data: {
+                        lms_users: {
+                            connect: [user_ID]
+                        },
+                        lms_quizzes: {
+                            connect: [quiz_ID]
+                        }
+                    }
+                })
+            }).then(async (result) => {
+                console.log(result);
+                const data = await result.json();
+                res(data)
+            }).catch(error => {
+                console.log(error);
+                rej(error)
+            })
+        })
+    )
+}
 
 module.exports = {
     createCourse,
@@ -642,7 +731,10 @@ module.exports = {
     getLesson,
     getQuiz1,
     getCertificate,
-    getUsers
+    getUsers,
+    saveScore,
+    vinculateQuizzWithUser,
+    createTries
 
 
 }
