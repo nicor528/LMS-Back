@@ -383,7 +383,7 @@ function vinculateLesson(user_ID, lesson_ID) {
                 body: await JSON.stringify({
                     data: {
                         lms_users: {
-                            connect: [parseInt(user_ID)]
+                            connect: [(user_ID)]
                         }
                     }
                 })
