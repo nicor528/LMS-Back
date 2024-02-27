@@ -654,7 +654,7 @@ function saveScore(user_ID, quiz_ID, score) {
 function vinculateQuizzWithUser(user_ID, quiz_ID) {
     return(
         new Promise (async (res, rej) => {
-            fetch(`${process.env.url}/lms-quizzes/${quiz_ID}`, {
+            fetch(`${process.env.url}/quizzes/${quiz_ID}`, {
                 method: "PUT",
                 headers: {
                     Authorization: `Bearer ${process.env.STRAPI_TOKEN}`,
@@ -662,7 +662,7 @@ function vinculateQuizzWithUser(user_ID, quiz_ID) {
                 },
                 body: await JSON.stringify({
                     data: {
-                        lms_user: {
+                        lms_users: {
                             connect: [user_ID]
                         }
                     }
