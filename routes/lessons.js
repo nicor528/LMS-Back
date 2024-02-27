@@ -58,7 +58,7 @@ router.post("/finish-lesson", (req, res) => {
     const user_course_ID = req.body.user_course_ID;
     const user_ID = req.body.user_ID;
     const lesson_ID = parseInt(req.body.lesson_ID);
-    if(user_ID && lesson_ID && user_course_ID){
+    if(user_ID && lesson_ID){
         vinculateLesson(user_ID, lesson_ID).then(response => {
             getOneUserCourse(data => {
                 let completed_porcent = 100/data.data.attributes.total_lessons;
