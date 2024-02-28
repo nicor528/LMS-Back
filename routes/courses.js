@@ -21,7 +21,7 @@ router.get("/get-all-courses", async (req, res) => {
 })
 
 router.get("/get-single-course", (req, res) => {
-    const course_ID = req.query.course_ID;
+    const course_ID = parseInt(req.query.course_ID);
     if(course_ID){
         getCourses().then(courses => {
             const course = courses.data.filter(item => item.id === course_ID);
