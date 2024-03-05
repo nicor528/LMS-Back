@@ -1,5 +1,5 @@
 const { SingUpEmail1 } = require("./apis/apiAuth");
-const { createUser2, getUser2, getCourses, vinculateCourse, getAllUserCourses, finishLesson, relationCourseWithUser, getModule, getOneCourse, getQuiz1 } = require("./apis/apiStrapi");
+const { createUser2, getUser2, getCourses, vinculateCourse, getAllUserCourses, finishLesson, relationCourseWithUser, getModule, getOneCourse, getQuiz1, getLesson, getUsers } = require("./apis/apiStrapi");
 /*
 createUser2("nicolas", "test23@gmail.com").then(data => {
     console.log(data.data.attributes)
@@ -116,7 +116,7 @@ getCourses().then(courses => {
     }).catch(error => console.log(error))
 
 }).catch(error => console.log(error))*/
-
+/*
 getQuiz1(1).then(quizz => {
     const answers = [{question: "what is a variable?", answer: "i dont know"}, {question: "what is a function", answer: "asdsad"}]
     console.log(quizz.data.attributes.lms_questions.data[0])
@@ -133,4 +133,10 @@ getQuiz1(1).then(quizz => {
     })
     const total_score = (correct_answers * 100)/questions_N
     console.log(total_score)
+})*/
+
+getUsers().then(result => {
+    console.log(result)
+}).catch(error => {
+    console.log(error)
 })
