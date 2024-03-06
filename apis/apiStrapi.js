@@ -92,7 +92,7 @@ function getUser2(id) {
                 const data =  await response.json()
                 console.log(data)
                 console.log(response)
-                console.log(data.data[7].attributes)
+                console.log(data.data)
                 const user = data.data.filter(user => user.attributes.user_ID === id)
                 console.log(user[0])
                 res(user[0])
