@@ -66,15 +66,15 @@ router.get("/test", (req,res) => {
 router.post("/singUpGoogle", async (req, res) => {
     const uid = req.body.uid;
     const email = req.body.email; 
-/*  const name = req.body.name;
+    const name = req.body.name;
     const lastName = req.body.lastName;
     const birth = req.body.birth;
     const postal_code  = req.body.postal_code;
     const city = req.body.country;
     const province = req.body.province;
     const phone = req.body.phone;
-    const street_name = req.body.street_name;*/
-    if(uid && email /* && lastName &&  name && birth && postal_code && city && province && phone && street_name */){
+    const street_name = req.body.street_name;
+    if(uid && email && lastName &&  name && birth && postal_code && city && province && phone && street_name ){
         createUser2(name, email, uid, lastName, birth, postal_code, city, province, phone, street_name).then(async (user) => {
             /*const data = await {
                 ...user.data
