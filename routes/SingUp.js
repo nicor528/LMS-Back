@@ -149,7 +149,9 @@ router.post("/singUpEmail", async (req, res) => {
                 /*const data = await {
                     ...user.data
                 }*/
+                console.log("test2")
                 console.log(user)
+                console.log("test3")
                 getUser2(user1.uid).then(user => {
                     res.status(200).send({data: user.data, status: true, message: "Success"})
                 }).catch(error => {
