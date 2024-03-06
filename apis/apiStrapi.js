@@ -93,7 +93,11 @@ function getUser2(id) {
                 console.log(data)
                 console.log(response)
                 const user = data.data.filter(user => user.attributes.user_ID === id)
+                console.log(user[0])
                 res(user[0])
+            }).catch(error => {
+                console.log(error)
+                rej(error)
             })
         })
     )
