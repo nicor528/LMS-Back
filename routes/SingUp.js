@@ -144,10 +144,12 @@ router.post("/singUpEmail", async (req, res) => {
     const street_name = req.body.street_name;
     if(name && email && pass && lastName && birth && postal_code && city && province && phone && street_name){
         SingUpEmail1(email, pass).then(user1 => {
+            console.log("test1")
             createUser2(name, email, user1.uid, lastName, birth, postal_code, city, province, phone, street_name).then(async (user) => {
                 /*const data = await {
                     ...user.data
                 }*/
+                console.log(user)
                 getUser2(user1.uid).then(user => {
                     res.status(200).send({data: user.data, status: true, message: "Success"})
                 }).catch(error => {
