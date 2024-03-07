@@ -74,8 +74,8 @@ router.post("/singUpGoogle", async (req, res) => {
     const province = req.body.province;
     const phone = req.body.phone;
     const street_name = req.body.street_name;
-    if(uid && email && lastName &&  name && birth && postal_code && city && province && phone && street_name ){
-        createUser2(name, email, uid, lastName, birth, postal_code, city, province, phone, street_name).then(async (user) => {
+    if(uid && email && lastName &&  name && postal_code && city && province && phone && street_name ){
+        createUser2(name, email, uid, lastName, birth ? birth : "2024-03-06T12:30:00Z", postal_code, city, province, phone, street_name).then(async (user) => {
             /*const data = await {
                 ...user.data
             }*/
@@ -142,10 +142,10 @@ router.post("/singUpEmail", async (req, res) => {
     const province = req.body.province;
     const phone = req.body.phone;
     const street_name = req.body.street_name;
-    if(name && email && pass && lastName && birth && postal_code && city && province && phone && street_name){
+    if(name && email && pass && lastName && postal_code && city && province && phone && street_name){
         SingUpEmail1(email, pass).then(user1 => {
             console.log("test1")
-            createUser2(name, email, user1.uid, lastName, birth, postal_code, city, province, phone, street_name).then(async (user) => {
+            createUser2(name, email, user1.uid, lastName, birth ? birth : "2024-03-06T12:30:00Z", postal_code, city, province, phone, street_name).then(async (user) => {
                 /*const data = await {
                     ...user.data
                 }*/

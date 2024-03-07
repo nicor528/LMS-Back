@@ -68,6 +68,17 @@ router.post("/singInEmail", async (req, res) => {
     }
 })
 
+router.post("/getUserInfo", (req, res) => {
+    const user_ID = req.body.user_ID;
+    if(user_ID){
+        getUser2(user_ID).then(user => {
+            res.status(200).send({data: user.data, status: true, message: "login succefull"})
+        })
+    }else{
+        res.status(401).send({message: "Missing data in the body", status: false})
+    }
+})
+
 /**
  * @swagger
  * /api/singin/singInWithId:
