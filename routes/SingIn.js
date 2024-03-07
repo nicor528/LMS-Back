@@ -7,7 +7,7 @@
 
 const express = require('express');
 const { SingInPass, resetPass } = require('../apis/apiAuth');
-const { getUser2, getAllUserCourses } = require('../apis/apiStrapi');
+const { getUser2, getAllUserCourses, editInfoUser } = require('../apis/apiStrapi');
 const router = express.Router();
 
 /**
@@ -180,6 +180,27 @@ router.post("/resetPass", async (req, res) => {
         }).catch(error => {res.status(400).send({error, status: false})})
     }else{
         res.status(401).send({message: "Missing data in the body", status: false})
+    }
+})
+
+router.post("/edit-info-user", (req, res) => {
+    const user_ID = req.body.user_ID;
+    const name = req.body.name;
+    const lastName = req.body.lastName;
+    const birth = req.body.birth;
+    const postal_code  = req.body.postal_code;
+    const city = req.body.city;
+    const province = req.body.province;
+    const country = req.body.country;
+    const street_name = req.body.street_name;
+ //   const interests = req.body.interests;
+    const academic = req.body.academic;
+    if(country && user_ID && name && lastName && birth && postal_code && city && province && street_name && academic){
+        editInfoUser(user_ID, name, lastName, birth, postal_code, city, province, street_name, academic, country).then(user => {
+            res.status(200).send({data: user, status: true, message: "sucefull"})
+        }).catch(error => {res.status(400).send({error, status: false})})
+    }else{
+        res.status(401).send({message: "Missing data in the body", status: false}) 
     }
 })
 

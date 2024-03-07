@@ -715,6 +715,40 @@ function createTries(user_ID, quiz_ID) {
     )
 }
 
+function editInfoUser(user_ID, name, lastName, birth, postal_code, city, province, street_name, academic, country) {
+    return(
+        new Promise (async (res, rej) => {
+            fetch(`${process.env.url}/lms-users/${user_ID}`, {
+                method: "PUT",
+                headers: {
+                    Authorization: `Bearer ${process.env.STRAPI_TOKEN}`,
+                    "Content-Type": 'application/json',
+                },
+                body: await JSON.stringify({
+                    data: {
+                        name: name,
+                        lastName: lastName,
+                        birth: birth,
+                        postal_code: postal_code,
+                        city: city,
+                        country: country,
+                        province: province,
+                        street_name: street_name,
+                        academic: academic
+                    }
+                })
+            }).then(async (result) => {
+                console.log(result);
+                const data = await result.json();
+                res(data)
+            }).catch(error => {
+                console.log(error);
+                rej(error)
+            })
+        })
+    )
+}
+
 module.exports = {
     createCourse,
     getCourses,
@@ -739,7 +773,8 @@ module.exports = {
     getUsers,
     saveScore,
     vinculateQuizzWithUser,
-    createTries
+    createTries,
+    editInfoUser
 
 
 }
