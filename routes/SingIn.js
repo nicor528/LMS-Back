@@ -72,8 +72,8 @@ router.get("/getUserInfo", (req, res) => {
     const user_ID = req.query.user_ID;
     if(user_ID){
         getUser2(user_ID).then(user => {
-            res.status(200).send({data: user.data, status: true, message: "login succefull"})
-        })
+            res.status(200).send({data: user, status: true, message: "sucefull"})
+        }).catch(error => {res.status(400).send({error, status: false})})
     }else{
         res.status(401).send({message: "Missing data in the body", status: false})
     }
