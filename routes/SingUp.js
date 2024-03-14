@@ -152,11 +152,17 @@ router.post("/singUpEmail", async (req, res) => {
                 console.log("test2")
                 console.log(user)
                 console.log("test3")
-                getUser2(user1.uid).then(user => {
-                    res.status(200).send({data: user.data, status: true, message: "Success"})
-                }).catch(error => {
-                    res.status(400).send({error, status: false})
+                getUser2(user1.uid)
+                .then(user => {
+                    res.status(200).send({ data: user.data, status: true, message: "Success" });
                 })
+                .catch(error => {
+                    let errorMessage = "internal error in strapi app";
+                    if (error.message) {
+                        errorMessage += `: ${error.message}`;
+                    }
+                    res.status(400).send({ message: errorMessage, status: false });
+                });
             }).catch(error => {
                 res.status(400).send({error, status: false})
             })
