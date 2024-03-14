@@ -97,7 +97,9 @@ function getUser2(id) {
                 console.log(user[0])
                 res(user[0])
             }).catch(error => {
+                console.log("123")
                 console.log(error)
+                console.log("123")
                 console.log(error.error)
                 rej(error.error)
             })
