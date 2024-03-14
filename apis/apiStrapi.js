@@ -90,11 +90,15 @@ async function getUser2(id) {
         });
 
         if (!response.ok) {
-            throw new Error('Network response was not ok');
+            throw new Error(`Error de red: ${response.status}`);
         }
 
         const data = await response.json();
         const user = data.data.find(user => user.attributes.user_ID === id);
+
+        if (!user) {
+            throw new Error("Usuario no encontrado");
+        }
 
         return user;
     } catch (error) {
