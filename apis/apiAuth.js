@@ -76,7 +76,7 @@ function SingUpEmail1 (email, pass) {
                 }if(error.code == "auth/weak-password"){
                     rej(2)
                 }else{
-                    rej(error)
+                    rej(error.code)
                 }
             })
         })
