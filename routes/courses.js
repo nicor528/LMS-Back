@@ -1,5 +1,5 @@
 const express = require('express');
-const { createCourse, getCourses, vinculateCourse, finishCourse, getAllUserCourses, finishLesson, updatePercentage } = require('../apis/apiStrapi');
+const { createCourse, getCourses, vinculateCourse, finishCourse, getAllUserCourses, finishLesson, updatePercentage, getMentor } = require('../apis/apiStrapi');
 const router = express.Router();
 
 router.post("/createCourse", async (req, res) => {
