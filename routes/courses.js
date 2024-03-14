@@ -31,26 +31,28 @@ router.get("/get-all-courses", async (req, res) => {
     }).catch(error => {res.status(400).send({error, status: false})})
 })
 
-router.get("/get-single-course", (req, res) => {
+router.get("/get-single-course", async (req, res) => {
     const course_ID = parseInt(req.query.course_ID);
     if(course_ID){
-        getCourses().then(courses => {
+        try {
+            const courses = await getCourses();
             let course = courses.data.filter(item => item.id === course_ID);
-            let mentors = []
-            console.log(course)
-            //res.status(200).send({data: course, status: true})
-            course[0].attributes.lms_mentors.data.map(mentor => {
-                getMentor(mentor.id).then(mentor => {
-                    mentors.push(mentor)
-                })
-            })
-            course[0].attributes.lms_mentors.data = mentors
-            res.status(200).send({data: course, status: true})
-        }).catch(error => {res.status(400).send({error, status: false})})
-    }else{
-        res.status(401).send({message: "Missing data in the body", status: false})
+
+            let mentorPromises = course[0].attributes.lms_mentors.data.map(mentor => {
+                return getMentor(mentor.id);
+            });
+
+            let mentors = await Promise.all(mentorPromises);
+            course[0].attributes.lms_mentors.data = mentors;
+
+            res.status(200).send({data: course, status: true});
+        } catch (error) {
+            res.status(400).send({error, status: false});
+        }
+    } else {
+        res.status(401).send({message: "Missing data in the body", status: false});
     }
-})
+});
 
 router.post("/add-course-user", async (req, res) => {
     const user_ID = req.body.user_ID;
