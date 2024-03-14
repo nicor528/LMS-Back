@@ -80,31 +80,27 @@ function createUser2(name, email, uid, lastName, birth, postal_code, city, count
     )
 }
 
-function getUser2(id) {
-    return(
-        new Promise ((res, rej) => {
-            fetch(`${process.env.url}/lms-users?populate=*`,{
-                method: "GET",
-                headers: {
-                    Authorization: `Bearer ${process.env.STRAPI_TOKEN}`
-                }
-            }).then(async (response) => {
-                const data =  await response.json()
-                console.log(data)
-                console.log(response)
-                console.log(data.data)
-                const user = data.data.filter(user => user.attributes.user_ID === id)
-                console.log(user[0])
-                res(user[0])
-            }).catch(error => {
-                console.log("123")
-                console.log(error)
-                console.log("123")
-                console.log(error.error)
-                rej(error.error)
-            })
-        })
-    )
+async function getUser2(id) {
+    try {
+        const response = await fetch(`${process.env.url}/lms-users?populate=*`, {
+            method: "GET",
+            headers: {
+                Authorization: `Bearer ${process.env.STRAPI_TOKEN}`
+            }
+        });
+
+        if (!response.ok) {
+            throw new Error('Network response was not ok');
+        }
+
+        const data = await response.json();
+        const user = data.data.find(user => user.attributes.user_ID === id);
+
+        return user;
+    } catch (error) {
+        console.error("Error al obtener el usuario:", error);
+        throw error; // Re-lanza el error para que quien llame a esta función pueda manejarlo si es necesario
+    }
 }
 
 function getCourses () {
