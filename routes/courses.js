@@ -14,6 +14,17 @@ router.post("/createCourse", async (req, res) => {
     }
 })
 
+router.get("/get-instructor-data", (req, res) => {
+    const id = req.query.id;
+    if(id){
+        getMentor(id).then(mentor => {
+            res.status(200).send({data: mentor.data, status: true})
+        })
+    }else{
+        res.status(401).send({message: "Missing data", status: false})
+    }
+})
+
 router.get("/get-all-courses", async (req, res) => {
     getCourses().then(courses => {
         res.status(200).send({data: courses.data, status: true})

@@ -501,6 +501,27 @@ function finishLesson(id, lesson) {
     )
 }
 
+function getMentor(id){
+    return(
+        new Promise((res, rej) => {
+            fetch(`${process.env.url}/lms-mentors/${id}?populate=*`, {
+                method: "GET",
+                headers: {
+                    Authorization: `Bearer ${process.env.STRAPI_TOKEN}`,
+                    "Content-Type": 'application/json',
+                }
+            }).then(async (result) => {
+                const data = await result.json();
+                console.log(data)
+                res(data)
+            }).catch(error => {
+                console.log(error)
+                rej(error)
+            })
+        })
+    )
+}
+
 function getLesson(id){
     return(
         new Promise((res, rej) => {
@@ -774,7 +795,8 @@ module.exports = {
     saveScore,
     vinculateQuizzWithUser,
     createTries,
-    editInfoUser
+    editInfoUser,
+    getMentor
 
 
 }
