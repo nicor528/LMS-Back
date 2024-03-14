@@ -98,6 +98,7 @@ function getUser2(id) {
                 res(user[0])
             }).catch(error => {
                 console.log(error)
+                console.log(error.json())
                 rej(error)
             })
         })
