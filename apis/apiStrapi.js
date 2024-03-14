@@ -90,7 +90,8 @@ async function getUser2(id) {
         });
 
         if (!response.ok) {
-            throw new Error(`Error de red: ${response.status}`);
+            const errorMessage = await response.text();
+            throw new Error(`Error de red: ${errorMessage}`);
         }
 
         const data = await response.json();
