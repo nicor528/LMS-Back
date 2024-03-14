@@ -19,7 +19,7 @@ router.get("/get-instructor-data", (req, res) => {
     if(id){
         getMentor(id).then(mentor => {
             res.status(200).send({data: mentor.data, status: true})
-        })
+        }).catch(error => {res.status(400).send({error, status: false})})
     }else{
         res.status(401).send({message: "Missing data", status: false})
     }
@@ -35,8 +35,16 @@ router.get("/get-single-course", (req, res) => {
     const course_ID = parseInt(req.query.course_ID);
     if(course_ID){
         getCourses().then(courses => {
-            const course = courses.data.filter(item => item.id === course_ID);
+            let course = courses.data.filter(item => item.id === course_ID);
+            let mentors = []
             console.log(course)
+            //res.status(200).send({data: course, status: true})
+            course[0].attributes.lms_mentors.data.map(mentor => {
+                getMentor(mentor.id).then(mentor => {
+                    mentors.push(mentor)
+                })
+            })
+            course[0].attributes.lms_mentors.data = mentors
             res.status(200).send({data: course, status: true})
         }).catch(error => {res.status(400).send({error, status: false})})
     }else{
