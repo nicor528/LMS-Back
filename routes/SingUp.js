@@ -165,7 +165,7 @@ router.post("/singUpEmail", async (req, res) => {
                 res.status(401).send({message: "email already in use", status: false})
             }if(error == 2){
                 res.status(401).send({message: "To short password", status: false})
-            }else{
+            }if(error != 1 && error != 2){
                 res.status(400).send({message: error, status: false})
             }
         })
