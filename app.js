@@ -60,6 +60,11 @@ app.use("/api/quizzes", require("./routes/quizzes"));
 app.use("/api/certificates", require("./routes/certificate"));
 app.use("/api/notifications", require("./routes/notification"));
 
+app.get('/', (req, res) => {
+  console.log('Received request: ', req.url);
+  res.status(200).send('API Running');
+});
+
 app.use((req, res, next) => {
     res.setHeader('Access-Control-Allow-Origin', '*');
     res.setHeader('Access-Control-Allow-Methods', 'GET, POST, OPTIONS, PUT, PATCH, DELETE');
