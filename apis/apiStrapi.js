@@ -108,6 +108,33 @@ async function getUser2(id) {
     }
 }
 
+async function getUser3(id) {
+    try {
+        const response = await fetch(`${process.env.url}/lms-users/${id}?populate=*`, {
+            method: "GET",
+            headers: {
+                Authorization: `Bearer ${process.env.STRAPI_TOKEN}`
+            }
+        });
+
+        if (!response.ok) {
+            const errorMessage = await response.text();
+            throw new Error(`Error de red: ${errorMessage}`);
+        }
+
+        const data = await response.json();
+
+        if (!user) {
+            throw new Error("Usuario no encontrado");
+        }
+
+        return data;
+    } catch (error) {
+        console.error("Error al obtener el usuario:", error);
+        throw error; // Re-lanza el error para que quien llame a esta función pueda manejarlo si es necesario
+    }
+}
+
 function getCourses () {
     return(
         new Promise (async (res, rej) => {
@@ -800,7 +827,8 @@ module.exports = {
     vinculateQuizzWithUser,
     createTries,
     editInfoUser,
-    getMentor
+    getMentor,
+    getUser3,
 
 
 }

@@ -7,7 +7,7 @@
 const express = require('express');
 const router = express.Router();
 const { SingUpEmail1 } = require('../apis/apiAuth');
-const { createUser2, getUser2 } = require('../apis/apiStrapi');
+const { createUser2, getUser2, getUser3 } = require('../apis/apiStrapi');
 
 /**
  * @swagger
@@ -152,7 +152,7 @@ router.post("/singUpEmail", async (req, res) => {
                 console.log("test2")
                 console.log(user)
                 console.log("test3")
-                getUser2(user1.uid)
+                getUser3(user.data.id)
                 .then(user => {
                     res.status(200).send({ data: user.data, status: true, message: "Success" });
                 })
