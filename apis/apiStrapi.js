@@ -124,10 +124,6 @@ async function getUser3(id) {
 
         const data = await response.json();
 
-        if (!user) {
-            throw new Error("Usuario no encontrado");
-        }
-
         return data;
     } catch (error) {
         console.error("Error al obtener el usuario:", error);
