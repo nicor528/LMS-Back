@@ -307,7 +307,10 @@ function vinculateCourse (userID, courseID, course, n_lessons) {
                             connect: [course.id]
                         },
                         total_lessons: n_lessons,
-                        percentage: 0
+                        percentage: 0,
+                        courseID: courseID,
+                        name: course.attributes.technology,
+                        imageUrl: "https://cms.pragra.io" + course.attributes.imageUrl.data.attributes.url
                     }
                 })
             }).then(async (result) => {
