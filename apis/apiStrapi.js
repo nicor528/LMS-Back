@@ -276,6 +276,10 @@ function getOneUserCourse (id) {
     )
 }
 
+function createNotification(id, ){
+
+}
+
 function vinculateCourse (userID, courseID, course, n_lessons) {
     return(
         new Promise (async (res, rej) => {
@@ -828,6 +832,7 @@ module.exports = {
     editInfoUser,
     getMentor,
     getUser3,
-
+    createNotification,
+    
 
 }
