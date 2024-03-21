@@ -1,5 +1,5 @@
 const express = require('express');
-const { addMessage, getUser2, createConversation, getAllConversations, getConversation } = require('../apis/apiStrapi');
+const { addMessage, getUser2, createConversation, getAllConversations, getConversation, readMessage } = require('../apis/apiStrapi');
 const router = express.Router();
 
 router.post("/add-message", (req, res) => {
@@ -55,6 +55,20 @@ router.get("/get-conversation-messages", (req, res) => {
         }).catch(error => {res.status(400).send({error, status: false})})
     }else{
         res.status(400).send({message: "missing data", status: false}) 
+    }
+})
+
+router.post("/read-message", (req, res) => {
+    const user_ID = req.body.user_ID;
+    const message_id = req.body.message_id;
+    if(user_ID && message_id){
+        getUser2(user_ID).then(user => {
+            readMessage(user.id, message_id).then(messsasge => {
+                res.status(200).send({data: messsasge, status: true, message: "sucefull"})
+            }).catch(error => {res.status(400).send({error, status: false})})
+        }).catch(error => {res.status(400).send({error, status: false})})
+    }else{
+        res.status(400).send({message: "missing data in the body", status: false})
     }
 })
 

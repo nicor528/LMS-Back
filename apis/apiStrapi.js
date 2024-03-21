@@ -909,6 +909,34 @@ function getAllConversations(array) {
     });
 }
 
+function readMessage(user_ID, message_id){
+    return(
+        new Promise((res, rej) => {
+            fetch(`${process.env.url}/lms-messages/${message_id}`, {
+                method: "PUT",
+                headers: {
+                    Authorization: `Bearer ${process.env.STRAPI_TOKEN}`,
+                    "Content-Type": 'application/json',
+                },
+                body: JSON.stringify({
+                    data: {
+                        lms_users: {
+                            connect: [user_ID]
+                        }
+                    }
+                })
+            }).then(async (result) => {
+                console.log(result);
+                const data = await result.json();
+                res(data)
+            }).catch(error => {
+                console.log(error);
+                rej(error)
+            })
+        })
+    )
+}
+
 module.exports = {
     createCourse,
     getCourses,
@@ -942,5 +970,6 @@ module.exports = {
     createConversation,
     getConversation,
     getAllConversations,
+    readMessage
 
 }
