@@ -34,7 +34,8 @@ const options = {
         "./routes/lessons.js",
         "./routes/quizzes.js",
         "./routes/certificate.js",
-        "./routes/notification.js"
+        "./routes/notification.js",
+        "./routes/chat.js"
     ],
 };
 
@@ -59,6 +60,7 @@ app.use("/api/lessons", require("./routes/lessons"));
 app.use("/api/quizzes", require("./routes/quizzes"));
 app.use("/api/certificates", require("./routes/certificate"));
 app.use("/api/notifications", require("./routes/notification"));
+app.use("/api/chat/", require("./routes/chat"));
 
 app.use((req, res, next) => {
     res.setHeader('Access-Control-Allow-Origin', '*');

@@ -1,4 +1,5 @@
 const dotenv = require('dotenv');
+const { json } = require('express');
 const { default: fetch } = require('node-fetch');
 dotenv.config();
 
@@ -804,6 +805,110 @@ function editInfoUser(user_ID, name, lastName, birth, postal_code, city, provinc
     )
 }
 
+function addMessage(user_ID, user_ID2, message, conversation_id){
+    return(
+        new Promise((res, rej) => {
+            fetch(`${process.env.url}/lms-messages`,{
+                method: "POST",
+                headers: {
+                    Authorization: `Bearer ${process.env.STRAPI_TOKEN}`,
+                    "Content-Type": 'application/json',
+                },
+                body: JSON.stringify({
+                    data: {
+                        from: user_ID,
+                        to: user_ID2,
+                        message: message,
+                        lms_conversations: {
+                            connect: [conversation_id]
+                        }
+                    }
+                })
+            }).then(async (result) => {
+                console.log(result);
+                const data = await result.json();
+                res(data)
+            }).catch(error => {
+                console.log(error);
+                rej(error)
+            })
+        })
+    
+    )
+}
+
+function createConversation(id, id2){
+    return(
+        new Promise((res, rej) => {
+            fetch(`${process.env.url}/lms-conversations`,{
+                method: "POST",
+                headers: {
+                    Authorization: `Bearer ${process.env.STRAPI_TOKEN}`,
+                    "Content-Type": 'application/json',
+                },
+                body: JSON.stringify({
+                    data: {
+                        lms_users: {
+                            connect: [id, id2]
+                        }
+                    }
+                })
+            }).then(async (result) => {
+                console.log(result);
+                const data = await result.json();
+                res(data)
+            }).catch(error => {
+                console.log(error);
+                rej(error)
+            })
+        })
+    
+    )
+}
+
+function getConversation(id){
+    return(
+        new Promise((res, rej) => {
+            fetch(`${process.env.url}/lms-conversations/${id}?populate=*`, {
+                method: "GET",
+                headers: {
+                    Authorization: `Bearer ${process.env.STRAPI_TOKEN}`,
+                    "Content-Type": 'application/json',
+                }
+            }).then(async (response) => {
+                const data = await response.json();
+                console.log(data);
+                res(data)
+            }).catch(error => {
+                console.log(error);
+                rej(error)
+            })
+        })
+    )
+}
+
+function getAllConversations(array) {
+    return new Promise((res, rej) => {
+        try {
+            const conversationPromises = array.map(conver => {
+                return getConversation(conver.id);
+            });
+
+            Promise.all(conversationPromises)
+                .then(conversations => {
+                    res(conversations);
+                })
+                .catch(error => {
+                    console.error("Error al obtener todas las conversaciones:", error);
+                    rej(error);
+                });
+        } catch (error) {
+            console.error("Error al procesar las conversaciones:", error);
+            rej(error);
+        }
+    });
+}
+
 module.exports = {
     createCourse,
     getCourses,
@@ -833,6 +938,9 @@ module.exports = {
     getMentor,
     getUser3,
     createNotification,
-    
+    addMessage,
+    createConversation,
+    getConversation,
+    getAllConversations,
 
 }
