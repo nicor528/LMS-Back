@@ -1,5 +1,5 @@
 const { SingUpEmail1 } = require("./apis/apiAuth");
-const { createUser2, getUser2, getCourses, vinculateCourse, getAllUserCourses, finishLesson, relationCourseWithUser, getModule, getOneCourse, getQuiz1, getLesson, getUsers } = require("./apis/apiStrapi");
+const { createUser2, getUser2, getCourses, vinculateCourse, getAllUserCourses, finishLesson, relationCourseWithUser, getModule, getOneCourse, getQuiz1, getLesson, getUsers, addMessage, createConversation, getAllConversations } = require("./apis/apiStrapi");
 /*
 createUser2("nicolas", "test23@gmail.com").then(data => {
     console.log(data.data.attributes)
@@ -135,8 +135,23 @@ getQuiz1(1).then(quizz => {
     console.log(total_score)
 })*/
 
-getUsers().then(result => {
+/*
+addMessage("iGaPnJK0qVRWt6I5ik7PFIR6lg73", "nCXrgRl23MaT9DwJOQbz7WnDXn02", "message example", "1").then(result => {
     console.log(result)
 }).catch(error => {
     console.log(error)
-})
+})*/
+
+/*
+createConversation("26", "12").then(result => {
+    console.log(result)
+}).catch(error => {
+    console.log(error)
+})*/
+
+getUser2("iGaPnJK0qVRWt6I5ik7PFIR6lg73").then(user => {
+    console.log(user)
+    getAllConversations(user.attributes.lms_conversations.data).then(conversations => {
+        console.log(conversations)
+    }).catch(error => console.log(error))
+}).catch(error =>  console.log(error))

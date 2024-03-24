@@ -197,6 +197,7 @@ router.post("/edit-info-user", (req, res) => {
     const academic = req.body.academic;
     if(country && user_ID && name && lastName && birth && postal_code && city && province && street_name && academic){
         editInfoUser(user_ID, name, lastName, birth, postal_code, city, province, street_name, academic, country).then(user => {
+            
             res.status(200).send({data: user, status: true, message: "sucefull"})
         }).catch(error => {res.status(400).send({error, status: false})})
     }else{
