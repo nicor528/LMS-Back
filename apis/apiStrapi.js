@@ -797,6 +797,26 @@ function editInfoUser(user_ID, name, lastName, birth, postal_code, city, provinc
     )
 }
 
+function isTest(){
+
+}
+
+function getTestInfo(){
+
+}
+
+function updateTestInfo(){
+
+}
+
+function checkAnswerCounter(){
+
+}
+
+function checkTestTime(){
+
+}
+
 module.exports = {
     createCourse,
     getCourses,
@@ -825,6 +845,10 @@ module.exports = {
     editInfoUser,
     getMentor,
     getUser3,
-
+    isTest,
+    getTestInfo,
+    updateTestInfo,
+    checkAnswerCounter,
+    checkTestTime
 
 }
