@@ -33,7 +33,32 @@ router.get("/get-all-courses", async (req, res) => {
 
 router.get("/get-single-course", async (req, res) => {
     const course_ID = parseInt(req.query.course_ID);
+    const user_ID = req.query.user_ID;
     if(course_ID){
+        try {
+            const courses = await getCourses();
+            let course = courses.data.filter(item => item.id === course_ID);
+
+            let mentorPromises = course[0].attributes.lms_mentors.data.map(mentor => {
+                return getMentor(mentor.id).then(mentorData => mentorData.data);
+            });
+
+            let mentors = await Promise.all(mentorPromises);
+            course[0].attributes.lms_mentors.data = mentors;
+            getAllUserCourses().then(data => {
+                const allCourses = data.data.find(data => data.attributes.user_ID === user_ID && (data.attributes.lms_course.data.id === course_ID || data.id === course_ID ));
+                if(allCourses !== undefined){
+                    course[0].attributes.enroled = true;
+                    res.status(200).send({data: course, status: true});
+                }else{
+                    course[0].attributes.enroled = false;
+                    res.status(200).send({data: course, status: true});
+                }
+            }).catch(error => {res.status(400).send({error, status: false})})
+        } catch (error) {
+            res.status(400).send({error, status: false});
+        }
+    } if(course_ID && user_ID){
         try {
             const courses = await getCourses();
             let course = courses.data.filter(item => item.id === course_ID);
@@ -49,7 +74,8 @@ router.get("/get-single-course", async (req, res) => {
         } catch (error) {
             res.status(400).send({error, status: false});
         }
-    } else {
+    }
+    else {
         res.status(401).send({message: "Missing data in the body", status: false});
     }
 });
