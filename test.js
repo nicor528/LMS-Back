@@ -148,10 +148,16 @@ createConversation("26", "12").then(result => {
 }).catch(error => {
     console.log(error)
 })*/
-
+/*
 getUser2("iGaPnJK0qVRWt6I5ik7PFIR6lg73").then(user => {
     console.log(user)
     getAllConversations(user.attributes.lms_conversations.data).then(conversations => {
         console.log(conversations)
     }).catch(error => console.log(error))
-}).catch(error =>  console.log(error))
+}).catch(error =>  console.log(error))*/
+
+getModule(1).then(result => {
+    console.log(result.data.attributes.lms_lessons.data[0])
+}).catch(error => {
+    console.log(error)
+})

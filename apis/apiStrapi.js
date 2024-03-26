@@ -641,7 +641,7 @@ function getCourseLessons (courseID) {
 function getModule(id){
     return(
         new Promise ((res,rej) => {
-            fetch(`${process.env.url}/lms-modules/${id}?populate=*`, {
+            fetch(`${process.env.url}/lms-modules/${id}?populate=lms_users,lms_lessons.lms_users`, {
                 method: "GET",
                 headers: {
                     Authorization: `Bearer ${process.env.STRAPI_TOKEN}`,
