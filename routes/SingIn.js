@@ -49,18 +49,15 @@ router.post("/singInEmail", async (req, res) => {
     if(email && pass){
         SingInPass(email, pass).then(user => {
             getUser2(user.uid).then(user => {
-                let data = {}
-                data.user = user.data
-                /*getAllUserCourses().then(courses => {
-                    const allCourses = courses.data.filter(data => data.attributes.user_ID === user.data.attributes.user_ID)
-                    data.user_courses = allCourses;
-                    getCertificates().then(certificates => {
-                        const user_certificates = certificates.data.filter(data => data.attributes.user_ID === user.data.attributes.user_ID)
-                        data.certificates = user_certificates;
-                        res.status(200).send({data: data, status: true, message: "login succefull"})
-                    })
-                })*/
-                res.status(200).send({data: user, status: true, message: "login succefull"})
+                getAllUserCourses().then(async (data) => {
+                    console.log("test1")
+                    console.log(user)
+                    let user1 = await user;
+                    const allCourses = await data.data.filter(data => data.attributes.user_ID === user_ID)
+                    user1.attributes.lms_user_courses = allCourses.length > 0 ? allCourses : [];
+                    console.log(user1)
+                    res.status(200).send({data: user1, status: true})
+                }).catch(error => {res.status(400).send({error, status: false, message: "loggin sucefully"})})
             }).catch(error => {res.status(400).send({message: "Wrong email or password", status: false})})
         }).catch(error => {res.status(400).send({message: "Wrong email or password", status: false})})
     }else{
