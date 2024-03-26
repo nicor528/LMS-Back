@@ -53,7 +53,7 @@ router.post("/singInEmail", async (req, res) => {
                     console.log("test1")
                     console.log(user)
                     let user1 = await user;
-                    const allCourses = await data.data.filter(data => data.attributes.user_ID === user_ID)
+                    const allCourses = await data.data.filter(data => data.attributes.user_ID === user.attributes.user_ID)
                     user1.attributes.lms_user_courses = allCourses.length > 0 ? allCourses : [];
                     console.log(user1)
                     res.status(200).send({data: user1, status: true})
