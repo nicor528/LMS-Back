@@ -56,7 +56,7 @@ router.get("/get-single-course", async (req, res) => {
 
 router.post("/add-course-user", async (req, res) => {
     const user_ID = req.body.user_ID;
-    const course_ID = parseInt(req.body.course_ID);
+    const course_ID = req.body.course_ID;
     //const course_title = req.body.course_title;
     //const key = req.body.key;
     if(user_ID && course_ID){
