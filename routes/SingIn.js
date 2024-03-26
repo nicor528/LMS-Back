@@ -73,6 +73,7 @@ router.get("/getUserInfo", (req, res) => {
     if(user_ID){
         getUser2(user_ID).then(user => {
             getAllUserCourses().then(async (data) => {
+                console.log("test1")
                 let user1 = await user;
                 const allCourses = await data.data.filter(data => data.attributes.user_ID === user_ID)
                 user1.data.attributes.lms_user_courses = allCourses.length > 0 ? allCourses : [];
