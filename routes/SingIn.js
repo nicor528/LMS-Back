@@ -72,7 +72,11 @@ router.get("/getUserInfo", (req, res) => {
     const user_ID = req.query.user_ID;
     if(user_ID){
         getUser2(user_ID).then(user => {
-            res.status(200).send({data: user, status: true, message: "sucefull"})
+            getAllUserCourses().then(async (data) => {
+                const allCourses = await data.data.filter(data => data.attributes.user_ID === user_ID && data.attributes.finish === false)
+                user.data.attributes.lms_user_courses = allCourses;
+                res.status(200).send({data: user, status: true})
+            }).catch(error => {res.status(400).send({error, status: false})})
         }).catch(error => {res.status(400).send({error, status: false})})
     }else{
         res.status(401).send({message: "Missing data in the body", status: false})
