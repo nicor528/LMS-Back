@@ -77,7 +77,7 @@ router.get("/getUserInfo", (req, res) => {
                 console.log(user)
                 let user1 = await user;
                 const allCourses = await data.data.filter(data => data.attributes.user_ID === user_ID)
-                user1.data.attributes.lms_user_courses = allCourses.length > 0 ? allCourses : [];
+                user1.attributes.lms_user_courses = allCourses.length > 0 ? allCourses : [];
                 console.log(user1)
                 res.status(200).send({data: user1, status: true})
             }).catch(error => {res.status(400).send({error, status: false})})
