@@ -61,7 +61,7 @@ router.post("/add-course-user", async (req, res) => {
     //const key = req.body.key;
     if(user_ID && course_ID){
         getCourses().then(courses => {
-            const Course = courses.data.filter(item => item.id === course_ID);
+            const Course = courses.data.filter(item => item.id === parseInt(course_ID));
             let n_lessons; 
             getOneCourse(Course[0].id).then(course => {
                 console.log(course)
