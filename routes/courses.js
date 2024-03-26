@@ -63,7 +63,7 @@ router.get("/get-single-course", async (req, res) => {
             const courses = await getCourses();
             let course = courses.data.filter(item => item.id === course_ID);
 
-            let mentorPromises = course[0].attributes.lms_mentors.data.map(mentor => {
+            let mentorPromises = course[0].attributes.lms_mentors.data.map(async (mentor) => {
                 return getMentor(mentor.id).then(mentorData => mentorData.data);
             });
 

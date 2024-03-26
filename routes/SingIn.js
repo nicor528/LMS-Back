@@ -56,8 +56,8 @@ router.post("/singInEmail", async (req, res) => {
                     const allCourses = await data.data.filter(data => data.attributes.user_ID === user.attributes.user_ID)
                     user1.attributes.lms_user_courses = allCourses.length > 0 ? allCourses : [];
                     console.log(user1)
-                    res.status(200).send({data: user1, status: true})
-                }).catch(error => {res.status(400).send({error, status: false, message: "loggin sucefully"})})
+                    res.status(200).send({data: user1, status: true, message: "loggin sucefully"})
+                }).catch(error => {res.status(400).send({error, status: false})})
             }).catch(error => {res.status(400).send({message: "Wrong email or password", status: false})})
         }).catch(error => {res.status(400).send({message: "Wrong email or password", status: false})})
     }else{
