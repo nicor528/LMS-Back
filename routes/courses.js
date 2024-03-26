@@ -76,7 +76,7 @@ router.post("/add-course-user", async (req, res) => {
                     const response = {
                         ...data.data
                     }
-                    res.status(200).send({data: data.data, status: true})
+                    res.status(200).send({data: data, status: true})
                 }).catch(error => {res.status(400).send({error, status: false})})
             }).catch(error => {res.status(400).send({error, status: false})})
         }).catch(error => {res.status(400).send({error, status: false})})
