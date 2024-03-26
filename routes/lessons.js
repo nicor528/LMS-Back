@@ -64,7 +64,9 @@ router.post("/finish-lesson", (req, res) => {
                 let completed_porcent = 100/data.data.attributes.total_lessons;
                 completed_porcent = completed_porcent + data.data.attributes.percentage;
                 updatePercentage(completed_porcent, user_course_ID).then(response => {
-                    res.status(200).send({data: response.data, status: true})
+                    getLesson(lesson_ID).then(lesson => {
+                        res.status(200).send({data: lesson.data, status: true})
+                    }).catch(error => {res.status(400).send({error, status: false})})
                 }).catch(error => {res.status(400).send({error, status: false})})
             }).catch(error => {res.status(400).send({error, status: false})})
         }).catch(error => {res.status(400).send({error, status: false})})
