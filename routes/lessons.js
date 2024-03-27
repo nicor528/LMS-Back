@@ -27,13 +27,13 @@ router.get("/get-module", (req, res) => {
         getModule(module_ID).then(async (module) => {
             let module1 = module;
             const finish = await module1.data.attributes.lms_users.data.find(user => user.attributes.user_ID == user_ID)
-            if(finish){
-                module1.data.attributes.finish = await true;
-                module1.data.attributes.lms_users = await [];
+            if(finish !== undefined){
+                module1.data.attributes.finish = true;
+                module1.data.attributes.lms_users = [];
                 res.status(200).send({data: module1.data, status: true})
             }else{
-                module1.data.attributes.finish = await false;
-                module1.data.attributes.lms_users = await [];
+                module1.data.attributes.finish = false;
+                module1.data.attributes.lms_users = [];
                 res.status(200).send({data: module1.data, status: true})
             }
         }).catch(error => {res.status(400).send({error, status: false})})
@@ -73,13 +73,13 @@ router.get("/get-lesson", (req, res) => {
             console.log(lesson1)
             const finish = await lesson1.data.attributes.lms_users.data.find(user => user.attributes.user_ID == user_ID);
             console.log(finish)
-            if(finish){
-                lesson1.data.attributes.finish = await true;
-                lesson1.data.attributes.lms_users = await [];
+            if(finish !== undefined){
+                lesson1.data.attributes.finish = true;
+                lesson1.data.attributes.lms_users = [];
                 res.status(200).send({data: lesson1.data, status: true})
             }else{
-                lesson1.data.attributes.finish = await false;
-                lesson1.data.attributes.lms_users = await [];
+                lesson1.data.attributes.finish = false;
+                lesson1.data.attributes.lms_users = [];
                 res.status(200).send({data: lesson1.data, status: true})
             }
         }).catch(error => {res.status(400).send({error, status: false})})
