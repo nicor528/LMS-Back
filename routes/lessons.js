@@ -74,8 +74,8 @@ router.get("/get-lesson", (req, res) => {
             const finish = await lesson1.data.attributes.lms_users.data.find(user => user.attributes.user_ID == user_ID);
             console.log(finish)
             if(finish){
-                lesson1.data.attributes.finish = true;
-                lesson1.data.attributes.lms_users = [];
+                lesson1.data.attributes.finish = await true;
+                lesson1.data.attributes.lms_users = await [];
                 res.status(200).send({data: lesson1.data, status: true})
             }else{
                 lesson1.data.attributes.finish = false;
