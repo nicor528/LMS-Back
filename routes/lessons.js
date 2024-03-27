@@ -24,16 +24,16 @@ router.get("/get-module", (req, res) => {
     const module_ID = req.query.module_ID;
     const user_ID = req.query.user_ID;
     if(module_ID && user_ID){
-        getModule(module_ID).then(module => {
+        getModule(module_ID).then(async (module) => {
             let module1 = module;
-            const finish = module1.data.attributes.lms_users.data.find(user => user.attributes.user_ID == user_ID)
+            const finish = await module1.data.attributes.lms_users.data.find(user => user.attributes.user_ID == user_ID)
             if(finish){
-                module1.data.attributes.finish = true;
-                module1.data.attributes.lms_users = [];
+                module1.data.attributes.finish = await true;
+                module1.data.attributes.lms_users = await [];
                 res.status(200).send({data: module1.data, status: true})
             }else{
-                module1.data.attributes.finish = false;
-                module1.data.attributes.lms_users = [];
+                module1.data.attributes.finish = await false;
+                module1.data.attributes.lms_users = await [];
                 res.status(200).send({data: module1.data, status: true})
             }
         }).catch(error => {res.status(400).send({error, status: false})})
@@ -52,10 +52,10 @@ router.post("/finish-module", (req, res) => {
     const module_ID = parseInt(req.body.module_ID);
     if(user_ID && module_ID){
         vinculateModule(user_ID, module_ID).then(response => {
-            getModule(module_ID).then(module => {
+            getModule(module_ID).then(async (module) => {
                 let module1 = module;
-                module1.data.attributes.finish = true;
-                module1.data.attributes.lms_users = [];
+                module1.data.attributes.finish = await true;
+                module1.data.attributes.lms_users = await [];
                 res.status(200).send({data: module1.data, status: true})
             }).catch(error => {res.status(400).send({error, status: false})})
         }).catch(error => {res.status(400).send({error, status: false})})
@@ -78,8 +78,8 @@ router.get("/get-lesson", (req, res) => {
                 lesson1.data.attributes.lms_users = await [];
                 res.status(200).send({data: lesson1.data, status: true})
             }else{
-                lesson1.data.attributes.finish = false;
-                lesson1.data.attributes.lms_users = [];
+                lesson1.data.attributes.finish = await false;
+                lesson1.data.attributes.lms_users = await [];
                 res.status(200).send({data: lesson1.data, status: true})
             }
         }).catch(error => {res.status(400).send({error, status: false})})
@@ -104,10 +104,10 @@ router.post("/finish-lesson", (req, res) => {
                 let completed_porcent = 100/course.attributes.total_lessons;
                 completed_porcent = completed_porcent + course.attributes.percentage;
                 updatePercentage(completed_porcent, user_course_ID).then(response => {
-                    getLesson(lesson_ID).then(lesson => {
+                    getLesson(lesson_ID).then(async (lesson) => {
                         let lesson1 = lesson;
-                        lesson1.data.attributes.finish = true;
-                        lesson1.data.attributes.lms_users = [];
+                        lesson1.data.attributes.finish = await true;
+                        lesson1.data.attributes.lms_users = await [];
                         res.status(200).send({data: lesson1.data, status: true})
                     }).catch(error => {res.status(400).send({error, status: false})})
                 }).catch(error => {res.status(400).send({error, status: false})})
