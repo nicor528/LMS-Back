@@ -68,9 +68,11 @@ router.get("/get-lesson", (req, res) => {
     const lesson_ID = req.query.lesson_ID;
     const user_ID = req.query.user_ID;
     if(lesson_ID && user_ID){
-        getLesson(lesson_ID).then(lesson => {
+        getLesson(lesson_ID).then(async (lesson) => {
             let lesson1 = lesson;
-            const finish = lesson1.data.attributes.lms_users.data.find(user => user.attributes.user_ID == user_ID)
+            console.log(lesson1)
+            const finish = await lesson1.data.attributes.lms_users.data.find(user => user.attributes.user_ID == user_ID);
+            console.log(finish)
             if(finish){
                 lesson1.data.attributes.finish = true;
                 lesson1.data.attributes.lms_users = [];
