@@ -1,5 +1,5 @@
 const express = require('express');
-const { getCourseLessons, getCourses, vinculateLesson, vinculateModule, getModule, getLesson, getOneUserCourse, updatePercentage } = require('../apis/apiStrapi');
+const { getCourseLessons, getCourses, vinculateLesson, vinculateModule, getModule, getLesson, getOneUserCourse, updatePercentage, getUser2 } = require('../apis/apiStrapi');
 const router = express.Router();
 
 /*
@@ -97,20 +97,22 @@ router.post("/finish-lesson", (req, res) => {
     const user_ID = req.body.user_ID;
     const lesson_ID = req.body.lesson_ID;
     if(user_ID && lesson_ID && course_ID){
-        vinculateLesson(user_ID, lesson_ID).then(response => {
-            console.log("1")
-            getAllUserCourses().then(data => {
-                const allCourses = data.data.filter(data => data.attributes.user_ID === user_ID && (data.attributes.lms_course.data.id === course_ID || data.id === course_ID ));
-                const course = allCourses[0]
-                let completed_porcent = 100/course.attributes.total_lessons;
-                completed_porcent = completed_porcent + course.attributes.percentage;
-                updatePercentage(completed_porcent, user_course_ID).then(response => {
-                    getLesson(lesson_ID).then(async (lesson) => {
-                        console.log("2")
-                        let lesson1 = lesson;
-                        lesson1.data.attributes.finish = await true;
-                        lesson1.data.attributes.lms_users = await [];
-                        res.status(200).send({data: lesson1.data, status: true})
+        getUser2(user_ID).then(user => {
+            vinculateLesson(user.id, lesson_ID).then(response => {
+                console.log("1")
+                getAllUserCourses().then(data => {
+                    const allCourses = data.data.filter(data => data.attributes.user_ID === user_ID && (data.attributes.lms_course.data.id === course_ID || data.id === course_ID ));
+                    const course = allCourses[0]
+                    let completed_porcent = 100/course.attributes.total_lessons;
+                    completed_porcent = completed_porcent + course.attributes.percentage;
+                    updatePercentage(completed_porcent, user_course_ID).then(response => {
+                        getLesson(lesson_ID).then(async (lesson) => {
+                            console.log("2")
+                            let lesson1 = lesson;
+                            lesson1.data.attributes.finish = await true;
+                            lesson1.data.attributes.lms_users = await [];
+                            res.status(200).send({data: lesson1.data, status: true})
+                        }).catch(error => {res.status(400).send({error, status: false})})
                     }).catch(error => {res.status(400).send({error, status: false})})
                 }).catch(error => {res.status(400).send({error, status: false})})
             }).catch(error => {res.status(400).send({error, status: false})})
