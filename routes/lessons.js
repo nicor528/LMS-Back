@@ -100,15 +100,16 @@ router.post("/finish-lesson", (req, res) => {
         getUser2(user_ID).then(user => {
             vinculateLesson(user.id, lesson_ID).then(response => {
                 console.log("1")
-                getAllUserCourses().then(data => {
-                    const allCourses = data.data.filter(data => data.attributes.user_ID === user_ID && (data.attributes.lms_course.data.id === course_ID || data.id === course_ID ));
+                getAllUserCourses().then(async (data) => {
+                    console.log("2")
+                    const allCourses = await data.data.filter(data => data.attributes.user_ID === user_ID && (data.attributes.lms_course.data.id === course_ID || data.id === course_ID ));
                     const course = allCourses[0]
                     console.log(course)
                     let completed_porcent = 100/course.attributes.total_lessons;
                     completed_porcent = completed_porcent + course.attributes.percentage;
                     updatePercentage(completed_porcent, user_course_ID).then(response => {
                         getLesson(lesson_ID).then(async (lesson) => {
-                            console.log("2")
+                            console.log("3")
                             let lesson1 = lesson;
                             lesson1.data.attributes.finish = await true;
                             lesson1.data.attributes.lms_users = await [];
