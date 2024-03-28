@@ -96,7 +96,7 @@ router.post("/finish-lesson", (req, res) => {
     const course_ID = req.body.course_ID;
     const user_ID = req.body.user_ID;
     const lesson_ID = parseInt(req.body.lesson_ID);
-    if(user_ID && lesson_ID && user_course_ID){
+    if(user_ID && lesson_ID && course_ID){
         vinculateLesson(user_ID, lesson_ID).then(response => {
             getAllUserCourses().then(data => {
                 const allCourses = data.data.filter(data => data.attributes.user_ID === user_ID && (data.attributes.lms_course.data.id === course_ID || data.id === course_ID ));
@@ -117,7 +117,6 @@ router.post("/finish-lesson", (req, res) => {
         res.status(400).send({message: "Missing data", status: false})
     }
 })
-
 
 /*
 router.post("/finish-lesson", (req, res) => {
