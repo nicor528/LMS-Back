@@ -21,7 +21,7 @@ router.get("/getCourseLessons", async (req,res) => {
 })*/
 
 router.get("/get-module", (req, res) => {
-    const module_ID = req.query.module_ID;
+    const module_ID = parseInt(req.query.module_ID);
     const user_ID = req.query.user_ID;
     if(module_ID && user_ID){
         getModule(module_ID).then(async (module) => {
@@ -49,7 +49,7 @@ router.get("/get-module", (req, res) => {
 
 router.post("/finish-module", (req, res) => {
     const user_ID = req.body.user_ID;
-    const module_ID = req.body.module_ID;
+    const module_ID = parseInt(req.body.module_ID);
     if(user_ID && module_ID){
         getUser2(user_ID).then(user => {
             vinculateModule(user.id, module_ID).then(response => {
@@ -67,7 +67,7 @@ router.post("/finish-module", (req, res) => {
 })
 
 router.get("/get-lesson", (req, res) => {
-    const lesson_ID = req.query.lesson_ID;
+    const lesson_ID = parseInt(req.query.lesson_ID);
     const user_ID = req.query.user_ID;
     if(lesson_ID && user_ID){
         getLesson(lesson_ID).then(async (lesson) => {
@@ -95,9 +95,9 @@ router.get("/get-lesson", (req, res) => {
 })
 
 router.post("/finish-lesson", (req, res) => {
-    const course_ID = req.body.course_ID;
+    const course_ID = parseInt(req.body.course_ID);
     const user_ID = req.body.user_ID;
-    const lesson_ID = req.body.lesson_ID;
+    const lesson_ID = parseInt(req.body.lesson_ID);
     if(user_ID && lesson_ID && course_ID){
         getUser2(user_ID).then(user => {
             vinculateLesson(user.id, lesson_ID).then(response => {
