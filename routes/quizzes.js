@@ -7,7 +7,19 @@ router.post("/get-quizz", async (req, res) => {
     const quiz_ID = req.body.quiz_ID;
     if(quiz_ID){
         getQuiz1(quiz_ID).then(quizz => {
-            res.status(200).send({data: quizz.data, status: true})
+            let quizz1 = quizz.data;
+            let n = 0;
+            quizz.data.attributes.lms_questions.data.map(question => {
+                let newquestion = question;
+                newquestion.options = [question.wrong_answer_1, question.wrong_answer_2, question.wrong_answer_3, question.correct_answer_1]
+                newquestion.wrong_answer_1 = "";
+                newquestion.wrong_answer_2 = "";
+                newquestion.wrong_answer_3 = "";
+                newquestion.correct_answer_1 = "";
+                quizz1.attributes.lms_questions.data[n] = newquestion;
+                n ++;
+            })
+            res.status(200).send({data: quizz1, status: true})
         }).catch(error => {res.status(400).send({error, status: false})})
     }else{
         res.status(401).send({message: "Missing data in the body", status: false})
