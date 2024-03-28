@@ -108,7 +108,7 @@ router.post("/finish-lesson", (req, res) => {
                     console.log(course)
                     let completed_porcent = 100/course.attributes.total_lessons;
                     completed_porcent = completed_porcent + course.attributes.percentage;
-                    updatePercentage(completed_porcent, user_course_ID).then(response => {
+                    updatePercentage(completed_porcent, course.id).then(response => {
                         getLesson(lesson_ID).then(async (lesson) => {
                             console.log("3")
                             let lesson1 = lesson;
