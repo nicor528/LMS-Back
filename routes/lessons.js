@@ -1,5 +1,5 @@
 const express = require('express');
-const { getCourseLessons, getCourses, vinculateLesson, vinculateModule, getModule, getLesson, getOneUserCourse, updatePercentage, getUser2 } = require('../apis/apiStrapi');
+const { getCourseLessons, getCourses, vinculateLesson, vinculateModule, getModule, getLesson, getOneUserCourse, updatePercentage, getUser2, getAllUserCourses } = require('../apis/apiStrapi');
 const router = express.Router();
 
 /*
@@ -102,6 +102,7 @@ router.post("/finish-lesson", (req, res) => {
                 console.log("1")
                 getAllUserCourses().then(async (data) => {
                     console.log("2")
+                    console.log(data)
                     const allCourses = await data.data.filter(data => data.attributes.user_ID === user_ID && (data.attributes.lms_course.data.id === course_ID || data.id === course_ID ));
                     const course = allCourses[0]
                     console.log(course)
