@@ -504,6 +504,7 @@ async function selectLesson(lesson){
             break;
         case "finish":
             data.finish = true;
+            data.percentage = 100;
             break;
         default:
             // Manejar el caso por defecto si lesson no coincide con ninguno de los casos anteriores.

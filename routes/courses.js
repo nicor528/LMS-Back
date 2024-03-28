@@ -88,7 +88,7 @@ router.post("/add-course-user", async (req, res) => {
     if(user_ID && course_ID){
         getCourses().then(courses => {
             const Course = courses.data.filter(item => item.id === parseInt(course_ID));
-            let n_lessons; 
+            let n_lessons = 0; 
             getOneCourse(Course[0].id).then(course => {
                 console.log(course)
                 course.data.attributes.lms_modules.data.map(item => {
