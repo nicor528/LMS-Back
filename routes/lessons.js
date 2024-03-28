@@ -49,14 +49,16 @@ router.get("/get-module", (req, res) => {
 
 router.post("/finish-module", (req, res) => {
     const user_ID = req.body.user_ID;
-    const module_ID = parseInt(req.body.module_ID);
+    const module_ID = req.body.module_ID;
     if(user_ID && module_ID){
-        vinculateModule(user_ID, module_ID).then(response => {
-            getModule(module_ID).then(async (module) => {
-                let module1 = module;
-                module1.data.attributes.finish = await true;
-                module1.data.attributes.lms_users = await [];
-                res.status(200).send({data: module1.data, status: true})
+        getUser2(user_ID).then(user => {
+            vinculateModule(user.id, module_ID).then(response => {
+                getModule(module_ID).then(async (module) => {
+                    let module1 = module;
+                    module1.data.attributes.finish = true;
+                    module1.data.attributes.lms_users = [];
+                    res.status(200).send({data: module1.data, status: true})
+                }).catch(error => {res.status(400).send({error, status: false})})
             }).catch(error => {res.status(400).send({error, status: false})})
         }).catch(error => {res.status(400).send({error, status: false})})
     }else{
