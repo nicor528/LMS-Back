@@ -103,6 +103,7 @@ router.post("/finish-lesson", (req, res) => {
                 getAllUserCourses().then(data => {
                     const allCourses = data.data.filter(data => data.attributes.user_ID === user_ID && (data.attributes.lms_course.data.id === course_ID || data.id === course_ID ));
                     const course = allCourses[0]
+                    console.log(course)
                     let completed_porcent = 100/course.attributes.total_lessons;
                     completed_porcent = completed_porcent + course.attributes.percentage;
                     updatePercentage(completed_porcent, user_course_ID).then(response => {
