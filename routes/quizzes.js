@@ -10,7 +10,7 @@ router.post("/get-quizz", async (req, res) => {
             let quizz1 = quizz.data;
             let n = 0;
             quizz.data.attributes.lms_questions.data.map(question => {
-                let newquestion = {}
+                let newquestion ;
                 newquestion.attributes.question = question.attributes.question;
                 newquestion.attributes.options = [question.attributes.wrong_answer_1, question.attributes.wrong_answer_2, question.attributes.wrong_answer_3, question.attributes.correct_answer_1]
                 quizz1.attributes.lms_questions.data[n] = newquestion;
