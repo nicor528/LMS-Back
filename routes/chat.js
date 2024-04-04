@@ -9,7 +9,9 @@ router.post("/add-message", (req, res) => {
     const conversation_id = req.body.conversation_id;
     if(user_ID && user_ID2 && message && conversation_id){
         addMessage(user_ID, user_ID2, message, conversation_id).then(result => {
-            res.status(200).send({data: result, status: true, message: "sucefull"})
+            getConversation2(conversation_id).then(conver => {
+                res.status(200).send({data: conver, status: true, message: "sucefull"})
+            }).catch(error => {res.status(400).send({error, status: false})})
         }).catch(error => {res.status(400).send({error, status: false})})
     }else{
         res.status(400).send({message: "missing data in the body", status: false})
