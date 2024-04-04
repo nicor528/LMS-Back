@@ -1,5 +1,5 @@
 const { SingUpEmail1 } = require("./apis/apiAuth");
-const { createUser2, getUser2, getCourses, vinculateCourse, getAllUserCourses, finishLesson, relationCourseWithUser, getModule, getOneCourse, getQuiz1, getLesson, getUsers, addMessage, createConversation, getAllConversations } = require("./apis/apiStrapi");
+const { createUser2, getUser2, getCourses, vinculateCourse, getAllUserCourses, finishLesson, relationCourseWithUser, getModule, getOneCourse, getQuiz1, getLesson, getUsers, addMessage, createConversation, getAllConversations, getTries, getConversation2 } = require("./apis/apiStrapi");
 /*
 createUser2("nicolas", "test23@gmail.com").then(data => {
     console.log(data.data.attributes)
@@ -155,11 +155,15 @@ getUser2("iGaPnJK0qVRWt6I5ik7PFIR6lg73").then(user => {
         console.log(conversations)
     }).catch(error => console.log(error))
 }).catch(error =>  console.log(error))*/
-
+/*
 getModule(1).then(result => {
     console.log(result.data.attributes.lms_users.data)
     const finish = result.data.attributes.lms_users.data.find(user => user.attributes.user_ID == "EEMlrD0dRu2o2SSa")
     console.log(finish)
 }).catch(error => {
     console.log(error)
-})
+})*/
+
+getConversation2(1).then(data => {
+    console.log(data.data.attributes.lms_users.data[0].attributes)
+}).catch(error => console.log(error))

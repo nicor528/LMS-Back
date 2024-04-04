@@ -772,6 +772,27 @@ function createTries(user_ID, quiz_ID) {
     )
 }
 
+function getTries () {
+    return(
+        new Promise(async (res, rej) => {
+            fetch(`${process.env.url}/lms-quizz-tries?populate=*`, {
+                method: "GET",
+                headers: {
+                    Authorization: `Bearer ${process.env.STRAPI_TOKEN}`,
+                    "Content-Type": 'application/json',
+                }
+            }).then(async (response) => {
+                const data = await response.json();
+                console.log(data);
+                res(data)
+            }).catch(error => {
+                console.log(error);
+                rej(error)
+            })
+        })
+    )
+}
+
 function editInfoUser(user_ID, name, lastName, birth, postal_code, city, province, street_name, academic, country) {
     return(
         new Promise (async (res, rej) => {
@@ -888,11 +909,32 @@ function getConversation(id){
     )
 }
 
+function getConversation2(id){
+    return(
+        new Promise((res, rej) => {
+            fetch(`${process.env.url}/lms-conversations/${id}?populate=lms_users.profilePicture,lms_messages`, {
+                method: "GET",
+                headers: {
+                    Authorization: `Bearer ${process.env.STRAPI_TOKEN}`,
+                    "Content-Type": 'application/json',
+                }
+            }).then(async (response) => {
+                const data = await response.json();
+                console.log(data);
+                res(data)
+            }).catch(error => {
+                console.log(error);
+                rej(error)
+            })
+        })
+    )
+}
+
 function getAllConversations(array) {
     return new Promise((res, rej) => {
         try {
             const conversationPromises = array.map(conver => {
-                return getConversation(conver.id);
+                return getConversation2(conver.id);
             });
 
             Promise.all(conversationPromises)
@@ -971,6 +1013,8 @@ module.exports = {
     createConversation,
     getConversation,
     getAllConversations,
-    readMessage
+    readMessage,
+    getTries,
+    getConversation2
 
 }

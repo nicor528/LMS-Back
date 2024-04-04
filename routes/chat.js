@@ -1,5 +1,5 @@
 const express = require('express');
-const { addMessage, getUser2, createConversation, getAllConversations, getConversation, readMessage } = require('../apis/apiStrapi');
+const { addMessage, getUser2, createConversation, getAllConversations, getConversation, readMessage, getConversation2 } = require('../apis/apiStrapi');
 const router = express.Router();
 
 router.post("/add-message", (req, res) => {
@@ -50,7 +50,7 @@ router.get("/get-user-conversations", (req, res) => {
 router.get("/get-conversation-messages", (req, res) => {
     const conversation_id = req.query.conversation_id;
     if(conversation_id){
-        getConversation(conversation_id).then(conver => {
+        getConversation2(conversation_id).then(conver => {
             res.status(200).send({data: conver, status: true, message: "sucefull"})
         }).catch(error => {res.status(400).send({error, status: false})})
     }else{

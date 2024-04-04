@@ -1,5 +1,5 @@
 const express = require('express');
-const { getQuizz, getQuiz1, saveScore, vinculateQuizzWithUser, createTries } = require('../apis/apiStrapi');
+const { getQuizz, getQuiz1, saveScore, vinculateQuizzWithUser, createTries, getTries } = require('../apis/apiStrapi');
 const router = express.Router();
 
 
@@ -21,6 +21,23 @@ router.post("/get-quizz", async (req, res) => {
         }).catch(error => {res.status(400).send({error, status: false})})
     }else{
         res.status(401).send({message: "Missing data in the body", status: false})
+    }
+})
+
+router.get("/quizz-attemps", (req, res) => {
+    const quiz_ID = req.query.quiz_ID;
+    const user_ID = req.query.user_ID;
+    if(user_ID && quiz_ID){
+        getTries().then(tries => {
+            const filteredObjects = tries.data.filter(item => 
+                item.attributes.lms_user.data.attributes.user_ID === user_ID &&
+                item.attributes.lms_quiz.data.id === parseInt(quiz_ID)
+            );
+            const count = filteredObjects.length;
+            res.status(200).send({data: {tries: count}, status: true})
+        }).catch(error => {res.status(400).send({error, status: false})})
+    }else{
+        res.status(401).send({message: "Missing data", status: false})
     }
 })
 
