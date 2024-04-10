@@ -1001,10 +1001,10 @@ function readMessage(user_ID, message_id){
     )
 }
 
-function vinculateAnnouncementWithUser(user_ID, quiz_ID) {
+function vinculateAnnouncementWithUser(user_ID, annoucement_ID) {
     return(//
         new Promise (async (res, rej) => {
-            fetch(`${process.env.url}/announcements/${quiz_ID}`, {
+            fetch(`${process.env.url}/lms-announcements/${annoucement_ID}`, {
                 method: "PUT",
                 headers: {
                     Authorization: `Bearer ${process.env.STRAPI_TOKEN}`,
