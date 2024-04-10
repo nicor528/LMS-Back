@@ -65,7 +65,7 @@ router.get("/user-notifications", (req, res) => {
             const notis = annoucments.map(async data => {
                 const toReturn = await Promise.all(data.announcements.data.map(async item => {
                     const announcementData = await getAnnoucnment(item.id);
-                    const user = announcementData.data.attributes.lms_users.data.find(user => user.attributes.user_ID == user_ID);
+                    const user = announcementData.data.attributes.lms_users.data.find(user => user.attributes.user_ID !== user_ID);
                     if (user) {
                         return { announcement_ID: announcementData.data.id, title: announcementData.data.attributes.title, courseID: announcementData.data.attributes.lms_course.data.id };
                     }
