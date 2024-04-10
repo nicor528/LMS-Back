@@ -77,7 +77,7 @@ router.get("/user-notifications", (req, res) => {
             
             Promise.all(notis).then(result => {
                 console.log(result);
-                res.status(200).send({data: result, status: true, message: "sucefull"})
+                res.status(200).send({data: result[0], status: true, message: "sucefull"})
             });
             
         }).catch(error => {res.status(400).send({error, status: false})})
