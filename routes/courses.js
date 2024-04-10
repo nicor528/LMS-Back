@@ -176,7 +176,7 @@ router.post("/read-annoucement", (req, res) => {
     const annoucement_ID = req.body.annoucement_ID;
     if(user_ID && annoucement_ID){
         getUser2(user_ID).then(user => {
-            vinculateAnnouncementWithUser(user.id, annoucement_ID).then(data => {
+            vinculateAnnouncementWithUser(user.id, parseInt(annoucement_ID)).then(data => {
                 res.status(200).send({data: data, status: true, message: "sucefull"})
             }).catch(error => {res.status(400).send({error, status: false})})
         }).catch(error => {res.status(400).send({error, status: false})})
