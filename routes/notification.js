@@ -3,6 +3,7 @@ const qs = require("qs");
 const {
     usersNotificationfetch,
 } = require("../apis/notifications/apiNotificationService");
+const { getAllUserCourses, getAnnoucnment } = require("../apis/apiStrapi");
 const router = express.Router();
 
 router.post("/notify-strapi", (req, res) => {
