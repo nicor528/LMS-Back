@@ -66,6 +66,7 @@ router.get("/user-notifications", (req, res) => {
                 const toReturn = await Promise.all(data.announcements.data.map(async item => {
                     let localDate = new Date();
                     const announcementData = await getAnnoucnment(item.id);
+                    console.log(announcementData.data)
                     const users = announcementData.data.attributes.lms_users.data;
                     if (!users.length || !users.some(user => user.attributes.user_ID === user_ID)) {
                         // Devolver el dato que necesitas si no se encuentra el user_ID o el array está vacío
