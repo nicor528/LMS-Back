@@ -1,5 +1,5 @@
 const { SingUpEmail1 } = require("./apis/apiAuth");
-const { createUser2, getUser2, getCourses, vinculateCourse, getAllUserCourses, finishLesson, relationCourseWithUser, getModule, getOneCourse, getQuiz1, getLesson, getUsers, addMessage, createConversation, getAllConversations, getTries, getConversation2 } = require("./apis/apiStrapi");
+const { createUser2, getUser2, getCourses, vinculateCourse, getAllUserCourses, finishLesson, relationCourseWithUser, getModule, getOneCourse, getQuiz1, getLesson, getUsers, addMessage, createConversation, getAllConversations, getTries, getConversation2, getAnnoucnment } = require("./apis/apiStrapi");
 /*
 createUser2("nicolas", "test23@gmail.com").then(data => {
     console.log(data.data.attributes)
@@ -164,6 +164,29 @@ getModule(1).then(result => {
     console.log(error)
 })*/
 
-getConversation2(1).then(data => {
-    console.log(data.data.attributes.lms_users.data[0].attributes)
-}).catch(error => console.log(error))
+getAllUserCourses().then(async (data) => {
+    const allCourses = await data.data.filter(data => data.attributes.user_ID === "iGaPnJK0qVRWt6I5ik7PFIR6lg73" && data.attributes.finish === false)
+    console.log(allCourses[0].attributes.lms_course.data.attributes)
+    const annoucments = allCourses.map(data => {
+        let data1 = {};
+        data1.courseID = data.attributes.lms_course.data.id;
+        data1.announcements = data.attributes.lms_course.data.attributes.announcements;
+        //data1.read = 
+        return data1;
+    })
+    console.log(annoucments)
+    const notis = annoucments.map(async data => {
+        const toReturn = await Promise.all(data.announcements.data.map(async item => {
+            const announcementData = await getAnnoucnment(item.id);
+            const user = announcementData.data.attributes.lms_users.data.find(user => user.attributes.user_ID == "iGaPnJK0qVRWt6I5ik7PFIR6lg73");
+            if (user) {
+                return { title: announcementData.data.attributes.title, courseID: announcementData.data.attributes.lms_course.data.id };
+            }
+        }));
+        return toReturn.filter(Boolean); // Eliminar elementos undefined del array
+    });
+    
+    Promise.all(notis).then(result => {
+        console.log(result);
+    });
+}).catch(error => {res.status(400).send({error, status: false})})

@@ -1,5 +1,5 @@
 const express = require('express');
-const { createCourse, getCourses, vinculateCourse, finishCourse, getAllUserCourses, finishLesson, updatePercentage, getMentor, getOneCourse } = require('../apis/apiStrapi');
+const { createCourse, getCourses, vinculateCourse, finishCourse, getAllUserCourses, finishLesson, updatePercentage, getMentor, getOneCourse, getUser2 } = require('../apis/apiStrapi');
 const router = express.Router();
 
 router.post("/createCourse", async (req, res) => {
@@ -165,6 +165,20 @@ router.get("/get-ongoing-courses", (req, res) => {
         getAllUserCourses().then(async (data) => {
             const allCourses = await data.data.filter(data => data.attributes.user_ID === user_ID && data.attributes.finish === false)
             res.status(200).send({data: allCourses, status: true})
+        }).catch(error => {res.status(400).send({error, status: false})})
+    }else{
+        res.status(401).send({message: "Missing data", status: false})
+    }
+})
+
+router.post("/read-annoucement", (req, res) => {
+    const user_ID = req.body.user_ID;
+    const annoucement_ID = req.body.annoucement_ID;
+    if(user_ID && annoucement_ID){
+        getUser2(user_ID).then(user => {
+            vinculateAnnouncementWithUser(user.id, annoucement_ID).then(data => {
+                res.status(200).send({data: data, status: true, message: "sucefull"})
+            }).catch(error => {res.status(400).send({error, status: false})})
         }).catch(error => {res.status(400).send({error, status: false})})
     }else{
         res.status(401).send({message: "Missing data", status: false})

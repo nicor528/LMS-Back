@@ -930,6 +930,27 @@ function getConversation2(id){
     )
 }
 
+function getAnnoucnment(id){
+    return(
+        new Promise((res, rej) => {
+            fetch(`${process.env.url}/announcements/${id}?populate=*`, {
+                method: "GET",
+                headers: {
+                    Authorization: `Bearer ${process.env.STRAPI_TOKEN}`,
+                    "Content-Type": 'application/json',
+                }
+            }).then(async (response) => {
+                const data = await response.json();
+                console.log(data);
+                res(data)
+            }).catch(error => {
+                console.log(error);
+                rej(error)
+            })
+        })
+    )
+}
+
 function getAllConversations(array) {
     return new Promise((res, rej) => {
         try {
@@ -962,6 +983,34 @@ function readMessage(user_ID, message_id){
                     "Content-Type": 'application/json',
                 },
                 body: JSON.stringify({
+                    data: {
+                        lms_users: {
+                            connect: [user_ID]
+                        }
+                    }
+                })
+            }).then(async (result) => {
+                console.log(result);
+                const data = await result.json();
+                res(data)
+            }).catch(error => {
+                console.log(error);
+                rej(error)
+            })
+        })
+    )
+}
+
+function vinculateAnnouncementWithUser(user_ID, quiz_ID) {
+    return(//
+        new Promise (async (res, rej) => {
+            fetch(`${process.env.url}/announcements/${quiz_ID}`, {
+                method: "PUT",
+                headers: {
+                    Authorization: `Bearer ${process.env.STRAPI_TOKEN}`,
+                    "Content-Type": 'application/json',
+                },
+                body: await JSON.stringify({
                     data: {
                         lms_users: {
                             connect: [user_ID]
@@ -1015,6 +1064,8 @@ module.exports = {
     getAllConversations,
     readMessage,
     getTries,
-    getConversation2
+    getConversation2,
+    getAnnoucnment,
+    vinculateAnnouncementWithUser
 
 }
