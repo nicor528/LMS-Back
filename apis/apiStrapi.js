@@ -1002,7 +1002,7 @@ function readMessage(user_ID, message_id){
 }
 
 function vinculateAnnouncementWithUser(user_ID, annoucement_ID) {
-    return(//
+    return(
         new Promise (async (res, rej) => {
             fetch(`${process.env.url}/lms-announcements/${annoucement_ID}`, {
                 method: "PUT",
@@ -1010,7 +1010,7 @@ function vinculateAnnouncementWithUser(user_ID, annoucement_ID) {
                     Authorization: `Bearer ${process.env.STRAPI_TOKEN}`,
                     "Content-Type": 'application/json',
                 },
-                body: await JSON.stringify({
+                body: JSON.stringify({
                     data: {
                         lms_users: {
                             connect: [user_ID]
