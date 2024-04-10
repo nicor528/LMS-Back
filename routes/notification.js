@@ -64,11 +64,12 @@ router.get("/user-notifications", (req, res) => {
             console.log(annoucments)
             const notis = annoucments.map(async data => {
                 const toReturn = await Promise.all(data.announcements.data.map(async item => {
+                    let localDate = new Date();
                     const announcementData = await getAnnoucnment(item.id);
                     const users = announcementData.data.attributes.lms_users.data;
                     if (!users.length || !users.some(user => user.attributes.user_ID === user_ID)) {
                         // Devolver el dato que necesitas si no se encuentra el user_ID o el array está vacío
-                        return { announcement_ID: announcementData.data.id, title: announcementData.data.attributes.title, courseID: announcementData.data.attributes.lms_course.data.id };
+                        return { date: localDate ,type: "announcement", announcement_ID: announcementData.data.id, title: announcementData.data.attributes.title, courseID: announcementData.data.attributes.lms_course.data.id, description: "your course have a new announcement" };
                     }
                 }));
                 return toReturn.filter(Boolean); // Eliminar elementos undefined del array
