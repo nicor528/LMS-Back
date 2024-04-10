@@ -181,7 +181,9 @@ router.post("/read-annoucement", (req, res) => {
                 
                 console.log(data)
                 res.status(200).send({data: data, status: true, message: "sucefull"})
-            }).catch(error => {res.status(400).send({error, status: false})})
+            }).catch(error => {
+                console.log("test1")
+                res.status(400).send({error, status: false})})
         }).catch(error => {res.status(400).send({error, status: false})})
     }else{
         res.status(401).send({message: "Missing data", status: false})
