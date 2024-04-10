@@ -67,7 +67,7 @@ router.get("/user-notifications", (req, res) => {
                     const announcementData = await getAnnoucnment(item.id);
                     const user = announcementData.data.attributes.lms_users.data.find(user => user.attributes.user_ID == user_ID);
                     if (user) {
-                        return { title: announcementData.data.attributes.title, courseID: announcementData.data.attributes.lms_course.data.id };
+                        return { announcement_ID: announcementData.data.id, title: announcementData.data.attributes.title, courseID: announcementData.data.attributes.lms_course.data.id };
                     }
                 }));
                 return toReturn.filter(Boolean); // Eliminar elementos undefined del array
