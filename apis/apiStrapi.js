@@ -157,7 +157,7 @@ function getCourses () {
 function getOneCourse (id) {
     return(
         new Promise (async (res, rej) => {
-            fetch(`${process.env.url}/lms-courses/${id}?populate[lms_modules][populate]=*`, {
+            fetch(`${process.env.url}/lms-courses/${id}?populate[lms_modules][lms_mentors][imageUrl][lms_annoucements][lms_technologies][lms_quiz][populate]=*`, {
                 method: "GET",
                 headers: {
                     Authorization: `Bearer ${process.env.STRAPI_TOKEN}`,
