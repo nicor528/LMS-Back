@@ -4,9 +4,10 @@ const router = express.Router();
 
 
 router.post("/get-quizz", async (req, res) => {
+    const user_ID = req.body.user_ID;
     const quiz_ID = req.body.quiz_ID;
-    if(quiz_ID){
-        getQuiz1(quiz_ID).then(quizz => {
+    if(quiz_ID && user_ID){
+        getQuiz1(parseInt(quiz_ID)).then(quizz => {
             let quizz1 = quizz.data;
             let n = 0;
             quizz.data.attributes.lms_questions.data.map(question => {
@@ -17,7 +18,18 @@ router.post("/get-quizz", async (req, res) => {
                 quizz1.attributes.lms_questions.data[n] = newquestion;
                 n ++;
             })
-            res.status(200).send({data: quizz1, status: true})
+            getTries().then(tries => {
+                const filteredObjects = tries.data.filter(item => 
+                    item.attributes.lms_user.data.attributes.user_ID === user_ID &&
+                    item.attributes.lms_quiz.data.id === parseInt(quiz_ID)
+                );
+                const count = filteredObjects.length;
+                if(count < quizz1.data.attributes.max_tries){
+                    res.status(200).send({data: quizz1, status: true})
+                }else{
+                    res.status(200).send({message: "You have reached the maximum tries", status: true})
+                }
+            }).catch(error => {res.status(400).send({error, status: false})})
         }).catch(error => {res.status(400).send({error, status: false})})
     }else{
         res.status(401).send({message: "Missing data in the body", status: false})
