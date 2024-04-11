@@ -92,7 +92,7 @@ router.get("/get-single-course", async (req, res) => {
     try {
         const courses = await getCourses();
         let course = courses.data.filter(item => item.id === course_ID);
-        console.log(course);
+        console.log(course[0]);
         let mentorPromises = course[0].attributes.lms_mentors.data.map(mentor => {
             return getMentor(mentor.id).then(mentorData => mentorData.data);
         });
@@ -107,7 +107,7 @@ router.get("/get-single-course", async (req, res) => {
         
         return res.status(200).send({ data: course, status: true });
     } catch (error) {
-        return res.status(400).send({ error, status: false });
+        return res.status(400).send({ error: error, status: false });
     }
 });
 
