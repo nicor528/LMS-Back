@@ -31,6 +31,7 @@ router.get("/get-all-courses", async (req, res) => {
     }).catch(error => {res.status(400).send({error, status: false})})
 })
 
+/*
 router.get("/get-single-course", async (req, res) => {
     const course_ID = parseInt(req.query.course_ID);
     const user_ID = req.query.user_ID;
@@ -78,7 +79,38 @@ router.get("/get-single-course", async (req, res) => {
     else {
         res.status(401).send({message: "Missing data in the body", status: false});
     }
+});*/
+
+router.get("/get-single-course", async (req, res) => {
+    const course_ID = parseInt(req.query.course_ID);
+    const user_ID = req.query.user_ID;
+    
+    if (!course_ID || !user_ID) {
+        return res.status(401).send({ message: "Missing data in the body", status: false });
+    }
+
+    try {
+        const courses = await getCourses();
+        let course = courses.data.filter(item => item.id === course_ID);
+        console.log(course);
+        let mentorPromises = course[0].attributes.lms_mentors.data.map(mentor => {
+            return getMentor(mentor.id).then(mentorData => mentorData.data);
+        });
+
+        let mentors = await Promise.all(mentorPromises);
+        course[0].attributes.lms_mentors.data = mentors;
+
+        const allCourses = await getAllUserCourses();
+        const isEnrolled = allCourses.data.find(data => data.attributes.user_ID === user_ID && (data.attributes.lms_course.data.id === course_ID || data.id === course_ID ));
+
+        course[0].attributes.enroled = isEnrolled !== undefined;
+        
+        return res.status(200).send({ data: course, status: true });
+    } catch (error) {
+        return res.status(400).send({ error, status: false });
+    }
 });
+
 
 router.post("/add-course-user", async (req, res) => {
     const user_ID = req.body.user_ID;
