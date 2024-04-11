@@ -1,5 +1,5 @@
 const express = require('express');
-const { createCourse, getCourses, vinculateCourse, finishCourse, getAllUserCourses, finishLesson, updatePercentage, getMentor, getOneCourse, getUser2, vinculateAnnouncementWithUser } = require('../apis/apiStrapi');
+const { createCourse, getCourses, vinculateCourse, finishCourse, getAllUserCourses, finishLesson, updatePercentage, getMentor, getOneCourse, getUser2, vinculateAnnouncementWithUser, getModule } = require('../apis/apiStrapi');
 const router = express.Router();
 
 router.post("/createCourse", async (req, res) => {
@@ -97,8 +97,15 @@ router.get("/get-single-course", async (req, res) => {
             return getMentor(mentor.id).then(mentorData => mentorData.data);
         });
 
+        let modulePromises = course[0].attributes.lms_modules.data.map(module1 => {
+            return getModule(module1.id).then(moduleData => moduleData.data)
+        })
+
         let mentors = await Promise.all(mentorPromises);
         course[0].attributes.lms_mentors.data = mentors;
+
+        let modules = await Promise.all(modulePromises);
+        course[0].attributes.lms_modules.data = modules;
 
         const allCourses = await getAllUserCourses();
         const isEnrolled = allCourses.data.find(data => data.attributes.user_ID === user_ID && (data.attributes.lms_course.data.id === course_ID || data.id === course_ID ));
