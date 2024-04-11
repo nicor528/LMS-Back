@@ -16,7 +16,7 @@ router.post("/get-quizz", async (req, res) => {
                 newquestion.attributes.question = question.attributes.question;
                 newquestion.attributes.options = [question.attributes.wrong_answer_1, question.attributes.wrong_answer_2, question.attributes.wrong_answer_3, question.attributes.correct_answer_1]
                 quizz1.attributes.lms_questions.data[n] = newquestion;
-                quizz1.attributes.max_tries = quizz.attributes.max_tries;
+                quizz1.attributes.max_tries = quizz.data.attributes.max_tries;
                 n ++;
             })
             getTries().then(tries => {
