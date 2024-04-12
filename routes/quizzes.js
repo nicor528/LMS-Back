@@ -25,7 +25,7 @@ router.post("/get-quizz", async (req, res) => {
                     item.attributes.lms_quiz.data.id === parseInt(quiz_ID)
                 );
                 const count = filteredObjects.length;
-                if(count < quizz1.attributes.max_tries){
+                if(count < quizz1.attributes.max_tries || count == undefined){
                     res.status(200).send({data: quizz1, status: true})
                 }else{
                     res.status(200).send({message: "You have reached the maximum tries", status: true})
