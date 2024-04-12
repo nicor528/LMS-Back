@@ -201,10 +201,13 @@ router.post("/edit-info-user", (req, res) => {
  //   const interests = req.body.interests;
     const academic = req.body.academic;
     if(country && user_ID && name && lastName && birth && postal_code && city && province && street_name && academic){
-        editInfoUser(user_ID, name, lastName, birth, postal_code, city, province, street_name, academic, country).then(user => {
+        getUser2(user_ID).then(user => {
+            editInfoUser(user.id, name, lastName, birth, postal_code, city, province, street_name, academic, country).then(user => {
             
-            res.status(200).send({data: user, status: true, message: "sucefull"})
+                res.status(200).send({data: user, status: true, message: "sucefull"})
+            }).catch(error => {res.status(400).send({error, status: false})})
         }).catch(error => {res.status(400).send({error, status: false})})
+        
     }else{
         res.status(401).send({message: "Missing data in the body", status: false}) 
     }
