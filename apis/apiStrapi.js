@@ -524,8 +524,7 @@ function finishLesson(id, lesson, score) {
                     "Content-Type": 'application/json',
                 },
                 body: JSON.stringify({
-                    finish: true,
-                    total_lessons: score
+                    data
                 })
             }).then(async (result) => {
                 console.log(result);

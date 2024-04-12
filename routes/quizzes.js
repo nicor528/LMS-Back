@@ -92,7 +92,7 @@ router.post("/get-quizz-result", (req, res) => {
                                 getAllUserCourses().then(data => {
                                     console.log("test1")
                                     const allCourses = data.data.filter(data => data.attributes.user_ID === user_ID && (data.attributes.lms_course.data.id === quizz.data.attributes.lms_course.data.id || data.id === quizz.data.attributes.lms_course.data.id ));
-                                    finishLesson(allCourses[0].id, "finish", score).then(data => {
+                                    finishLesson(allCourses[0].id, "finish", total_score).then(data => {
                                         console.log("test1")
                                         res.status(200).send({data: {score: total_score, aproved: pass}, status: true})
                                     }).catch(error => {res.status(400).send({error, status: false})})  
