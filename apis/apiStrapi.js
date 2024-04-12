@@ -157,7 +157,7 @@ function getCourses () {
 function getOneCourse (id) {
     return(
         new Promise (async (res, rej) => {
-            fetch(`${process.env.url}/lms-courses/${id}?populate[lms_modules][populate]=*`, {
+            fetch(`${process.env.url}/lms-courses/${id}?populate[lms_certificate][populate]=*`, {
                 method: "GET",
                 headers: {
                     Authorization: `Bearer ${process.env.STRAPI_TOKEN}`,
@@ -1030,6 +1030,34 @@ function vinculateAnnouncementWithUser(user_ID, annoucement_ID) {
     )
 }
 
+function vinculateCertificate(user_ID, certificate_ID){
+    return(
+        new Promise((res, rej) => {
+            fetch(`${process.env.url}/lms-users/${user_ID}`, {
+                method: "PUT",
+                headers: {
+                    Authorization: `Bearer ${process.env.STRAPI_TOKEN}`,
+                    "Content-Type": 'application/json',
+                },
+                body: JSON.stringify({
+                    data: {
+                        lms_certificates: {
+                            connect: [certificate_ID]
+                        }
+                    }
+                })
+            }).then(async (result) => {
+                console.log(result);
+                const data = await result.json();
+                res(data)
+            }).catch(error => {
+                console.log(error);
+                rej(error)
+            })
+        })
+    )
+}
+
 module.exports = {
     createCourse,
     getCourses,
@@ -1067,6 +1095,7 @@ module.exports = {
     getTries,
     getConversation2,
     getAnnoucnment,
-    vinculateAnnouncementWithUser
+    vinculateAnnouncementWithUser,
+    vinculateCertificate
 
 }

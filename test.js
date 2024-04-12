@@ -179,7 +179,7 @@ getQuiz1(1).then(quizz => {
         }).catch(error => {res.status(400).send({error, status: false})})  
     }).catch(error => {res.status(400).send({error, status: false})})
 })*/
-
+/*
 async function test () {
     const user_ID = "iGaPnJK0qVRWt6I5ik7PFIR6lg73"
     const course_ID = 2;
@@ -215,4 +215,8 @@ async function test () {
     }
 }
 
-test()
+test()*/
+
+getOneCourse(2).then(course => {
+    console.log(course.data.attributes.lms_certificate)
+})
