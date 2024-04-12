@@ -806,7 +806,7 @@ function editInfoUser(user_ID, name, lastName, birth, postal_code, city, provinc
                 body: await JSON.stringify({
                     data: {
                         name: name,
-                        lastName: lastName,
+                        last_Name: lastName,
                         birth: birth,
                         postal_code: postal_code,
                         city: city,
