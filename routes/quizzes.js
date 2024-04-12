@@ -85,7 +85,7 @@ router.post("/get-quizz-result", (req, res) => {
                 const pass = total_score >= 50 ? true : false
                 saveScore(user.id, quiz_ID, total_score).then((score) => { // to do
                     vinculateQuizzWithUser(user_ID, quiz_ID).then(result => { //to do
-                        createTries(user_ID, quiz_ID).then(result => {
+                        //createTries(user_ID, quiz_ID).then(result => {
                             if(pass){
                                 getAllUserCourses().then(data => {
                                     const allCourses = data.data.filter(data => data.attributes.user_ID === user_ID && (data.attributes.lms_course.data.id === quizz.data.attributes.lms_course.data.id || data.id === quizz.data.attributes.lms_course.data.id ));
@@ -96,7 +96,7 @@ router.post("/get-quizz-result", (req, res) => {
                             }else{
                                 res.status(200).send({data: {score: total_score, aproved: pass}, status: true})
                             }
-                        }).catch(error => {res.status(400).send({error, status: false})})
+                        //}).catch(error => {res.status(400).send({error, status: false})})
                     }).catch(error => {res.status(400).send({error, status: false})})
                 }).catch(error => {res.status(400).send({error, status: false})})
             }).catch(error => {res.status(400).send({error, status: false})})
