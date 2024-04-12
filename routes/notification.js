@@ -52,6 +52,7 @@ router.get("/user-notifications", (req, res) => {
     const user_ID = req.query.user_ID;
     if(user_ID){
         getAllUserCourses().then(async (data) => {
+            console.log("test1")
             const allCourses = await data.data.filter(data => data.attributes.user_ID === user_ID && data.attributes.finish === false)
             console.log(allCourses[0].attributes.lms_course.data.attributes)
             const annoucments = allCourses.map(data => {
@@ -77,10 +78,11 @@ router.get("/user-notifications", (req, res) => {
             });
             
             Promise.all(notis).then(result => {
+                console.log("test1")
                 console.log(result);
                 res.status(200).send({data: result[0], status: true, message: "sucefull"})
             });
-            
+
         }).catch(error => {res.status(400).send({error, status: false})})
     }else{
         res.status(401).send({message: "Missing data", status: false}) 
