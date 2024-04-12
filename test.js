@@ -1,5 +1,5 @@
 const { SingUpEmail1 } = require("./apis/apiAuth");
-const { createUser2, getUser2, getCourses, vinculateCourse, getAllUserCourses, finishLesson, relationCourseWithUser, getModule, getOneCourse, getQuiz1, getLesson, getUsers, addMessage, createConversation, getAllConversations, getTries, getConversation2, getAnnoucnment, saveScore, getMentor } = require("./apis/apiStrapi");
+const { createUser2, getUser2, getCourses, vinculateCourse, getAllUserCourses, finishLesson, relationCourseWithUser, getModule, getOneCourse, getQuiz1, getLesson, getUsers, addMessage, createConversation, getAllConversations, getTries, getConversation2, getAnnoucnment, saveScore, getMentor, getCertificate } = require("./apis/apiStrapi");
 /*
 createUser2("nicolas", "test23@gmail.com").then(data => {
     console.log(data.data.attributes)
@@ -217,6 +217,12 @@ async function test () {
 
 test()*/
 
-getOneCourse(2).then(course => {
-    console.log(course.data.attributes.lms_certificate)
+getUser2("iGaPnJK0qVRWt6I5ik7PFIR6lg73").then(user => {
+    //console.log(user)
+    const certificates = user.attributes.lms_certificates.data.map((certificate) => {
+        console.log(certificate)
+        getCertificate(certificate.id).then(certificate => {
+            return certificate
+        })
+    })
 })
