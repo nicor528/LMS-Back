@@ -54,6 +54,7 @@ router.get("/user-notifications", (req, res) => {
         getAllUserCourses().then(async (data) => {
             console.log("test1")
             const allCourses = await data.data.filter(data => data.attributes.user_ID === user_ID && data.attributes.finish === false)
+            console.log(allCourses)
             console.log(allCourses[0].attributes.lms_course.data.attributes)
             if(!allCourses){
                 res.status(200).send({data: [], status: true, message: "sucefull"})
