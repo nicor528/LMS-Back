@@ -1,5 +1,5 @@
 const express = require('express');
-const { getQuizz, getQuiz1, saveScore, vinculateQuizzWithUser, createTries, getTries, getUser2, getAllUserCourses } = require('../apis/apiStrapi');
+const { getQuizz, getQuiz1, saveScore, vinculateQuizzWithUser, createTries, getTries, getUser2, getAllUserCourses, finishLesson } = require('../apis/apiStrapi');
 const router = express.Router();
 
 
