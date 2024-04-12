@@ -523,9 +523,10 @@ function finishLesson(id, lesson, score) {
                     Authorization: `Bearer ${process.env.STRAPI_TOKEN}`,
                     "Content-Type": 'application/json',
                 },
-                body: JSON.stringify(
-                    data
-                )
+                body: JSON.stringify({
+                    finish: true,
+                    total_lessons: score
+                })
             }).then(async (result) => {
                 console.log(result);
                 const data = await result.json();
