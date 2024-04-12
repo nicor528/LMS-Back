@@ -20,8 +20,10 @@ router.post("/get-quizz", async (req, res) => {
                 quizz1.attributes.max_tries = quizz.data.attributes.max_tries;
                 n ++;
             })
-            getTries().then(tries => {
+            res.status(200).send({data: quizz1, status: true})
+    /*        getTries().then(tries => {
                 console.log("test1")
+                console.log(tries)
                 const filteredObjects = tries.data.filter(item => 
                     item.attributes.lms_user.data.attributes.user_ID === user_ID &&
                     item.attributes.lms_quiz.data.id === parseInt(quiz_ID)
@@ -34,7 +36,7 @@ router.post("/get-quizz", async (req, res) => {
                     console.log("test1")
                     res.status(200).send({message: "You have reached the maximum tries", status: true})
                 }
-            }).catch(error => {res.status(400).send({error, status: false})})
+            }).catch(error => {res.status(400).send({error, status: false})})*/
         }).catch(error => {res.status(400).send({error, status: false})})
     }else{
         res.status(401).send({message: "Missing data in the body", status: false})
