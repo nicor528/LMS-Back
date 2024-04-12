@@ -467,7 +467,7 @@ function vinculateModule(user_ID, module_ID) {
     )
 }
 
-async function selectLesson(lesson){
+async function selectLesson(lesson, score){
     let data = {
 
     }
@@ -505,6 +505,7 @@ async function selectLesson(lesson){
         case "finish":
             data.finish = true;
             data.percentage = 100;
+            data.total_lessons = score
             break;
         default:
             // Manejar el caso por defecto si lesson no coincide con ninguno de los casos anteriores.
@@ -512,10 +513,10 @@ async function selectLesson(lesson){
     return data
 }
 
-function finishLesson(id, lesson) {
+function finishLesson(id, lesson, score) {
     return(
         new Promise (async (res, rej) => {
-            const data = await selectLesson(lesson)
+            const data = await selectLesson(lesson, score)
             fetch(`${process.env.url}/lms-user-courses/${id}`, {
                 method: "PUT",
                 headers: {
@@ -692,10 +693,10 @@ function saveScore(user_ID, quiz_ID, score) {
                 },
                 body: await JSON.stringify({
                     data: {
-                        lms_users: {
-                            connect: [user_ID]
+                        lms_user: {
+                            connect: [parseInt(user_ID)]
                         },
-                        lms_quizzes: {
+                        lms_quiz: {
                             connect: [quiz_ID]
                         },
                         score: score

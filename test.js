@@ -1,5 +1,5 @@
 const { SingUpEmail1 } = require("./apis/apiAuth");
-const { createUser2, getUser2, getCourses, vinculateCourse, getAllUserCourses, finishLesson, relationCourseWithUser, getModule, getOneCourse, getQuiz1, getLesson, getUsers, addMessage, createConversation, getAllConversations, getTries, getConversation2, getAnnoucnment } = require("./apis/apiStrapi");
+const { createUser2, getUser2, getCourses, vinculateCourse, getAllUserCourses, finishLesson, relationCourseWithUser, getModule, getOneCourse, getQuiz1, getLesson, getUsers, addMessage, createConversation, getAllConversations, getTries, getConversation2, getAnnoucnment, saveScore, getMentor } = require("./apis/apiStrapi");
 /*
 createUser2("nicolas", "test23@gmail.com").then(data => {
     console.log(data.data.attributes)
@@ -164,29 +164,55 @@ getModule(1).then(result => {
     console.log(error)
 })*/
 
-getAllUserCourses().then(async (data) => {
-    const allCourses = await data.data.filter(data => data.attributes.user_ID === "iGaPnJK0qVRWt6I5ik7PFIR6lg73" && data.attributes.finish === false)
-    console.log(allCourses[0].attributes.lms_course.data.attributes)
-    const annoucments = allCourses.map(data => {
-        let data1 = {};
-        data1.courseID = data.attributes.lms_course.data.id;
-        data1.announcements = data.attributes.lms_course.data.attributes.announcements;
-        //data1.read = 
-        return data1;
-    })
-    console.log(annoucments)
-    const notis = annoucments.map(async data => {
-        const toReturn = await Promise.all(data.announcements.data.map(async item => {
-            const announcementData = await getAnnoucnment(item.id);
-            const user = announcementData.data.attributes.lms_users.data.find(user => user.attributes.user_ID == "iGaPnJK0qVRWt6I5ik7PFIR6lg73");
-            if (user) {
-                return { title: announcementData.data.attributes.title, courseID: announcementData.data.attributes.lms_course.data.id };
-            }
-        }));
-        return toReturn.filter(Boolean); // Eliminar elementos undefined del array
-    });
-    
-    Promise.all(notis).then(result => {
-        console.log(result);
-    });
-}).catch(error => {res.status(400).send({error, status: false})})
+/*
+getQuiz1(1).then(quizz => {
+    console.log(quizz.data.attributes.lms_course)
+    getAllUserCourses().then(data => {
+        const allCourses = data.data.filter(data => data.attributes.user_ID === "iGaPnJK0qVRWt6I5ik7PFIR6lg73" && (data.attributes.lms_course.data.id === quizz.data.attributes.lms_course.data.id || data.id === quizz.data.attributes.lms_course.data.id ));
+        console.log(allCourses)
+        finishLesson(allCourses[0].id, "finish").then(data => {
+            saveScore(26, quizz.data.id, 50).then(data => {
+                console.log(data)
+            }).catch(error => {
+                console.log(error)
+            })
+        }).catch(error => {res.status(400).send({error, status: false})})  
+    }).catch(error => {res.status(400).send({error, status: false})})
+})*/
+
+async function test () {
+    const user_ID = "iGaPnJK0qVRWt6I5ik7PFIR6lg73"
+    const course_ID = 2;
+    try {
+        const courses = await getCourses();
+        let course = courses.data.filter(item => item.id === course_ID);
+        console.log(course[0]);
+        let mentorPromises = course[0].attributes.lms_mentors.data.map(mentor => {
+            return getMentor(mentor.id).then(mentorData => mentorData.data);
+        });
+
+        let modulePromises = course[0].attributes.lms_modules.data.map(module1 => {
+            return getModule(module1.id).then(moduleData => moduleData.data)
+        })
+
+        let mentors = await Promise.all(mentorPromises);
+        course[0].attributes.lms_mentors.data = mentors;
+
+        let modules = await Promise.all(modulePromises);
+        course[0].attributes.lms_modules.data = modules;
+
+        //const quiz = await getQuiz1(course[0].attributes.lms_quizs.data[0].id)
+
+       // const score = 
+
+        const allCourses = await getAllUserCourses();
+        const isEnrolled = allCourses.data.find(data => data.attributes.user_ID === user_ID && (data.attributes.lms_course.data.id === course_ID || data.id === course_ID ));
+        course[0].attributes.quiz_score = isEnrolled.attributes.finish ? isEnrolled.attributes.total_lessons : 0
+        course[0].attributes.enroled = isEnrolled !== undefined;
+        console.log(isEnrolled)
+    } catch (error) {
+        console.log(error)
+    }
+}
+
+test()
