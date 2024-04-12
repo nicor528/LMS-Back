@@ -813,7 +813,7 @@ function editInfoUser(user_ID, name, lastName, birth, postal_code, city, provinc
                         country: country,
                         province: province,
                         street_name: street_name,
-                        academic: academic
+                        academic_qualifications: academic
                     }
                 })
             }).then(async (result) => {
