@@ -83,7 +83,7 @@ function createUser2(name, email, uid, lastName, birth, postal_code, city, count
 
 async function getUser2(id) {
     try {
-        const response = await fetch(`${process.env.url}/lms-users?populate=*&_where={"user_ID":${id}}`, {
+        const response = await fetch(`${process.env.url}/lms-users?_limit=-1&populate=*`, {
             method: "GET",
             headers: {
                 Authorization: `Bearer ${process.env.STRAPI_TOKEN}`
