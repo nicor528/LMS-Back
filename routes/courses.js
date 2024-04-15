@@ -109,6 +109,7 @@ router.get("/get-single-course", async (req, res) => {
 
         const allCourses = await getAllUserCourses();
         const isEnrolled = allCourses.data.find(data => data.attributes.user_ID === user_ID && (data.attributes.lms_course.data.id === course_ID || data.id === course_ID ));
+        console.log(isEnrolled)
         course[0].attributes.quiz_score = isEnrolled.attributes.finish ? isEnrolled.attributes.total_lessons : 0
         course[0].attributes.enroled = isEnrolled !== undefined;
         
