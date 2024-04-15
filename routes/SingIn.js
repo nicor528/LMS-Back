@@ -48,6 +48,7 @@ router.post("/singInEmail", async (req, res) => {
     const pass = req.body.pass;
     if(email && pass){
         SingInPass(email, pass).then(user => {
+            console.log("test2")
             getUser2(user.uid).then(user => {
                 getAllUserCourses().then(async (data) => {
                     console.log("test1")
