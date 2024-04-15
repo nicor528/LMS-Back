@@ -91,13 +91,15 @@ router.post("/get-quizz-result", (req, res) => {
                             if(pass){
                                 getAllUserCourses().then(data => {
                                     console.log("test4")
-                                    const allCourses = data.data.filter(data => data.attributes.user_ID === user_ID && (data.attributes.lms_course.data.id === quizz.data.attributes.lms_course.data.id || data.id === quizz.data.attributes.lms_course.data.id ));
+                                    const allCourses = data.data.filter(data => data.attributes.user_ID === user_ID && (data.attributes.lms_course.data.id == quizz.data.attributes.lms_course.data.id || data.id === quizz.data.attributes.lms_course.data.id ));
+                                    console.log(allCourses)
                                     finishLesson(allCourses[0].id, "finish", total_score).then(data => {
                                         console.log("test3")
                                         console.log(quizz.data.attributes.lms_course.data.id)
                                         getOneCourse(quizz.data.attributes.lms_course.data.id).then(course => {
                                             console.log("test2")
                                             vinculateCertificate(user.id, course.data.attributes.lms_certificate.data.id).then(data => {
+                                                console.log(quiz_ID + "this is it")
                                                 res.status(200).send({data: {score: total_score, aproved: pass}, status: true})
                                             }).catch(error => {res.status(400).send({error, status: false})}) 
                                         }).catch(error => {res.status(400).send({error, status: false})}) 
