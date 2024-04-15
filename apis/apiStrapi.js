@@ -96,6 +96,7 @@ async function getUser2(id) {
         }
 
         const data = await response.json();
+        console.log(data.data)
         const user = data.data.find(user => user.attributes.user_ID === id);
 
         if (!user) {
