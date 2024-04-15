@@ -87,6 +87,7 @@ router.post("/get-quizz-result", (req, res) => {
                     console.log("test1")
                     vinculateQuizzWithUser(user_ID, quiz_ID).then(result => { //to do
                         console.log("test1")
+                        console.log(quiz_ID + "this is it")
                         //createTries(user_ID, quiz_ID).then(result => {
                             if(pass){
                                 getAllUserCourses().then(data => {
@@ -99,7 +100,7 @@ router.post("/get-quizz-result", (req, res) => {
                                         getOneCourse(quizz.data.attributes.lms_course.data.id).then(course => {
                                             console.log("test2")
                                             vinculateCertificate(user.id, course.data.attributes.lms_certificate.data.id).then(data => {
-                                                console.log(quiz_ID + "this is it")
+                                                
                                                 res.status(200).send({data: {score: total_score, aproved: pass}, status: true})
                                             }).catch(error => {res.status(400).send({error, status: false})}) 
                                         }).catch(error => {res.status(400).send({error, status: false})}) 
