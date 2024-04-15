@@ -90,10 +90,10 @@ router.post("/get-quizz-result", (req, res) => {
                         //createTries(user_ID, quiz_ID).then(result => {
                             if(pass){
                                 getAllUserCourses().then(data => {
-                                    console.log("test1")
+                                    console.log("test4")
                                     const allCourses = data.data.filter(data => data.attributes.user_ID === user_ID && (data.attributes.lms_course.data.id === quizz.data.attributes.lms_course.data.id || data.id === quizz.data.attributes.lms_course.data.id ));
                                     finishLesson(allCourses[0].id, "finish", total_score).then(data => {
-                                        console.log("test1")
+                                        console.log("test3")
                                         console.log(quizz.data.attributes.lms_course.data.id)
                                         getOneCourse(quizz.data.attributes.lms_course.data.id).then(course => {
                                             console.log("test2")
