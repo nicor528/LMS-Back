@@ -1,5 +1,5 @@
 const express = require('express');
-const { createCourse, getCourses, vinculateCourse, finishCourse, getAllUserCourses, finishLesson, updatePercentage, getMentor, getOneCourse, getUser2, vinculateAnnouncementWithUser, getModule } = require('../apis/apiStrapi');
+const { createCourse, getCourses, vinculateCourse, finishCourse, getAllUserCourses, finishLesson, updatePercentage, getMentor, getOneCourse, getUser2, vinculateAnnouncementWithUser, getModule, getOneCourse1 } = require('../apis/apiStrapi');
 const router = express.Router();
 
 router.post("/createCourse", async (req, res) => {
@@ -133,7 +133,7 @@ router.post("/add-course-user", async (req, res) => {
         getCourses().then(courses => {
             const Course = courses.data.filter(item => item.id === parseInt(course_ID));
             let n_lessons = 0; 
-            getOneCourse(Course[0].id).then(course => {
+            getOneCourse1(Course[0].id).then(course => {
                 console.log(course)
                 course.data.attributes.lms_modules.data.map(item => {
                     console.log(item)

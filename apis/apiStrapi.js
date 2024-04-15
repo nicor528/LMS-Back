@@ -176,6 +176,28 @@ function getOneCourse (id) {
     )
 }
 
+function getOneCourse1 (id) {
+    return(
+        new Promise (async (res, rej) => {
+            fetch(`${process.env.url}/lms-courses/${id}?populate[lms_modules][populate]=*`, {
+                method: "GET",
+                headers: {
+                    Authorization: `Bearer ${process.env.STRAPI_TOKEN}`,
+                    "Content-Type": 'application/json',
+                },
+            }).then(async (result) => {
+                //console.log(result)
+                const data = await result.json();
+                console.log(data)
+                res(data)
+            }).catch(error => {
+                console.log(error)
+                rej(error)
+            })
+        })
+    )
+}
+
 function getAllUserCourses () {
     return(
         new Promise (async (res, rej) => {
@@ -1123,6 +1145,7 @@ module.exports = {
     getAnnoucnment,
     vinculateAnnouncementWithUser,
     vinculateCertificate,
-    addPoints
+    addPoints,
+    getOneCourse1
 
 }
