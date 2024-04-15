@@ -1,5 +1,5 @@
 const express = require('express');
-const { getCourseLessons, getCourses, vinculateLesson, vinculateModule, getModule, getLesson, getOneUserCourse, updatePercentage, getUser2, getAllUserCourses } = require('../apis/apiStrapi');
+const { getCourseLessons, getCourses, vinculateLesson, vinculateModule, getModule, getLesson, getOneUserCourse, updatePercentage, getUser2, getAllUserCourses, addPoints } = require('../apis/apiStrapi');
 const router = express.Router();
 
 /*
@@ -122,11 +122,14 @@ router.post("/finish-lesson", (req, res) => {
                             completed_porcent = completed_porcent + course.attributes.percentage;
                             updatePercentage(completed_porcent, course.id).then(response => {
                                 getLesson(lesson_ID).then(async (lesson) => {
+                                    const newPoints = user.attributes.points + 10
                                     console.log("3")
                                     let lesson1 = lesson;
                                     lesson1.data.attributes.finish = true;
                                     lesson1.data.attributes.lms_users = [];
-                                    res.status(200).send({data: lesson1.data, status: true})
+                                    addPoints(user.id, newPoints).then(data => {
+                                        res.status(200).send({data: lesson1.data, status: true})
+                                    }).catch(error => {res.status(400).send({error, status: false})})
                                 }).catch(error => {res.status(400).send({error, status: false})})
                             }).catch(error => {res.status(400).send({error, status: false})})
                         }).catch(error => {res.status(400).send({error, status: false})})

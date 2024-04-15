@@ -1058,6 +1058,32 @@ function vinculateCertificate(user_ID, certificate_ID){
     )
 }
 
+function addPoints(user_ID, points){
+    return(
+        new Promise((res, rej) => {
+            fetch(`${process.env.url}/lms-users/${user_ID}`, {
+                method: "PUT",
+                headers: {
+                    Authorization: `Bearer ${process.env.STRAPI_TOKEN}`,
+                    "Content-Type": 'application/json',
+                },
+                body: JSON.stringify({
+                    data: {
+                        points: points
+                    }
+                })
+            }).then(async (result) => {
+                console.log(result);
+                const data = await result.json();
+                res(data)
+            }).catch(error => {
+                console.log(error);
+                rej(error)
+            })
+        })
+    )
+}
+
 module.exports = {
     createCourse,
     getCourses,
@@ -1096,6 +1122,7 @@ module.exports = {
     getConversation2,
     getAnnoucnment,
     vinculateAnnouncementWithUser,
-    vinculateCertificate
+    vinculateCertificate,
+    addPoints
 
 }
