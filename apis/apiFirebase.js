@@ -6,6 +6,8 @@ const DB = getFirestore(app);
 const storage = getStorage(app);
 
 function createNewCourseRequest (user_ID, course_ID, course, user) {
+    console.log(course);
+    console.log(user)
     return(
         new Promise(async (res, rej) => {
             let localDate = new Date();
@@ -60,6 +62,7 @@ function getOpenRequests() {
 function aproveUserCourseRequest(request_ID) {
     return(
         new Promise(async (res, rej) => {
+            let localDate = new Date();
             try{
                 const openRef = doc(DB, "user-courses-requests", "open", "requests", request_ID)
                 const OpenDocSnap = await getDoc(openRef);
@@ -67,6 +70,11 @@ function aproveUserCourseRequest(request_ID) {
                 if(OpenDocSnap.exists()){
                     const docOpen = OpenDocSnap.data()
                     console.log(docOpen)
+                    await setDoc(closeRef, {
+                        date: localDate,
+                        course_ID: docOpen.course_ID,
+                        user_name
+                    })
                 }else{
                     rej("request dosent exist")
                 }
