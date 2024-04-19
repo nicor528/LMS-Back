@@ -23,7 +23,7 @@ function getRequestUserState(user_ID, course_ID) {
                 }if(docSnap.exists()){
                     res("pending")
                 }else{
-                    res("no exist")
+                    res("no_exist")
                 }
             }catch(error) {
                 console.log(error)
