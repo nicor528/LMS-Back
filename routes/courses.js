@@ -116,7 +116,13 @@ router.get("/get-single-course", async (req, res) => {
         }else{
             course[0].attributes.quiz_score = 0
         }
-        const EnroledRequest = await getRequestUserState(user_ID, course_ID)
+
+        if(user_ID){
+            const EnroledRequest = await getRequestUserState(user_ID, course_ID)
+        }else{
+            const EnroledRequest = "no_exist"
+        }
+        
         course[0].attributes.enroled = EnroledRequest;
 
         return res.status(200).send({ data: course, status: true });
