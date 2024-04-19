@@ -142,7 +142,7 @@ router.post("/singUpEmail", async (req, res) => {
     const province = "";
     const phone = "";
     const street_name = "";
-    if(name && email && pass){
+    if(email && pass){
         SingUpEmail1(email, pass).then(user1 => {
             console.log("test1")
             createUser2(name, email, user1.uid, lastName, "2024-03-06T12:30:00Z", postal_code, city, province, phone, street_name).then(async (user) => {
