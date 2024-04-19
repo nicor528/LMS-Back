@@ -130,9 +130,12 @@ router.post("/create-user-course-request", (req, res) => {
     if(user_ID && course_ID){
         getUser2(user_ID).then(user => {
             getCourses().then(courses => {
+                console.log("1")
                 const course = courses.data.filter(item => item.id === parseInt(course_ID));
                 getOneCourse1(course[0].id).then(course => {
+                    console.log("2")
                     createNewCourseRequest(user_ID, course[0].id, course.data.attributes, user.attributes).then(data => {
+                        console.log("3")
                         if(data == "on going request"){
                             res.status(200).send({message: "on going request", status: false}) 
                         }else{
