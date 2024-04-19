@@ -1,6 +1,6 @@
 const express = require('express');
 const { createCourse, getCourses, vinculateCourse, finishCourse, getAllUserCourses, finishLesson, updatePercentage, getMentor, getOneCourse, getUser2, vinculateAnnouncementWithUser, getModule, getOneCourse1 } = require('../apis/apiStrapi');
-const { createNewCourseRequest } = require('../apis/apiFirebase');
+const { createNewCourseRequest, getRequestUserState } = require('../apis/apiFirebase');
 const router = express.Router();
 
 router.post("/createCourse", async (req, res) => {
@@ -116,8 +116,9 @@ router.get("/get-single-course", async (req, res) => {
         }else{
             course[0].attributes.quiz_score = 0
         }
-        course[0].attributes.enroled = isEnrolled !== undefined;
-        
+        const EnroledRequest = await getRequestUserState(user_ID, course_ID)
+        course[0].attributes.enroled = EnroledRequest;
+
         return res.status(200).send({ data: course, status: true });
     } catch (error) {
         return res.status(400).send({ error: error, status: false });

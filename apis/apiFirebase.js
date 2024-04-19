@@ -5,6 +5,34 @@ const { setDoc, doc, getDoc, query, collection, where, getDocs, getFirestore } =
 const DB = getFirestore(app);
 const storage = getStorage(app);
 
+function getRequestUserState(user_ID, course_ID) {
+    return(
+        new Promise(async (res, rej) => {
+            try{
+                const docRefOpen = doc(DB, "user-courses-requests", "open", "requests", user_ID + course_ID)
+                const docSnap = await getDoc(docRefOpen);
+                const docRefClose = doc(DB, "user-courses-requests", "closed", "requests", user_ID + course_ID)
+                const docSnapClose = await getDoc(docRefClose);
+                if(docSnapClose.exists()){
+                    const data = docRefClose.data();
+                    if(data.state === "aproved"){
+                        res("enroled")
+                    }else{
+                        res("rejected")
+                    }
+                }if(docSnap.exists()){
+                    res("pending")
+                }else{
+                    res("no exist")
+                }
+            }catch(error) {
+                console.log(error)
+                rej(error)
+            }
+        })
+    )
+}
+
 function createNewCourseRequest (user_ID, course_ID, course, user) {
     console.log(course);
     console.log(user)
@@ -73,8 +101,11 @@ function aproveUserCourseRequest(request_ID) {
                     await setDoc(closeRef, {
                         date: localDate,
                         course_ID: docOpen.course_ID,
-                        user_name
+                        user_name: docOpen.user_name,
+                        user_ID: user_ID,
+                        satate: "aproved"
                     })
+
                 }else{
                     rej("request dosent exist")
                 }
@@ -91,6 +122,6 @@ module.exports = {
     createNewCourseRequest,
     getOpenRequests,
     aproveUserCourseRequest,
-
+    getRequestUserState,
 
 }
