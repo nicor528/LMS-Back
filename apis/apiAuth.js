@@ -89,5 +89,6 @@ module.exports = {
     SingUpEmail1,
     SingInPass,
     resetPass,
+    app,
 
 }

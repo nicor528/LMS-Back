@@ -1,4 +1,5 @@
 const { SingUpEmail1 } = require("./apis/apiAuth");
+const { createNewCourseRequest, getOpenRequests, aproveUserCourseRequest } = require("./apis/apiFirebase");
 const { createUser2, getUser2, getCourses, vinculateCourse, getAllUserCourses, finishLesson, relationCourseWithUser, getModule, getOneCourse, getQuiz1, getLesson, getUsers, addMessage, createConversation, getAllConversations, getTries, getConversation2, getAnnoucnment, saveScore, getMentor, getCertificate } = require("./apis/apiStrapi");
 /*
 createUser2("nicolas", "test23@gmail.com").then(data => {
@@ -216,7 +217,7 @@ async function test () {
 }
 
 test()*/
-
+/*
 getUser2("iGaPnJK0qVRWt6I5ik7PFIR6lg73").then(user => {
     //console.log(user)
     const certificates = user.attributes.lms_certificates.data.map((certificate) => {
@@ -225,4 +226,14 @@ getUser2("iGaPnJK0qVRWt6I5ik7PFIR6lg73").then(user => {
             return certificate
         })
     })
-})
+})*/
+/*
+createNewCourseRequest("iGaPnJK0qVRWt6I5ik7PFIR6lg73", 1, {technology: "Data Science"}, {name: "nicolas"}).then(data => {
+    console.log(data)
+}).catch(error => {
+    console.log(error)
+})*/
+
+aproveUserCourseRequest("iGaPnJK0qVRWt6I5ik7PFIR6lg73")/*.then(data => {
+    console.log(data)
+})*/

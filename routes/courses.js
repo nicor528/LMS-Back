@@ -1,5 +1,6 @@
 const express = require('express');
 const { createCourse, getCourses, vinculateCourse, finishCourse, getAllUserCourses, finishLesson, updatePercentage, getMentor, getOneCourse, getUser2, vinculateAnnouncementWithUser, getModule, getOneCourse1 } = require('../apis/apiStrapi');
+const { createNewCourseRequest } = require('../apis/apiFirebase');
 const router = express.Router();
 
 router.post("/createCourse", async (req, res) => {
@@ -122,6 +123,29 @@ router.get("/get-single-course", async (req, res) => {
         return res.status(400).send({ error: error, status: false });
     }
 });
+
+router.post("/create-user-course-request", (res, req) => {
+    const user_ID = req.body.user_ID;
+    const course_ID = req.body.course_ID;
+    if(user_ID && course_ID){
+        getUser2(user_ID).then(user => {
+            getCourses().then(courses => {
+                const course = courses.data.filter(item => item.id === parseInt(course_ID));
+                getOneCourse1(course[0].id).then(course => {
+                    createNewCourseRequest(user_ID, course[0].id, course.data.attributes, user.attributes).then(data => {
+                        if(data == "on going request"){
+                            res.status(200).send({message: "on going request", status: false}) 
+                        }else{
+                            res.status(200).send({message: "request send", status: true})
+                        }
+                    }).catch(error => {res.status(400).send({error, status: false})})
+                }).catch(error => {res.status(400).send({error, status: false})})
+            }).catch(error => {res.status(400).send({error, status: false})})
+        }).catch(error => {res.status(400).send({error, status: false})})
+    }else{
+        res.status(401).send({message: "Missing data in the body", status: false})
+    }
+})
 
 
 router.post("/add-course-user", async (req, res) => {

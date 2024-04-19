@@ -66,16 +66,16 @@ router.get("/test", (req,res) => {
 router.post("/singUpGoogle", async (req, res) => {
     const uid = req.body.uid;
     const email = req.body.email; 
-    const name = req.body.name;
-    const lastName = req.body.lastName;
-    const birth = req.body.birth;
-    const postal_code  = req.body.postal_code;
-    const city = req.body.city;
-    const province = req.body.province;
-    const phone = req.body.phone;
-    const street_name = req.body.street_name;
-    if(uid && email && lastName &&  name && postal_code && city && province && phone && street_name ){
-        createUser2(name, email, uid, lastName, birth ? birth : "2024-03-06T12:30:00Z", postal_code, city, province, phone, street_name).then(async (user) => {
+    const name = "";
+    const lastName = "";
+    //const birth = req.body.birth;
+    const postal_code  = "";
+    const city = "";
+    const province = "";
+    const phone = "";
+    const street_name = "";
+    if(uid && email ){
+        createUser2(name, email, uid, lastName, "2024-03-06T12:30:00Z", postal_code, city, province, phone, street_name).then(async (user) => {
             /*const data = await {
                 ...user.data
             }*/
@@ -131,21 +131,21 @@ router.post("/singUpGoogle", async (req, res) => {
  */
 router.post("/singUpEmail", async (req, res) => {
     //console.log(req.body)
-    const name = req.body.name;
+    const name = "";
+    const lastName = "";
     //const uid = req.body.uid;
     const email = req.body.email;
-    const lastName = req.body.lastName;
     const pass = req.body.pass;
-    const birth = req.body.birth;
-    const postal_code  = req.body.postal_code;
-    const city = req.body.city;
-    const province = req.body.province;
-    const phone = req.body.phone;
-    const street_name = req.body.street_name;
-    if(name && email && pass && lastName && postal_code && city && province && phone && street_name){
+    //const birth = req.body.birth;
+    const postal_code  = "";
+    const city = "";
+    const province = "";
+    const phone = "";
+    const street_name = "";
+    if(name && email && pass){
         SingUpEmail1(email, pass).then(user1 => {
             console.log("test1")
-            createUser2(name, email, user1.uid, lastName, birth ? birth : "2024-03-06T12:30:00Z", postal_code, city, province, phone, street_name).then(async (user) => {
+            createUser2(name, email, user1.uid, lastName, "2024-03-06T12:30:00Z", postal_code, city, province, phone, street_name).then(async (user) => {
                 /*const data = await {
                     ...user.data
                 }*/
@@ -180,11 +180,8 @@ router.post("/singUpEmail", async (req, res) => {
     }
 })
 
-
-
 router.post("/singUpFace")
 
 router.post("/singUpTwitter")
-
 
 module.exports = router;
