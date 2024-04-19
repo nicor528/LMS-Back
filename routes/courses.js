@@ -124,7 +124,7 @@ router.get("/get-single-course", async (req, res) => {
     }
 });
 
-router.post("/create-user-course-request", (res, req) => {
+router.post("/create-user-course-request", (req, res) => {
     const user_ID = req.body.user_ID;
     const course_ID = req.body.course_ID;
     if(user_ID && course_ID){
