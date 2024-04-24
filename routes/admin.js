@@ -1,10 +1,16 @@
 const express = require('express');
-const { getOpenRequests, aproveUserCourseRequest } = require('../apis/apiFirebase');
+const { getOpenRequests, aproveUserCourseRequest, getCloseRequests } = require('../apis/apiFirebase');
 const { getAllUsers, getCourses, getOneCourse1, vinculateCourse } = require('../apis/apiStrapi');
 const router = express.Router();
 
 router.get("/get-open-user-courses-requests", (req, res) => {
     getOpenRequests().then(data => {
+        res.status(200).send({data: data, status: true})
+    }).catch(error => {res.status(400).send({error, status: false})})
+})
+
+router.get("/get-cloed-user-course-request", (req, res) => {
+    getCloseRequests().then(data => {
         res.status(200).send({data: data, status: true})
     }).catch(error => {res.status(400).send({error, status: false})})
 })
@@ -51,5 +57,8 @@ router.get("/get-all-users", (req, res) => {
         res.status(200).send({data: users.data, status: true})
     }).catch(error => {res.status(400).send({error, status: false})})
 })
+
+
+
 
 module.exports = router;

@@ -138,6 +138,28 @@ function getOpenRequests() {
     )
 }
 
+function getCloseRequests() {
+    return(
+        new Promise(async (res, rej) => {
+            try{
+                const closeRef = collection(DB, "user-courses-requests", "closed", "requests")
+                const snapShot = await getDocs(closeRef)
+                const closed = snapShot.docs.map(request => {
+                    const request2 = request.data();
+                    return{...request2}
+                })
+                res(closed)
+            }catch(error){
+                console.log(error)
+                rej(error)
+            }
+        })
+    )
+}
+
+
+
+
 function aproveUserCourseRequest(request_ID, aproved) {
     return(
         new Promise(async (res, rej) => {
@@ -179,5 +201,6 @@ module.exports = {
     uploadProfilePicture,
     getProfilePicture,
     getPDF,
+    getCloseRequests
     
 }
