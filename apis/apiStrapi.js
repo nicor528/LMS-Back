@@ -1135,6 +1135,30 @@ function addPoints(user_ID, points){
     )
 }
 
+async function getAllUsers() {
+    try {
+        const response = await fetch(`${process.env.url}/lms-users?pagination[page]=1&pagination[pageSize]=10000`, {
+            method: "GET",
+            headers: {
+                Authorization: `Bearer ${process.env.STRAPI_TOKEN}`
+            }
+        });
+
+        if (!response.ok) {
+            const errorMessage = await response.text();
+            throw new Error(`Error de red: ${errorMessage}`);
+        }
+
+        const data = await response.json();
+        console.log(data)
+    
+        return data;
+    } catch (error) {
+        console.error("Error al obtener el usuario:", error);
+        throw error; // Re-lanza el error para que quien llame a esta función pueda manejarlo si es necesario
+    }
+}
+
 module.exports = {
     createCourse,
     getCourses,
@@ -1176,6 +1200,7 @@ module.exports = {
     vinculateCertificate,
     addPoints,
     getOneCourse1,
-    unVinculateLesson
+    unVinculateLesson,
+    getAllUsers,
 
 }

@@ -113,6 +113,7 @@ router.get("/get-single-course", async (req, res) => {
         console.log(isEnrolled)
         if(isEnrolled != undefined){
             course[0].attributes.quiz_score = isEnrolled.attributes.finish ? isEnrolled.attributes.total_lessons : 0
+            course[0].attributes.finishDate = isEnrolled.attributes.finish ? isEnrolled.attributes.end_date : null;
         }else{
             course[0].attributes.quiz_score = 0
         }
