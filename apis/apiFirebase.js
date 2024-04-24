@@ -1,5 +1,5 @@
 const { app } = require("./apiAuth");
-const { setDoc, doc, getDoc, query, collection, where, getDocs, getFirestore } = require("firebase/firestore");
+const { setDoc, doc, getDoc, query, collection, where, getDocs, getFirestore, deleteDoc } = require("firebase/firestore");
 const { getStorage, ref, uploadString, uploadBytes, getDownloadURL  } = require("firebase/storage")
 
 const DB = getFirestore(app);
@@ -100,7 +100,8 @@ function createNewCourseRequest (user_ID, course_ID, course, user) {
                         course_ID: course_ID,
                         course_name: course.technology,
                         user_name: user.name,
-                        user_ID: user_ID
+                        user_ID: user_ID,
+                        state: "pending"
                     })
                     const docSnap = await getDoc(docRef);
                     if (docSnap.exists()) {
@@ -137,7 +138,7 @@ function getOpenRequests() {
     )
 }
 
-function aproveUserCourseRequest(request_ID) {
+function aproveUserCourseRequest(request_ID, aproved) {
     return(
         new Promise(async (res, rej) => {
             let localDate = new Date();
@@ -153,9 +154,11 @@ function aproveUserCourseRequest(request_ID) {
                         course_ID: docOpen.course_ID,
                         user_name: docOpen.user_name,
                         user_ID: user_ID,
-                        satate: "aproved"
+                        course_name: docOpen.course_name,
+                        satate: aproved? "aproved" : "rejected"
                     })
-
+                    await deleteDoc(openRef);
+                    res("")
                 }else{
                     rej("request dosent exist")
                 }
