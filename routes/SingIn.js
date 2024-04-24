@@ -200,7 +200,7 @@ router.post("/edit-profile-picture", (req, res) => {
     const user_ID = req.body.user_ID;
     const image1 = req.body.image1;
     if(user_ID && image1){
-        const image1Buffer = Buffer.from(image1.split(",")[1], "base64");
+        const image1Buffer = Buffer.from(image1, "base64");
         uploadProfilePicture(user_ID, image1Buffer).then(url => {
             res.status(200).send({data: url, status:true, message: "ok"})
         }).catch(error => {res.status(400).send({error, status: false})})
