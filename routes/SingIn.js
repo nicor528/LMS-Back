@@ -199,6 +199,7 @@ router.post("/resetPass", async (req, res) => {
 router.post("/edit-profile-picture", (req, res) => {
     const user_ID = req.body.user_ID;
     const image1 = req.body.image1;
+    console.log(image1)
     if(user_ID && image1){
         const image1Buffer = Buffer.from(image1.split(",")[1], "base64");
         uploadProfilePicture(user_ID, image1Buffer).then(url => {
