@@ -8,6 +8,7 @@
 const express = require('express');
 const { SingInPass, resetPass } = require('../apis/apiAuth');
 const { getUser2, getAllUserCourses, editInfoUser } = require('../apis/apiStrapi');
+const { uploadProfilePicture, getProfilePicture } = require('../apis/apiFirebase');
 const router = express.Router();
 
 /**
@@ -57,7 +58,10 @@ router.post("/singInEmail", async (req, res) => {
                     const allCourses = await data.data.filter(data => data.attributes.user_ID === user.attributes.user_ID)
                     user1.attributes.lms_user_courses = allCourses.length > 0 ? allCourses : [];
                     console.log(user1)
-                    res.status(200).send({data: user1, status: true, message: "loggin sucefully"})
+                    getProfilePicture(user1.attributes.user_ID).then(url => {
+                        user1.attributes.profilePictureUrl = url;
+                        res.status(200).send({data: user1, status: true, message: "loggin sucefully"})
+                    }) .catch(error => {res.status(400).send({error, status: false})})
                 }).catch(error => {res.status(400).send({error, status: false})})
             }).catch(error => {res.status(400).send({message: "Wrong email or password", status: false})})
         }).catch(error => {res.status(400).send({message: "Wrong email or password", status: false})})
@@ -77,7 +81,10 @@ router.get("/getUserInfo", (req, res) => {
                 const allCourses = await data.data.filter(data => data.attributes.user_ID === user_ID)
                 user1.attributes.lms_user_courses = allCourses.length > 0 ? allCourses : [];
                 console.log(user1)
-                res.status(200).send({data: user1, status: true})
+                getProfilePicture(user1.attributes.user_ID).then(url => {
+                    user1.attributes.profilePictureUrl = url;
+                    res.status(200).send({data: user1, status: true, message: "loggin sucefully"})
+                }) .catch(error => {res.status(400).send({error, status: false})})
             }).catch(error => {res.status(400).send({error, status: false})})
         }).catch(error => {res.status(400).send({error, status: false})})
     }else{
@@ -183,6 +190,19 @@ router.post("/resetPass", async (req, res) => {
     if(email){
         resetPass(email).then(() => {
             res.status(200).send({status:true, message: "ok"})
+        }).catch(error => {res.status(400).send({error, status: false})})
+    }else{
+        res.status(401).send({message: "Missing data in the body", status: false})
+    }
+})
+
+router.post("/edit-profile-picture", (req, res) => {
+    const user_ID = req.body.user_ID;
+    const image1 = req.body.image1;
+    if(user_ID && image1){
+        const image1Buffer = Buffer.from(image1.split(",")[1], "base64");
+        uploadProfilePicture(user_ID, image1Buffer).then(url => {
+            res.status(200).send({data: url, status:true, message: "ok"})
         }).catch(error => {res.status(400).send({error, status: false})})
     }else{
         res.status(401).send({message: "Missing data in the body", status: false})

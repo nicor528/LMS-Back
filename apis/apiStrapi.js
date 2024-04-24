@@ -434,6 +434,34 @@ function finishCourse(id, userID) {
     )
 }
 
+function unVinculateLesson(user_ID, lesson_ID) {
+    return(
+        new Promise(async (res, rej) => {
+            fetch(`${process.env.url}/lms-lessons/${lesson_ID}`, {
+                method: "PUT",
+                headers: {
+                    Authorization: `Bearer ${process.env.STRAPI_TOKEN}`,
+                    "Content-Type": 'application/json',
+                },
+                body: await JSON.stringify({
+                    data: {
+                        lms_users: {
+                            disconnect: [user_ID]
+                        }
+                    }
+                })
+            }).then(async (result) => {
+                console.log(result);
+                const data = await result.json();
+                res(data)
+            }).catch(error => {
+                console.log(error);
+                rej(error)
+            })
+        })
+    )
+}
+
 function vinculateLesson(user_ID, lesson_ID) {
     return(
         new Promise (async (res, rej) => {
@@ -1147,6 +1175,7 @@ module.exports = {
     vinculateAnnouncementWithUser,
     vinculateCertificate,
     addPoints,
-    getOneCourse1
+    getOneCourse1,
+    unVinculateLesson
 
 }

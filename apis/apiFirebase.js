@@ -1,9 +1,59 @@
-const { getStorage } = require("firebase/storage");
 const { app } = require("./apiAuth");
 const { setDoc, doc, getDoc, query, collection, where, getDocs, getFirestore } = require("firebase/firestore");
+const { getStorage, ref, uploadString, uploadBytes, getDownloadURL  } = require("firebase/storage")
 
 const DB = getFirestore(app);
 const storage = getStorage(app);
+
+function uploadProfilePicture(user_ID, picture) {
+    return(
+        new Promise(async (res, rej) => {
+            try{
+                const url = user_ID + "/profilePicture.jpeg";
+                const storageRef = ref(storage, url);
+                const snapShot = await uploadBytes(storageRef, picture);
+                const downUrl = await getDownloadURL(snapShot.ref);
+                res(downUrl);
+            }catch(error){
+                console.log(error);
+                rej(error)
+            }
+
+        })
+    )
+}
+
+function getProfilePicture (user_ID) {
+    return(
+        new Promise(async (res, rej) => {
+            try{
+                const url = user_ID + "/profilePicture.jpeg";
+                const pathRef = ref(storage, url);
+                const downUrl = await getDownloadURL(pathRef);
+                res(downUrl);
+            }catch(error){
+                console.log(error);
+                rej(error)
+            }
+        })
+    )
+}
+
+function getPDF (pdf) {
+    return(
+        new Promise (async (res, rej) => {
+            try{
+                const url = pdf;
+                const pathRef = ref(storage, url);
+                const downUrl = await getDownloadURL(pathRef);
+                res(downUrl);
+            }catch(error){
+                console.log(error)
+                rej(error)
+            }
+        })
+    )
+}
 
 function getRequestUserState(user_ID, course_ID) {
     return(
@@ -123,5 +173,8 @@ module.exports = {
     getOpenRequests,
     aproveUserCourseRequest,
     getRequestUserState,
-
+    uploadProfilePicture,
+    getProfilePicture,
+    getPDF,
+    
 }

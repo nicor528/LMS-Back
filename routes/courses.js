@@ -116,11 +116,11 @@ router.get("/get-single-course", async (req, res) => {
         }else{
             course[0].attributes.quiz_score = 0
         }
-
+        let EnroledRequest;
         if(user_ID){
-            const EnroledRequest = await getRequestUserState(user_ID, course_ID)
+            EnroledRequest = await getRequestUserState(user_ID, course_ID)
         }else{
-            const EnroledRequest = "no_exist"
+            EnroledRequest = "no_exist"
         }
         
         course[0].attributes.enroled = EnroledRequest;
