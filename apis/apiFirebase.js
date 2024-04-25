@@ -103,6 +103,7 @@ function createNewCourseRequest (user_ID, course_ID, course, user) {
                         user_ID: user_ID,
                         state: "pending",
                         email: user.email,
+                        imageUrl: course.imageUrl.data.attributes.formats.small.url
                     })
                     const docSnap = await getDoc(docRef);
                     if (docSnap.exists()) {
@@ -179,7 +180,8 @@ function aproveUserCourseRequest(request_ID, aproved) {
                         user_ID: user_ID,
                         course_name: docOpen.course_name,
                         satate: aproved? "aproved" : "rejected",
-                        email: docOpen.email
+                        email: docOpen.email,
+                        imageUrl: docOpen.imageUrl
                     })
                     await deleteDoc(openRef);
                     res("")
