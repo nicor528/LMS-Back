@@ -83,6 +83,31 @@ function getRequestUserState(user_ID, course_ID) {
     )
 }
 
+function createNewScore (user_ID, module_ID, score, aproved) {
+    return(
+        new Promise(async (res, rej) => {
+            try{
+                const docRef = doc (DB, "users-quiz-results-modules", user_ID + module_ID);
+                await setDoc(docRef, {
+                    user_ID: user_ID,
+                    module_ID: module_ID,
+                    score: score,
+                    aproved: aproved
+                })
+                const docSnap = await getDoc(docRef);
+                if(docSnap.exists()) {
+                    res()
+                }else{
+                    rej(docSnap)
+                }
+            }catch(error) {
+                console.log(error);
+                rej(error)
+            }
+        })
+    )
+}
+
 function createNewCourseRequest (user_ID, course_ID, course, user) {
     console.log(course);
     console.log(user)
@@ -177,7 +202,7 @@ function aproveUserCourseRequest(request_ID, aproved) {
                         date: localDate,
                         course_ID: docOpen.course_ID,
                         user_name: docOpen.user_name,
-                        user_ID: user_ID,
+                        user_ID: docOpen.user_ID,
                         course_name: docOpen.course_name,
                         satate: aproved? "aproved" : "rejected",
                         email: docOpen.email,
@@ -205,6 +230,7 @@ module.exports = {
     uploadProfilePicture,
     getProfilePicture,
     getPDF,
-    getCloseRequests
+    getCloseRequests,
+    createNewScore
     
 }
