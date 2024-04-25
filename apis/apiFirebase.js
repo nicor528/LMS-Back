@@ -99,7 +99,7 @@ function createNewCourseRequest (user_ID, course_ID, course, user) {
                         date: localDate,
                         course_ID: course_ID,
                         course_name: course.technology,
-                        user_name: user.name + user.last_name,
+                        user_name: user.name + " " + user.last_name,
                         user_ID: user_ID,
                         state: "pending",
                         email: user.email,
