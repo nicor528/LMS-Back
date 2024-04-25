@@ -1,5 +1,6 @@
 const express = require('express');
-const { getQuizz, getQuiz1, saveScore, vinculateQuizzWithUser, createTries, getTries, getUser2, getAllUserCourses, finishLesson, getOneCourse, vinculateCertificate } = require('../apis/apiStrapi');
+const { getQuizz, getQuiz1, saveScore, vinculateQuizzWithUser, createTries, getTries, getUser2, getAllUserCourses, finishLesson, getOneCourse, vinculateCertificate, vinculateModule } = require('../apis/apiStrapi');
+const { createNewScore } = require('../apis/apiFirebase');
 const router = express.Router();
 
 
@@ -57,6 +58,43 @@ router.get("/quizz-attemps", (req, res) => {
         }).catch(error => {res.status(400).send({error, status: false})})
     }else{
         res.status(401).send({message: "Missing data", status: false})
+    }
+})
+
+router.post("/get-quizz-module-result", (req, res) => {
+    const answers = req.body.answers;
+    const quiz_ID = req.body.quiz_ID;
+    const user_ID = req.body.user_ID;
+    if(answers && quiz_ID && user_ID){
+        getUser2(user_ID).then(user => {
+            getQuiz1(quiz_ID).then(quizz => {
+                const right_answers = quizz.data.attributes.lms_questions.data.map(question => {
+                    return {correct_answer: question.attributes.correct_answer_1, question: question.attributes.question}
+                }) 
+                const questions_N = quizz.data.attributes.lms_questions.data.length
+                let correct_answers = 0;
+                answers.map(answer => {
+                    const correct = right_answers.find(data => data.question === answer.question && data.correct_answer === answer.answer)
+                    if(correct){
+                        correct_answers ++
+                    }
+                })
+                const total_score = (correct_answers * 100)/questions_N
+                console.log(total_score)
+                const pass = total_score >= 50 ? true : false
+                createNewScore(user_ID, quizz.data.attributes.lms_module.data.id, total_score, pass).then(() => {
+                    if(pass){
+                        vinculateModule(user.id, quizz.data.attributes.lms_module.data.id).then(response => {
+                            res.status(200).send({data: {score: total_score, aproved: pass}, status: true})
+                        }).catch(error => {res.status(400).send({error, status: false})})
+                    }else{
+                        res.status(200).send({data: {score: total_score, aproved: pass}, status: true})
+                    }
+                }).catch(error => {res.status(400).send({error, status: false})})
+            }).catch(error => {res.status(400).send({error, status: false})})
+        }).catch(error => {res.status(400).send({error, status: false})})
+    }else{
+
     }
 })
 

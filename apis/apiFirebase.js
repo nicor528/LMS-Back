@@ -83,6 +83,27 @@ function getRequestUserState(user_ID, course_ID) {
     )
 }
 
+function getScore(user_ID, module_ID) {
+    return(
+        new Promise(async (res, rej) => {
+
+            try{
+                const docRef = doc(DB, "users-quiz-results-modules", user_ID + module_ID);
+                const docSnap = await getDoc(docRef);
+                if(docSnap.exists()){
+                    const data = docSnap.data();
+                    res(data.score)
+                }else{
+                    rej(docSnap)
+                }
+            }catch(error){
+                console.log(error);
+                rej(error)
+            }
+        })
+    )
+}
+
 function createNewScore (user_ID, module_ID, score, aproved) {
     return(
         new Promise(async (res, rej) => {
@@ -231,6 +252,7 @@ module.exports = {
     getProfilePicture,
     getPDF,
     getCloseRequests,
-    createNewScore
+    createNewScore,
+    getScore
     
 }

@@ -1,6 +1,6 @@
 const express = require('express');
 const { getCourseLessons, getCourses, vinculateLesson, vinculateModule, getModule, getLesson, getOneUserCourse, updatePercentage, getUser2, getAllUserCourses, addPoints, unVinculateLesson } = require('../apis/apiStrapi');
-const { getPDF } = require('../apis/apiFirebase');
+const { getPDF, getScore } = require('../apis/apiFirebase');
 const router = express.Router();
 
 /*
@@ -31,7 +31,10 @@ router.get("/get-module", (req, res) => {
             if(finish !== undefined){
                 module1.data.attributes.finish = true;
                 module1.data.attributes.lms_users = [];
-                res.status(200).send({data: module1.data, status: true})
+                getScore(user_ID, module_ID).then(score => {
+                    module1.data.attributes.score = score;
+                    res.status(200).send({data: module1.data, status: true})
+                }).catch(error => {res.status(400).send({error, status: false})})
             }else{
                 module1.data.attributes.finish = false;
                 module1.data.attributes.lms_users = [];
