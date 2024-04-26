@@ -41,11 +41,6 @@ router.get("/get-module", (req, res) => {
                 res.status(200).send({data: module1.data, status: true})
             }
         }).catch(error => {res.status(400).send({error, status: false})})
-    }
-    if(module_ID){
-        getModule(module_ID).then(response => {
-            res.status(200).send({data: response.data, status: true})
-        }).catch(error => {res.status(400).send({error, status: false})})
     }else{
         res.status(401).send({message: "Missing data", status: false})
     }
