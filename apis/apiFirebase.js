@@ -225,7 +225,7 @@ function aproveUserCourseRequest(request_ID, aproved) {
                         user_name: docOpen.user_name,
                         user_ID: docOpen.user_ID,
                         course_name: docOpen.course_name,
-                        satate: aproved? "aproved" : "rejected",
+                        state: aproved? "aproved" : "rejected",
                         email: docOpen.email,
                         imageUrl: docOpen.imageUrl
                     })
