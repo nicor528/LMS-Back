@@ -140,9 +140,8 @@ router.post("/create-user-course-request", (req, res) => {
             getCourses().then(courses => {
                 console.log("1")
                 const course = courses.data.filter(item => item.id === parseInt(course_ID));
-                getOneCourse1(course[0].id).then(course => {
                     console.log("2")
-                    createNewCourseRequest(user_ID, course.data.id, course.data.attributes, user.attributes).then(data => {
+                    createNewCourseRequest(user_ID, course[0].data.id, course[0].data.attributes, user.attributes).then(data => {
                         console.log("3")
                         if(data == "on going request"){
                             res.status(200).send({message: "on going request", status: false}) 
@@ -150,7 +149,6 @@ router.post("/create-user-course-request", (req, res) => {
                             res.status(200).send({message: "request send", status: true})
                         }
                     }).catch(error => {res.status(400).send({error, status: false})})
-                }).catch(error => {res.status(400).send({error, status: false})})
             }).catch(error => {res.status(400).send({error, status: false})})
         }).catch(error => {res.status(400).send({error, status: false})})
     }else{
