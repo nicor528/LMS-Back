@@ -694,7 +694,7 @@ function getCourseLessons (courseID) {
 function getModule(id){
     return(
         new Promise ((res,rej) => {
-            fetch(`${process.env.url}/lms-modules/${id}?populate=lms_users,lms_lessons.lms_users`, {
+            fetch(`${process.env.url}/lms-modules/${id}?populate=lms_users,lms_lessons.lms_users,lms_quiz`, {
                 method: "GET",
                 headers: {
                     Authorization: `Bearer ${process.env.STRAPI_TOKEN}`,
@@ -1137,7 +1137,7 @@ function addPoints(user_ID, points){
 
 async function getAllUsers() {
     try {
-        const response = await fetch(`${process.env.url}/lms-users?pagination[page]=1&pagination[pageSize]=10000`, {
+        const response = await fetch(`${process.env.url}/lms-users?populate=*&pagination[page]=1&pagination[pageSize]=10000`, {
             method: "GET",
             headers: {
                 Authorization: `Bearer ${process.env.STRAPI_TOKEN}`
