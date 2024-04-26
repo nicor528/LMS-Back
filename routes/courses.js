@@ -98,20 +98,21 @@ router.get("/get-single-course", async (req, res) => {
             return getMentor(mentor.id).then(mentorData => mentorData.data);
         });
 
-        let modulePromises = course[0].attributes.lms_modules.data.map(module1 => {
+        let modulePromises = course[0].attributes.lms_modules.data.map(async (module1) => {
             try{
-                let module = getModule(module1.id).then(moduleData => moduleData.data)
-                const finish = module.attributes.lms_users.data.find(user => user.attributes.user_ID == user_ID)
+                let module = await getModule(module1.id)
+                console.log("moduleeeee", module)
+                const finish = module.data.attributes.lms_users.data.find(user => user.attributes.user_ID == user_ID)
                 if(finish !== undefined){
-                    module.attributes.finish = true;
-                    module.attributes.lms_users = [];
-                    const score = getScore(user_ID, module1.id)
-                    module.attributes.score = score;
-                    return module
+                    module.data.attributes.finish = true;
+                    module.data.attributes.lms_users = [];
+                    const score = await getScore(user_ID, module1.id)
+                    module.data.attributes.score = score;
+                    return module.data
                 }else{
-                    module.attributes.finish = false;
-                    module.attributes.lms_users = [];
-                    return module
+                    module.data.attributes.finish = false;
+                    module.data.attributes.lms_users = [];
+                    return module.data
                 }
             }catch(error) {
                 console.log(error)
