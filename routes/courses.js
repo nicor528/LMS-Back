@@ -1,6 +1,6 @@
 const express = require('express');
 const { createCourse, getCourses, vinculateCourse, finishCourse, getAllUserCourses, finishLesson, updatePercentage, getMentor, getOneCourse, getUser2, vinculateAnnouncementWithUser, getModule, getOneCourse1 } = require('../apis/apiStrapi');
-const { createNewCourseRequest, getRequestUserState } = require('../apis/apiFirebase');
+const { createNewCourseRequest, getRequestUserState, getScore } = require('../apis/apiFirebase');
 const router = express.Router();
 
 router.post("/createCourse", async (req, res) => {
@@ -82,6 +82,26 @@ router.get("/get-single-course", async (req, res) => {
     }
 });*/
 
+function getModuleInfo(module_ID, user_ID) {
+    return getModule(module_ID)
+        .then(async module => {
+            let moduleData = module.data;
+            const finish = moduleData.attributes.lms_users.data.find(user => user.attributes.user_ID == user_ID);
+            if (finish !== undefined) {
+                moduleData.attributes.finish = true;
+            } else {
+                moduleData.attributes.finish = false;
+            }
+            moduleData.attributes.lms_users = [];
+            const score = await getScore(user_ID, module_ID);
+            moduleData.attributes.score = score;
+            return moduleData;
+        })
+        .catch(error => {
+            throw error;
+        });
+}
+
 router.get("/get-single-course", async (req, res) => {
     const course_ID = parseInt(req.query.course_ID);
     const user_ID = req.query.user_ID;
@@ -99,7 +119,7 @@ router.get("/get-single-course", async (req, res) => {
         });
 
         let modulePromises = course[0].attributes.lms_modules.data.map(module1 => {
-            return getModule(module1.id).then(moduleData => moduleData.data)
+            return getModuleInfo(module1.id, user_ID);
         })
 
         let mentors = await Promise.all(mentorPromises);
