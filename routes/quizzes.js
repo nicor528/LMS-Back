@@ -63,7 +63,7 @@ router.get("/quizz-attemps", (req, res) => {
 
 router.post("/get-quizz-module-result", (req, res) => {
     const answers = req.body.answers;
-    const quiz_ID = req.body.quiz_ID;
+    const quiz_ID = req.body.quizz_ID;
     const user_ID = req.body.user_ID;
     if(answers && quiz_ID && user_ID){
         getUser2(user_ID).then(user => {
