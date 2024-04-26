@@ -64,7 +64,7 @@ function getRequestUserState(user_ID, course_ID) {
                 const docRefClose = doc(DB, "user-courses-requests", "closed", "requests", user_ID + course_ID)
                 const docSnapClose = await getDoc(docRefClose);
                 if(docSnapClose.exists()){
-                    const data = docRefClose.data();
+                    const data = docSnapClose.data();
                     if(data.state === "aproved"){
                         res("enroled")
                     }else{
