@@ -1,6 +1,6 @@
 const express = require('express');
 const { createCourse, getCourses, vinculateCourse, finishCourse, getAllUserCourses, finishLesson, updatePercentage, getMentor, getOneCourse, getUser2, vinculateAnnouncementWithUser, getModule, getOneCourse1 } = require('../apis/apiStrapi');
-const { createNewCourseRequest, getRequestUserState, getScore } = require('../apis/apiFirebase');
+const { createNewCourseRequest, getRequestUserState } = require('../apis/apiFirebase');
 const router = express.Router();
 
 router.post("/createCourse", async (req, res) => {
@@ -82,27 +82,6 @@ router.get("/get-single-course", async (req, res) => {
     }
 });*/
 
-function getModuleInfo(module_ID, user_ID) {
-    return getModule(module_ID)
-        .then(async module => {
-            let moduleData = module.data;
-            const finish = moduleData.attributes.lms_users.data.find(user => user.attributes.user_ID == user_ID);
-            if (finish !== undefined) {
-                moduleData.attributes.finish = true;
-            } else {
-                moduleData.attributes.finish = false;
-            }
-            moduleData.attributes.lms_users = [];
-            const score = await getScore(user_ID, module_ID);
-            moduleData.attributes.score = score;
-            return moduleData;
-        })
-        .catch(error => {
-            console.error('Error in getModuleInfo:', error);
-            throw error; // Aquí puedes agregar un manejo más específico si es necesario
-        });
-}
-
 router.get("/get-single-course", async (req, res) => {
     const course_ID = parseInt(req.query.course_ID);
     const user_ID = req.query.user_ID;
@@ -120,12 +99,8 @@ router.get("/get-single-course", async (req, res) => {
         });
 
         let modulePromises = course[0].attributes.lms_modules.data.map(module1 => {
-            return getModuleInfo(module1.id, user_ID).catch(error => {
-                console.error('Error in modulePromise:', error);
-                // Puedes manejar el error aquí de acuerdo a tus necesidades
-                throw error; // Relanza el error para que pueda ser capturado por el bloque catch externo
-            });
-        });
+            return getModule(module1.id).then(moduleData => moduleData.data)
+        })
 
         let mentors = await Promise.all(mentorPromises);
         course[0].attributes.lms_mentors.data = mentors;
@@ -138,14 +113,7 @@ router.get("/get-single-course", async (req, res) => {
         if(isEnrolled != undefined){
             course[0].attributes.quiz_score = isEnrolled.attributes.finish ? isEnrolled.attributes.total_lessons : 0
             course[0].attributes.finishDate = isEnrolled.attributes.finish ? isEnrolled.attributes.end_date : null;
-            let modules;
-            try {
-                modules = await Promise.all(modulePromises);
-            } catch (error) {
-                console.error('Error in Promise.all(modulePromises):', error);
-                // Puedes manejar el error aquí de acuerdo a tus necesidades
-                return res.status(400).send({ error: error.message, status: false });
-            }
+            let modules = await Promise.all(modulePromises);
             course[0].attributes.lms_modules.data = modules;
         }else{
             course[0].attributes.quiz_score = 0
