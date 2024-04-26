@@ -98,7 +98,8 @@ function getModuleInfo(module_ID, user_ID) {
             return moduleData;
         })
         .catch(error => {
-            throw error;
+            console.error('Error in getModuleInfo:', error);
+            throw error; // Aquí puedes agregar un manejo más específico si es necesario
         });
 }
 
@@ -119,8 +120,12 @@ router.get("/get-single-course", async (req, res) => {
         });
 
         let modulePromises = course[0].attributes.lms_modules.data.map(module1 => {
-            return getModuleInfo(module1.id, user_ID);
-        })
+            return getModuleInfo(module1.id, user_ID).catch(error => {
+                console.error('Error in modulePromise:', error);
+                // Puedes manejar el error aquí de acuerdo a tus necesidades
+                throw error; // Relanza el error para que pueda ser capturado por el bloque catch externo
+            });
+        });
 
         let mentors = await Promise.all(mentorPromises);
         course[0].attributes.lms_mentors.data = mentors;
@@ -133,7 +138,14 @@ router.get("/get-single-course", async (req, res) => {
         if(isEnrolled != undefined){
             course[0].attributes.quiz_score = isEnrolled.attributes.finish ? isEnrolled.attributes.total_lessons : 0
             course[0].attributes.finishDate = isEnrolled.attributes.finish ? isEnrolled.attributes.end_date : null;
-            let modules = await Promise.all(modulePromises);
+            let modules;
+            try {
+                modules = await Promise.all(modulePromises);
+            } catch (error) {
+                console.error('Error in Promise.all(modulePromises):', error);
+                // Puedes manejar el error aquí de acuerdo a tus necesidades
+                return res.status(400).send({ error: error.message, status: false });
+            }
             course[0].attributes.lms_modules.data = modules;
         }else{
             course[0].attributes.quiz_score = 0
