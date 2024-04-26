@@ -117,7 +117,7 @@ router.post("/un-finish-lesson", (req, res) => {
 router.get("/get-lesson", (req, res) => {
     const lesson_ID = parseInt(req.query.lesson_ID);
     const user_ID = req.query.user_ID;
-    if(lesson_ID && user_ID){
+    if(lesson_ID || user_ID){
         getLesson(lesson_ID).then(async (lesson) => {
             let lesson1 = lesson;
             console.log(lesson1)
@@ -147,10 +147,6 @@ router.get("/get-lesson", (req, res) => {
                     res.status(200).send({data: lesson1.data, status: true})
                 }
             }
-        }).catch(error => {res.status(400).send({error, status: false})})
-    }if(lesson_ID){
-        getLesson(lesson_ID).then(lesson => {
-            res.status(200).send({data: lesson.data, status: true})
         }).catch(error => {res.status(400).send({error, status: false})})
     }else{
         res.status(400).send({message: "Missing data", status: false})
