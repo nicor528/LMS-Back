@@ -101,16 +101,16 @@ router.get("/get-single-course", async (req, res) => {
         let modulePromises = course[0].attributes.lms_modules.data.map(module1 => {
             try{
                 let module = getModule(module1.id).then(moduleData => moduleData.data)
-                const finish = module.data.attributes.lms_users.data.find(user => user.attributes.user_ID == user_ID)
+                const finish = module.attributes.lms_users.data.find(user => user.attributes.user_ID == user_ID)
                 if(finish !== undefined){
-                    module.data.attributes.finish = true;
-                    module.data.attributes.lms_users = [];
+                    module.attributes.finish = true;
+                    module.attributes.lms_users = [];
                     const score = getScore(user_ID, module1.id)
-                    module.data.attributes.score = score;
+                    module.attributes.score = score;
                     return module
                 }else{
-                    module.data.attributes.finish = false;
-                    module.data.attributes.lms_users = [];
+                    module.attributes.finish = false;
+                    module.attributes.lms_users = [];
                     return module
                 }
             }catch(error) {
