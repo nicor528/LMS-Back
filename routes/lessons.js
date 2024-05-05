@@ -133,6 +133,7 @@ router.get("/get-lesson", (req, res) => {
                 }).catch(error => {res.status(400).send({error, status: false})})
             }if(lesson1.data.attributes.type == "text"){
                 getTextLesson(lesson1.data.attributes.title).then(lesson => {
+                    console.log(lesson)
                     lesson1.data.attributes.lesson = lesson[0]
                     if(finish !== undefined){
                         lesson1.data.attributes.finish = true;
