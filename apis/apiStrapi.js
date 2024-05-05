@@ -1158,6 +1158,27 @@ async function getAllUsers() {
         throw error; // Re-lanza el error para que quien llame a esta función pueda manejarlo si es necesario
     }
 }
+//filters[courseName][$eq]=${title}&
+
+function getTextLesson (title) {
+    return(
+        new Promise (async (res, rej) => {
+            fetch(`${process.env.url}/tutorial-pages?filters[courseName][$eq]=${title}`, {
+                method: "GET",
+                headers: {
+                    Authorization: `Bearer ${process.env.STRAPI_TOKEN}`,
+                    "Content-Type": 'application/json',
+                }
+            }).then(async (result) => {
+                const data = await result.json();
+                res(data)
+            }).catch(error => {
+                console.log(error);
+                rej(error)
+            })
+        })
+    )
+}
 
 module.exports = {
     createCourse,
@@ -1202,5 +1223,6 @@ module.exports = {
     getOneCourse1,
     unVinculateLesson,
     getAllUsers,
+    getTextLesson
 
 }

@@ -1,6 +1,6 @@
 const { SingUpEmail1 } = require("./apis/apiAuth");
 const { createNewCourseRequest, getOpenRequests, aproveUserCourseRequest, uploadProfilePicture, getProfilePicture } = require("./apis/apiFirebase");
-const { createUser2, getUser2, getCourses, vinculateCourse, getAllUserCourses, finishLesson, relationCourseWithUser, getModule, getOneCourse, getQuiz1, getLesson, getUsers, addMessage, createConversation, getAllConversations, getTries, getConversation2, getAnnoucnment, saveScore, getMentor, getCertificate, getAllUsers } = require("./apis/apiStrapi");
+const { createUser2, getUser2, getCourses, vinculateCourse, getAllUserCourses, finishLesson, relationCourseWithUser, getModule, getOneCourse, getQuiz1, getLesson, getUsers, addMessage, createConversation, getAllConversations, getTries, getConversation2, getAnnoucnment, saveScore, getMentor, getCertificate, getAllUsers, getTextLesson } = require("./apis/apiStrapi");
 /*
 createUser2("nicolas", "test23@gmail.com").then(data => {
     console.log(data.data.attributes)
@@ -255,6 +255,6 @@ getProfilePicture("iGaPnJK0qVRWt6I5ik7PFIR6lg73").then(data => {
     console.log(data)
 }).catch(error => console.log(error))*/
 
-getAllUsers().then(users => {
-    console.log(users)
-}).catch(error => console.log(error))
+getTextLesson("text example lesson").then(data => {
+    console.log("test", data)
+}).catch(error => console.log("test2", error))

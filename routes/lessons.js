@@ -1,5 +1,5 @@
 const express = require('express');
-const { getCourseLessons, getCourses, vinculateLesson, vinculateModule, getModule, getLesson, getOneUserCourse, updatePercentage, getUser2, getAllUserCourses, addPoints, unVinculateLesson } = require('../apis/apiStrapi');
+const { getCourseLessons, getCourses, vinculateLesson, vinculateModule, getModule, getLesson, getOneUserCourse, updatePercentage, getUser2, getAllUserCourses, addPoints, unVinculateLesson, getTextLesson } = require('../apis/apiStrapi');
 const { getPDF, getScore } = require('../apis/apiFirebase');
 const router = express.Router();
 
@@ -121,6 +121,19 @@ router.get("/get-lesson", (req, res) => {
             if(lesson1.data.attributes.type == "pdf"){
                 getPDF(lesson1.data.attributes.pdf.data[0].attributes.name).then(url => {
                     lesson1.data.attributes.pdfUrl = url;
+                    if(finish !== undefined){
+                        lesson1.data.attributes.finish = true;
+                        lesson1.data.attributes.lms_users = [];
+                        res.status(200).send({data: lesson1.data, status: true})
+                    }else{
+                        lesson1.data.attributes.finish = false;
+                        lesson1.data.attributes.lms_users = [];
+                        res.status(200).send({data: lesson1.data, status: true})
+                    }
+                }).catch(error => {res.status(400).send({error, status: false})})
+            }if(lesson1.data.attributes.type == "text"){
+                getTextLesson(lesson1.data.attributes.title).then(lesson => {
+                    lesson1.data.attributes.lesson = lesson[0]
                     if(finish !== undefined){
                         lesson1.data.attributes.finish = true;
                         lesson1.data.attributes.lms_users = [];

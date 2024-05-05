@@ -1,5 +1,5 @@
 const express = require('express');
-const { addMessage, getUser2, createConversation, getAllConversations, getConversation, readMessage, getConversation2 } = require('../apis/apiStrapi');
+const { addMessage, getUser2, createConversation, getAllConversations, getConversation, readMessage, getConversation2, getAllUsers } = require('../apis/apiStrapi');
 const router = express.Router();
 
 router.post("/add-message", (req, res) => {
@@ -15,6 +15,38 @@ router.post("/add-message", (req, res) => {
         }).catch(error => {res.status(400).send({error, status: false})})
     }else{
         res.status(400).send({message: "missing data in the body", status: false})
+    }
+})
+
+function filterUsersBySearchParam(users, searchParam) {
+    // Expresión regular para buscar el parámetro de búsqueda como subcadena en minúsculas
+    const searchRegex = new RegExp(searchParam.toLowerCase());
+  
+    // Filtrar usuarios basado en el criterio de búsqueda
+    const filteredUsers = users.filter(user => {
+      const name = user.attributes.name.toLowerCase();
+      const lastName = user.attributes.last_name.toLowerCase();
+      const email = user.attributes.email.toLowerCase();
+  
+      // Verificar si el parámetro de búsqueda está contenido en alguno de los campos
+      return name.includes(searchRegex) || lastName.includes(searchRegex) || email.includes(searchRegex);
+    });
+  
+    return filteredUsers;
+  }
+
+router.get("/search-user", (req, res) => {
+    const search = req.query.search;
+    if(search){
+        getAllUsers().then(users => {
+            try{
+                
+            }catch(error){
+
+            }
+        })
+    }else{
+
     }
 })
 
