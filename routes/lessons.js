@@ -134,7 +134,7 @@ router.get("/get-lesson", (req, res) => {
             }if(lesson1.data.attributes.type == "text"){
                 getTextLesson(lesson1.data.attributes.title).then(lesson => {
                     console.log(lesson)
-                    lesson1.data.attributes.lesson = lesson[0]
+                    lesson1.data.attributes.lesson = lesson.data[0]
                     if(finish !== undefined){
                         lesson1.data.attributes.finish = true;
                         lesson1.data.attributes.lms_users = [];
