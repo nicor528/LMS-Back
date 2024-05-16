@@ -1,6 +1,7 @@
 const dotenv = require('dotenv');
 const { json } = require('express');
 const { default: fetch } = require('node-fetch');
+const { connect } = require('pm2');
 dotenv.config();
 
 function generateAlphanumericCode() {
@@ -66,6 +67,9 @@ function createUser2(name, email, uid, lastName, birth, postal_code, city, count
                         province: province,
                         phone: phone,
                         street_name : street_name,
+                        lms_user_type: {
+                            connect: [4]
+                        }
                     }
                 })
             }).then(async (response) => {

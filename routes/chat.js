@@ -38,15 +38,16 @@ function filterUsersBySearchParam(users, searchParam) {
 router.get("/search-user", (req, res) => {
     const search = req.query.search;
     if(search){
-        getAllUsers().then(users => {
+        getAllUsers().then(async (users) => {
             try{
-                
+                const newUsers = await filterUsersBySearchParam(users.data, search);
+                res.status(200).send({data: newUsers, status: true, message: "sucefull"})
             }catch(error){
-
+                res.status(400).send({error, status: false})
             }
         })
     }else{
-
+        res.status(400).send({message: "missing data in the body", status: false})
     }
 })
 

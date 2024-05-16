@@ -255,6 +255,26 @@ getProfilePicture("iGaPnJK0qVRWt6I5ik7PFIR6lg73").then(data => {
     console.log(data)
 }).catch(error => console.log(error))*/
 
-getTextLesson("text example lesson").then(data => {
-    console.log("test", data)
-}).catch(error => console.log("test2", error))
+getAllUsers().then(async (users) => {
+    console.log(users)
+    const newUsers = await filterUsersBySearchParam(users.data, "abh")
+    console.log(newUsers)
+})
+
+
+function filterUsersBySearchParam(users, searchParam) {
+    // Expresión regular para buscar el parámetro de búsqueda como subcadena en minúsculas
+    const searchRegex = searchParam.toLowerCase();
+  
+    // Filtrar usuarios basado en el criterio de búsqueda
+    const filteredUsers = users.filter(user => {
+      const name = user.attributes.name.toLowerCase();
+      const lastName = user.attributes.last_name.toLowerCase();
+      const email = user.attributes.email.toLowerCase();
+  
+      // Verificar si el parámetro de búsqueda está contenido en alguno de los campos
+      return name.includes(searchRegex) || lastName.includes(searchRegex) || email.includes(searchRegex);
+    });
+  
+    return filteredUsers;
+  }
