@@ -20,7 +20,7 @@ router.post("/add-message", (req, res) => {
 
 function filterUsersBySearchParam(users, searchParam) {
     // Expresión regular para buscar el parámetro de búsqueda como subcadena en minúsculas
-    const searchRegex = new RegExp(searchParam.toLowerCase());
+    const searchRegex = searchParam.toLowerCase();
   
     // Filtrar usuarios basado en el criterio de búsqueda
     const filteredUsers = users.filter(user => {
