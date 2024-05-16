@@ -260,6 +260,7 @@ router.get("/get-ongoing-courses", (req, res) => {
     if(user_ID){
         getAllUserCourses().then(async (data) => {
             const allCourses = await data.data.filter(data => data.attributes.user_ID === user_ID && data.attributes.finish === false)
+            console.log(allCourses)
             res.status(200).send({data: allCourses, status: true})
         }).catch(error => {res.status(400).send({error, status: false})})
     }else{
