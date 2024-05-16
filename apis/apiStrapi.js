@@ -206,7 +206,7 @@ function getOneCourse1 (id) {
 function getAllUserCourses () {
     return(
         new Promise (async (res, rej) => {
-            fetch(`${process.env.url}/lms-user-courses?populate[lms_course][populate]=*`, {
+            fetch(`${process.env.url}/lms-user-courses?populate[lms_course][populate]=*&pagination[page]=1&pagination[pageSize]=10000`, {
                 method: "GET",
                 headers: {
                     Authorization: `Bearer ${process.env.STRAPI_TOKEN}`,
