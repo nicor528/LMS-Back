@@ -968,7 +968,7 @@ function getConversation(id){
 function getConversation2(id){
     return(
         new Promise((res, rej) => {
-            fetch(`${process.env.url}/lms-conversations/${id}?populate=lms_users.profilePicture,lms_messages`, {
+            fetch(`${process.env.url}/lms-conversations/${id}?populate=lms_users.profilePicture,lms_messages&pagination[page]=1&pagination[pageSize]=10000`, {
                 method: "GET",
                 headers: {
                     Authorization: `Bearer ${process.env.STRAPI_TOKEN}`,
