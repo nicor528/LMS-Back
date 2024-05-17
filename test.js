@@ -254,27 +254,24 @@ test()*/
 getProfilePicture("iGaPnJK0qVRWt6I5ik7PFIR6lg73").then(data => {
     console.log(data)
 }).catch(error => console.log(error))*/
-
-getAllUsers().then(async (users) => {
-    console.log(users)
-    const newUsers = await filterUsersBySearchParam(users.data, "abh")
-    console.log(newUsers)
+getUser2("iGaPnJK0qVRWt6I5ik7PFIR6lg73").then(user => {
+    getAllConversations(user.attributes.lms_conversations.data).then(conversations => {
+        //console.log(conversations[0].data.attributes.lms_users)
+        const theConver = conversations.map(convers => {
+            console.log(convers)
+            console.log("1")
+            console.log(convers.data.attributes.lms_users)
+            if(convers.data.attributes.lms_users.data[0].attributes.user_ID == user_ID && convers.data.attributes.lms_users.data[1].attributes.user_ID){
+                return convers
+            }
+            //if(convers.data.id.attributes.lms_users)
+        })
+        if(theConver.lenght < 1){
+            createConversation(user.id, user2.is).then(result => {
+                res.status(200).send({data: result, status: true, message: "sucefull"})
+            })
+        }else{
+            res.status(200).send({data: theConver, status: true, message: "sucefull"})  
+        }
+    })
 })
-
-
-function filterUsersBySearchParam(users, searchParam) {
-    // Expresión regular para buscar el parámetro de búsqueda como subcadena en minúsculas
-    const searchRegex = searchParam.toLowerCase();
-  
-    // Filtrar usuarios basado en el criterio de búsqueda
-    const filteredUsers = users.filter(user => {
-      const name = user.attributes.name.toLowerCase();
-      const lastName = user.attributes.last_name.toLowerCase();
-      const email = user.attributes.email.toLowerCase();
-  
-      // Verificar si el parámetro de búsqueda está contenido en alguno de los campos
-      return name.includes(searchRegex) || lastName.includes(searchRegex) || email.includes(searchRegex);
-    });
-  
-    return filteredUsers;
-  }

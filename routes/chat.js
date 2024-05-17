@@ -82,6 +82,37 @@ router.get("/get-user-conversations", (req, res) => {
     }
 })
 
+router.get("/get-one-user-conversations", (req, res) => {
+    const user_ID = req.query.user_ID;
+    const user_ID2 = req.query.user_ID2
+    if(user_ID && user_ID2){
+        getUser2(user_ID).then(user => {
+            getUser2(user_ID2).then(user2 => {
+                getAllConversations(user.attributes.lms_conversations.data).then(conversations => {
+                    const theConver = conversations.map(convers => {
+                        console.log(convers)
+                        console.log("1")
+                        console.log(convers.data.attributes.lms_users)
+                        if(convers.data.attributes.lms_users.data[0].attributes.user_ID == user_ID && convers.data.attributes.lms_users.data[1].attributes.user_ID == user_ID2){
+                            return convers
+                        }
+                        //if(convers.data.id.attributes.lms_users)
+                    })
+                    if(theConver.lenght < 1){
+                        createConversation(user.id, user2.is).then(result => {
+                            res.status(200).send({data: result, status: true, message: "sucefull"})
+                        }).catch(error => {res.status(400).send({error, status: false})})
+                    }else{
+                        res.status(200).send({data: theConver, status: true, message: "sucefull"})  
+                    }
+                }).catch(error => {res.status(400).send({error, status: false})})
+            }).catch(error => {res.status(400).send({error, status: false})})
+        }).catch(error => {res.status(400).send({error, status: false})})
+    }else{
+        res.status(400).send({message: "missing data", status: false}) 
+    }
+})
+
 router.get("/get-conversation-messages", (req, res) => {
     const conversation_id = req.query.conversation_id;
     if(conversation_id){
