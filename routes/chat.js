@@ -112,7 +112,7 @@ router.get("/get-one-user-conversations", (req, res) => {
                             }).catch(error => {res.status(400).send({error, status: false})})
                         }).catch(error => {res.status(400).send({error, status: false})})
                     }else{
-                        res.status(200).send({data: theConver, status: true, message: "sucefull"})  
+                        res.status(200).send({data: theConver[0], status: true, message: "sucefull"})  
                     }
                 }).catch(error => {res.status(400).send({error, status: false})})
             }).catch(error => {res.status(400).send({error, status: false})})
