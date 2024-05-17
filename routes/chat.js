@@ -105,7 +105,7 @@ router.get("/get-one-user-conversations", (req, res) => {
                     
                     console.log(theConver);
                     
-                    if(!theConver[0].data){
+                    if(theConver.length === 0){
                         createConversation(user.id, user2.id).then(result => {
                             res.status(200).send({data: result, status: true, message: "sucefull"})
                         }).catch(error => {res.status(400).send({error, status: false})})
