@@ -89,22 +89,28 @@ router.get("/get-one-user-conversations", (req, res) => {
         getUser2(user_ID).then(user => {
             getUser2(user_ID2).then(user2 => {
                 getAllConversations(user.attributes.lms_conversations.data).then(conversations => {
-                    const theConver = conversations.map(convers => {
-                        console.log(convers)
-                        console.log("1")
-                        console.log(convers.data.attributes.lms_users)
-                        if(convers.data.attributes.lms_users.data[0].attributes.user_ID == user_ID && convers.data.attributes.lms_users.data[1].attributes.user_ID == user_ID2){
-                            return convers
+                    const theConver = conversations.filter(convers => {
+                        // Verifica que convers y los atributos necesarios no sean null
+                        if (convers && convers.data && convers.data.attributes.lms_users && convers.data.attributes.lms_users.data.length >= 2) {
+                            const user1 = convers.data.attributes.lms_users.data[0].attributes.user_ID;
+                            const user2 = convers.data.attributes.lms_users.data[1].attributes.user_ID;
+                    
+                            // Verifica si el primer usuario coincide con user_ID y el segundo usuario con user_ID2
+                            if (user1 === user_ID && user2 === user_ID2) {
+                                return true;
+                            }
                         }
-                        //if(convers.data.id.attributes.lms_users)
-                    })
-                    const filteredConver = theConver.filter(convers => convers !== null);
-                    if(filteredConver.lenght < 1){
+                        return false;
+                    });
+                    
+                    console.log(theConver);
+                    
+                    if(theConver.lenght < 1){
                         createConversation(user.id, user2.is).then(result => {
                             res.status(200).send({data: result, status: true, message: "sucefull"})
                         }).catch(error => {res.status(400).send({error, status: false})})
                     }else{
-                        res.status(200).send({data: filteredConver, status: true, message: "sucefull"})  
+                        res.status(200).send({data: theConver, status: true, message: "sucefull"})  
                     }
                 }).catch(error => {res.status(400).send({error, status: false})})
             }).catch(error => {res.status(400).send({error, status: false})})
