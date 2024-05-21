@@ -266,12 +266,13 @@ getUser2("iGaPnJK0qVRWt6I5ik7PFIR6lg73").then(user => {
             }
             //if(convers.data.id.attributes.lms_users)
         })
-        if(theConver.lenght < 1){
+        const filteredConver = theConver.filter(convers => convers !== null);
+        if(filteredConver.lenght < 1){
             createConversation(user.id, user2.is).then(result => {
                 res.status(200).send({data: result, status: true, message: "sucefull"})
             })
         }else{
-            res.status(200).send({data: theConver, status: true, message: "sucefull"})  
+            res.status(200).send({data: filteredConver, status: true, message: "sucefull"})  
         }
     })
 })

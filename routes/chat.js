@@ -96,7 +96,7 @@ router.get("/get-one-user-conversations", (req, res) => {
                             const user2 = convers.data.attributes.lms_users.data[1].attributes.user_ID;
                     
                             // Verifica si el primer usuario coincide con user_ID y el segundo usuario con user_ID2
-                            if (user1 === user_ID && user2 === user_ID2) {
+                            if ((user1 === user_ID && user2 === user_ID2) || (user2 === user_ID && user1 === user_ID2)) {
                                 return true;
                             }
                         }
