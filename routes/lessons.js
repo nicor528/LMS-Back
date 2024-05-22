@@ -119,7 +119,7 @@ router.get("/get-lesson", (req, res) => {
             const finish = await lesson1.data.attributes.lms_users.data.find(user => user.attributes.user_ID == user_ID);
             console.log(finish)
             if(lesson1.data.attributes.type == "pdf"){
-                getPDF(lesson1.data.attributes.pdf.data[0].attributes.name).then(url => {
+                getPDF(lesson1.data.attributes.description).then(url => {
                     lesson1.data.attributes.pdfUrl = url;
                     if(finish !== undefined){
                         lesson1.data.attributes.finish = true;
