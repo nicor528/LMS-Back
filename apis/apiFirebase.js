@@ -186,7 +186,7 @@ function createNewCourseRequest (user_ID, course_ID, course, user) {
                         user_ID: user_ID,
                         state: "pending",
                         email: user.email,
-                        imageUrl: course.imageUrl.data.attributes.url
+                        imageUrl: course.imageUrl.data.attributes.url ? course.imageUrl.data.attributes.url : ""
                     })
                     const docSnap = await getDoc(docRef);
                     if (docSnap.exists()) {
