@@ -128,9 +128,9 @@ router.post("/get-quizz-result", (req, res) => {
                         console.log(quiz_ID + "this is it")
                         //createTries(user_ID, quiz_ID).then(result => {
                             if(pass){
-                                getAllUserCourses().then(data => {
+                                getAllUserCourses().then(async (data) => {
                                     console.log("test4")
-                                    const allCourses = data.data.filter(data => data.attributes.user_ID === user_ID && (data.attributes.lms_course.data.id == quizz.data.attributes.lms_course.data.id || data.id === quizz.data.attributes.lms_course.data.id ));
+                                    const allCourses = await data.data.filter(data => data.attributes.user_ID === user_ID && (data.attributes.lms_course.data.id == quizz.data.attributes.lms_course.data.id || data.id === quizz.data.attributes.lms_course.data.id ));
                                     console.log(allCourses)
                                     finishLesson(allCourses[0].id, "finish", total_score).then(data => {
                                         console.log("test3")
