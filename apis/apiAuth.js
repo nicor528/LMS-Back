@@ -35,11 +35,8 @@ function SingInPass (email, password) {
     return(
       new Promise((res, rej) => {
         signInWithEmailAndPassword(auth, email, password)
-          .then((userCredential)=>{
-            const user = userCredential.user
-            console.log(user)
-            const data = {id: user.uid}
-            res(user)
+        .then((userCredential) => {
+            res(userCredential);
           }).catch(error => {
             console.log(error);
             rej(error)
