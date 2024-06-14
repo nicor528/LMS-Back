@@ -2,8 +2,45 @@ const { app } = require("./apiAuth");
 const { setDoc, doc, getDoc, query, collection, where, getDocs, getFirestore, deleteDoc } = require("firebase/firestore");
 const { getStorage, ref, uploadString, uploadBytes, getDownloadURL  } = require("firebase/storage")
 
+const jwt = require('jsonwebtoken');
+const dotenv = require('dotenv');
+dotenv.config();
+
+
+
 const DB = getFirestore(app);
 const storage = getStorage(app);
+
+function createToken(payload, expiresIn) {
+    return jwt.sign(payload, process.env.JWT_SECRET, { expiresIn });
+}
+
+async function saveTokensInFirebase(userID, accessToken, refreshToken, refreshTokenExpiry) {
+    const userRef = doc(DB, 'users-data', userID);
+    await setDoc(userRef, {
+        accessToken,
+        refreshToken,
+        refreshTokenExpiry: refreshTokenExpiry.toISOString()
+    });
+}
+
+async function generateAndSaveTokens(userID) {
+    const payload = { userID };
+
+    // Crear tokens
+    const accessToken = createToken(payload, '1h');  // Token de acceso con validez de 1 hora
+    const refreshToken = createToken(payload, '7d');  // Token de actualización con validez de 7 días
+
+    // Calcular fecha de expiración del token de actualización
+    const refreshTokenExpiry = new Date();
+    refreshTokenExpiry.setDate(refreshTokenExpiry.getDate() + 7);
+
+    // Guardar tokens en Firebase
+    await saveTokensInFirebase(userID, accessToken, refreshToken, refreshTokenExpiry);
+
+    return { accessToken, refreshToken };
+}
+
 
 function uploadProfilePicture(user_ID, picture) {
     return(
@@ -253,6 +290,7 @@ module.exports = {
     getPDF,
     getCloseRequests,
     createNewScore,
-    getScore
+    getScore,
+    generateAndSaveTokens
     
 }
