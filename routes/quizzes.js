@@ -138,7 +138,7 @@ router.post("/get-quizz-result", (req, res) => {
                                         getOneCourse(quizz.data.attributes.lms_course.data.id).then(course => {
                                             console.log("test2")
                                             console.log(user.id)
-                                            console.log(course.data.attributes.lms_certificate.data.id)
+                                            console.log(course)
                                             vinculateCertificate(user.id, course.data.attributes.lms_certificate.data.id).then(data => {
                                                 console.log("a ver ahora")
                                                 res.status(200).send({data: {score: total_score, aproved: pass}, status: true})
