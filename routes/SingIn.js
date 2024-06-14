@@ -47,33 +47,61 @@ const router = express.Router();
 router.post("/singInEmail", async (req, res) => {
     const email = req.body.email;
     const pass = req.body.pass;
-    if(email && pass){
-        try{
-            SingInPass(email, pass).then(async (user) => {
-                console.log("test2")
-                const { accessToken, refreshToken } = await generateAndSaveTokens(user.uid);
-                getUser2(user.uid).then(user => {
-                    getAllUserCourses().then(async (data) => {
-                        console.log("test1")
-                        console.log(user)
-                        let user1 = await user;
-                        const allCourses = await data.data.filter(data => data.attributes.user_ID === user.attributes.user_ID)
-                        user1.attributes.lms_user_courses = allCourses.length > 0 ? allCourses : [];
-                        console.log(user1)
-                        getProfilePicture(user1.attributes.user_ID).then(url => {
-                            user1.attributes.profilePictureUrl = url;
-                            res.status(200).send({data: user1, accessToken, refreshToken, status: true, message: "loggin sucefully"})
-                        }) .catch(error => {res.status(400).send({error, status: false})})
-                    }).catch(error => {res.status(400).send({error, status: false})})
-                }).catch(error => {res.status(400).send({message: "Wrong email or password", status: false})})
-            }).catch(error => {res.status(400).send({message: "Wrong email or password", status: false})})
-        }catch(error){
-            res.status(400).send({ message: 'Wrong email or password', status: false });
-        }
-    }else{
-        res.status(401).send({message: "Missing data in the body", status: false})
+  
+    if (email && pass) {
+      try {
+        SingInPass(email, pass).then(async (userCredential) => {
+          const user = userCredential.user;
+  
+          // Verificar si el correo electrónico está verificado
+          if (!user.emailVerified) {
+            res.status(401).send({ message: "Email not verified", status: false });
+            return;
+          }
+  
+          // Si el correo está verificado, proceder con la generación de tokens y otras operaciones
+          console.log("Usuario autenticado correctamente");
+  
+          const { accessToken, refreshToken } = await generateAndSaveTokens(user.uid);
+          
+          // Obtener datos del usuario
+          getUser2(user.uid).then(async (userData) => {
+            // Procesar los datos del usuario y otras operaciones necesarias
+            console.log("Datos del usuario:", userData);
+  
+            getAllUserCourses().then(async (coursesData) => {
+              const allCourses = coursesData.data.filter(data => data.attributes.user_ID === userData.attributes.user_ID);
+              userData.attributes.lms_user_courses = allCourses.length > 0 ? allCourses : [];
+  
+              getProfilePicture(userData.attributes.user_ID).then(url => {
+                userData.attributes.profilePictureUrl = url;
+                res.status(200).send({
+                  data: userData,
+                  accessToken,
+                  refreshToken,
+                  status: true,
+                  message: "Inicio de sesión exitoso"
+                });
+              }).catch(error => {
+                res.status(400).send({ error, status: false });
+              });
+            }).catch(error => {
+              res.status(400).send({ error, status: false });
+            });
+          }).catch(error => {
+            res.status(400).send({ message: "Wrong email or password", status: false });
+          });
+  
+        }).catch(error => {
+          res.status(400).send({ message: "Wrong email or password", status: false });
+        });
+      } catch (error) {
+        res.status(400).send({ message: 'Wrong email or password', status: false });
+      }
+    } else {
+      res.status(401).send({ message: "Missing data in the body", status: false });
     }
-})
+  });
 
 router.get("/getUserInfo", (req, res) => {
     const user_ID = req.query.user_ID;

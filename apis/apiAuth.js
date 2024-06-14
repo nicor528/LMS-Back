@@ -1,7 +1,7 @@
 const dotenv = require('dotenv');
 dotenv.config();
 
-const { getAuth, signInWithCredential, signInWithEmailAndPassword, createUserWithEmailAndPassword, sendPasswordResetEmail } = require("firebase/auth"); 
+const { getAuth, signInWithCredential, signInWithEmailAndPassword, createUserWithEmailAndPassword, sendPasswordResetEmail, sendEmailVerification } = require("firebase/auth"); 
 const { initializeApp } = require("firebase/app");
 const { GoogleAuthProvider } = require("firebase/auth"); // Asegúrate de importar cualquier otro proveedor que necesites
 
@@ -61,27 +61,36 @@ function resetPass (email) {
     )
 }
 
-function SingUpEmail1 (email, pass) {
-    return(
-        new Promise (async (res, rej) => {
-            createUserWithEmailAndPassword(auth, email, pass).then(userCredential => {
-                const user = userCredential.user;
-                console.log(user.uid)
-                res(user)
-            }).catch(error => {
-                console.log(error)
-                console.log(error.code)
-                if(error.code == "auth/email-already-in-use"){
-                    rej(1)
-                }if(error.code == "auth/weak-password"){
-                    rej(2)
-                }else{
-                    rej(error.code)
-                }
+function SingUpEmail1(email, pass) {
+    return new Promise((res, rej) => {
+      createUserWithEmailAndPassword(auth, email, pass)
+        .then((userCredential) => {
+          const user = userCredential.user;
+          console.log(user.uid);
+  
+          // Enviar correo de verificación
+          sendEmailVerification(user)
+            .then(() => {
+              console.log("Correo de verificación enviado.");
+              res(user);
             })
+            .catch((error) => {
+              console.error("Error al enviar correo de verificación:", error);
+              rej(error);
+            });
         })
-    )
-}
+        .catch((error) => {
+          console.error(error);
+          if (error.code === "auth/email-already-in-use") {
+            rej(1); // Correo electrónico ya en uso
+          } else if (error.code === "auth/weak-password") {
+            rej(2); // Contraseña débil
+          } else {
+            rej(error.code); // Otro error
+          }
+        });
+    });
+  }
 
 
 module.exports = {
