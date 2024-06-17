@@ -8,7 +8,7 @@
 const express = require('express');
 const { SingInPass, resetPass } = require('../apis/apiAuth');
 const { getUser2, getAllUserCourses, editInfoUser } = require('../apis/apiStrapi');
-const { uploadProfilePicture, getProfilePicture, generateAndSaveTokens } = require('../apis/apiFirebase');
+const { uploadProfilePicture, getProfilePicture, generateAndSaveTokens, uploadCV, getCV } = require('../apis/apiFirebase');
 const router = express.Router();
 
 /**
@@ -116,8 +116,11 @@ router.get("/getUserInfo", (req, res) => {
                 console.log(user1)
                 getProfilePicture(user1.attributes.user_ID).then(url => {
                     user1.attributes.profilePictureUrl = url;
-                    res.status(200).send({data: user1, status: true, message: "loggin sucefully"})
-                }) .catch(error => {res.status(400).send({error, status: false})})
+                    getCV(user_ID).then(pdfURL => {
+                        user1.pdfURL = pdfURL;
+                        res.status(200).send({data: user1, status: true, message: "loggin sucefully"})
+                    }).catch(error => {res.status(400).send({error, status: false})})
+                }).catch(error => {res.status(400).send({error, status: false})})
             }).catch(error => {res.status(400).send({error, status: false})})
         }).catch(error => {res.status(400).send({error, status: false})})
     }else{
@@ -236,6 +239,19 @@ router.post("/edit-profile-picture", (req, res) => {
     if(user_ID && image1){
         const image1Buffer = Buffer.from(image1.split(",")[1], "base64");
         uploadProfilePicture(user_ID, image1Buffer).then(url => {
+            res.status(200).send({data: url, status:true, message: "ok"})
+        }).catch(error => {res.status(400).send({error, status: false})})
+    }else{
+        res.status(401).send({message: "Missing data in the body", status: false})
+    }
+})
+
+router.post("upload-CV", (req, res) => {
+    const user_ID = req.body.user_ID;
+    const pdf = req.body.pdf;
+    if(user_ID && pdf){
+        const pdfBuffer = Buffer.from(pdf.split(",")[1], "base64");
+        uploadCV(user_ID, pdfBuffer).then(url => {
             res.status(200).send({data: url, status:true, message: "ok"})
         }).catch(error => {res.status(400).send({error, status: false})})
     }else{

@@ -60,6 +60,40 @@ function uploadProfilePicture(user_ID, picture) {
     )
 }
 
+function uploadCV(user_ID, pdfFile) {
+    return new Promise(async (res, rej) => {
+        try {
+            const url = user_ID + "/CV.pdf";
+            const storageRef = ref(storage, url);
+            const snapShot = await uploadBytes(storageRef, pdfFile);
+            const downUrl = await getDownloadURL(snapShot.ref);
+            res(downUrl);
+        } catch (error) {
+            console.log(error);
+            rej(error);
+        }
+    });
+}
+
+function getCV(user_ID) {
+    return new Promise(async (res, rej) => {
+        try {
+            const url = user_ID + "/CV.pdf";
+            const pathRef = ref(storage, url);
+            const downUrl = await getDownloadURL(pathRef);
+            res(downUrl);
+        } catch (error) {
+            if (error.code === 'storage/object-not-found') {
+                // El archivo no existe
+                res("")
+            } else {
+                console.log(error);
+                rej(error);
+            }
+        }
+    });
+}
+
 function getProfilePicture (user_ID) {
     return(
         new Promise(async (res, rej) => {
@@ -291,6 +325,8 @@ module.exports = {
     getCloseRequests,
     createNewScore,
     getScore,
-    generateAndSaveTokens
+    generateAndSaveTokens,
+    uploadCV,
+    getCV
     
 }
