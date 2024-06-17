@@ -8,7 +8,7 @@
 const express = require('express');
 const { SingInPass, resetPass } = require('../apis/apiAuth');
 const { getUser2, getAllUserCourses, editInfoUser } = require('../apis/apiStrapi');
-const { uploadProfilePicture, getProfilePicture, generateAndSaveTokens, uploadCV, getCV } = require('../apis/apiFirebase');
+const { uploadProfilePicture, getProfilePicture, generateAndSaveTokens, uploadCV, getCV, verifyToken, refreshAccessToken } = require('../apis/apiFirebase');
 const router = express.Router();
 
 /**
@@ -103,30 +103,52 @@ router.post("/singInEmail", async (req, res) => {
     }
   });
 
-router.get("/getUserInfo", (req, res) => {
+router.get("/getUserInfo", async (req, res) => {
     const user_ID = req.query.user_ID;
-    if(user_ID){
-        getUser2(user_ID).then(user => {
-            getAllUserCourses().then(async (data) => {
-                console.log("test1")
-                console.log(user)
-                let user1 = await user;
-                const allCourses = await data.data.filter(data => data.attributes.user_ID === user_ID)
-                user1.attributes.lms_user_courses = allCourses.length > 0 ? allCourses : [];
-                console.log(user1)
-                getProfilePicture(user1.attributes.user_ID).then(url => {
-                    user1.attributes.profilePictureUrl = url;
-                    getCV(user_ID).then(pdfURL => {
-                        user1.pdfURL = pdfURL;
-                        res.status(200).send({data: user1, status: true, message: "loggin sucefully"})
-                    }).catch(error => {res.status(400).send({error, status: false})})
-                }).catch(error => {res.status(400).send({error, status: false})})
-            }).catch(error => {res.status(400).send({error, status: false})})
-        }).catch(error => {res.status(400).send({error, status: false})})
-    }else{
-        res.status(401).send({message: "Missing data in the body", status: false})
+    const token = req.query.token;
+    const refreshToken = req.query.refreshToken;
+
+    if (!user_ID || !token) {
+        return res.status(401).send({ message: "Missing data in the body", status: false });
     }
-})
+
+    try {
+        const tokenPayload = verifyToken(token);
+        // Si el token es válido, continuar con la lógica normal
+        const user = await getUser2(user_ID);
+        const allCourses = (await getAllUserCourses()).data.filter(data => data.attributes.user_ID === user_ID);
+        user.attributes.lms_user_courses = allCourses.length > 0 ? allCourses : [];
+        const profilePictureUrl = await getProfilePicture(user.attributes.user_ID);
+        user.attributes.profilePictureUrl = profilePictureUrl;
+        const pdfURL = await getCV(user_ID);
+        user.pdfURL = pdfURL;
+        res.status(200).send({ data: user, status: true, message: "successful" });
+
+    } catch (error) {
+        if (error.name === 'TokenExpiredError' && refreshToken) {
+            try {
+                // Intentar actualizar el token de acceso usando el refresh token
+                const newAccessToken = await refreshAccessToken(user_ID, refreshToken);
+
+                // Continuar con la lógica normal usando el nuevo token de acceso
+                const user = await getUser2(user_ID);
+                const allCourses = (await getAllUserCourses()).data.filter(data => data.attributes.user_ID === user_ID);
+                user.attributes.lms_user_courses = allCourses.length > 0 ? allCourses : [];
+                const profilePictureUrl = await getProfilePicture(user.attributes.user_ID);
+                user.attributes.profilePictureUrl = profilePictureUrl;
+                const pdfURL = await getCV(user_ID);
+                user.pdfURL = pdfURL;
+
+                res.status(200).send({ data: user, newAccessToken: newAccessToken, status: true, message: "Token refreshed and successful" });
+
+            } catch (refreshError) {
+                res.status(401).send({ message: refreshError.message, status: false });
+            }
+        } else {
+            res.status(401).send({ message: 'Invalid or expired token', status: false });
+        }
+    }
+});
 
 /**
  * @swagger
@@ -222,67 +244,130 @@ router.post("/singInWithId", async (req, res) => {
  *                   type: boolean
  */
 router.post("/resetPass", async (req, res) => {
-    const email = req.body.email;
-    if(email){
-        resetPass(email).then(() => {
-            res.status(200).send({status:true, message: "ok"})
-        }).catch(error => {res.status(400).send({error, status: false})})
-    }else{
-        res.status(401).send({message: "Missing data in the body", status: false})
-    }
-})
+    const { email, token, refreshToken, user_ID } = req.body;
 
-router.post("/edit-profile-picture", (req, res) => {
-    const user_ID = req.body.user_ID;
-    const image1 = req.body.image1;
-    console.log(image1)
-    if(user_ID && image1){
+    if (!email || !token || !user_ID) {
+        return res.status(401).send({ message: "Missing data in the body", status: false });
+    }
+
+    try {
+        const tokenPayload = verifyToken(token);
+        // Si el token es válido, proceder con la lógica normal
+        await resetPass(email);
+        res.status(200).send({ status: true, message: "ok" });
+    } catch (error) {
+        if (error.name === 'TokenExpiredError' && refreshToken) {
+            try {
+                // Intentar actualizar el token de acceso usando el refresh token
+                const newAccessToken = await refreshAccessToken(user_ID, refreshToken);
+                // Proceder con la lógica normal después de refrescar el token
+                await resetPass(email);
+                res.status(200).send({ newAccessToken: newAccessToken, status: true, message: "Token refreshed and password reset" });
+            } catch (refreshError) {
+                res.status(401).send({ message: refreshError.message, status: false });
+            }
+        } else {
+            res.status(401).send({ message: 'Invalid or expired token', status: false });
+        }
+    }
+});
+
+
+router.post("/edit-profile-picture", async (req, res) => {
+    const { user_ID, image1, token, refreshToken } = req.body;
+
+    if (!user_ID || !image1 || !token) {
+        return res.status(401).send({ message: "Missing data in the body", status: false });
+    }
+
+    try {
+        const tokenPayload = verifyToken(token);
+        // Si el token es válido, proceder con la lógica normal
         const image1Buffer = Buffer.from(image1.split(",")[1], "base64");
-        uploadProfilePicture(user_ID, image1Buffer).then(url => {
-            res.status(200).send({data: url, status:true, message: "ok"})
-        }).catch(error => {res.status(400).send({error, status: false})})
-    }else{
-        res.status(401).send({message: "Missing data in the body", status: false})
+        const url = await uploadProfilePicture(user_ID, image1Buffer);
+        res.status(200).send({ data: url, status: true, message: "ok" });
+    } catch (error) {
+        if (error.name === 'TokenExpiredError' && refreshToken) {
+            try {
+                // Intentar actualizar el token de acceso usando el refresh token
+                const newAccessToken = await refreshAccessToken(user_ID, refreshToken);
+                // Proceder con la lógica normal después de refrescar el token
+                const image1Buffer = Buffer.from(image1.split(",")[1], "base64");
+                const url = await uploadProfilePicture(user_ID, image1Buffer);
+                res.status(200).send({ data: url, newAccessToken: newAccessToken, status: true, message: "Token refreshed and profile picture updated" });
+            } catch (refreshError) {
+                res.status(401).send({ message: refreshError.message, status: false });
+            }
+        } else {
+            res.status(401).send({ message: 'Invalid or expired token', status: false });
+        }
     }
-})
+});
 
-router.post("/upload-CV", (req, res) => {
-    const user_ID = req.body.user_ID;
-    const pdf = req.body.pdf;
-    if(user_ID && pdf){
+
+router.post("/upload-CV", async (req, res) => {
+    const { user_ID, pdf, token, refreshToken } = req.body;
+
+    if (!user_ID || !pdf || !token) {
+        return res.status(401).send({ message: "Missing data in the body", status: false });
+    }
+
+    try {
+        const tokenPayload = verifyToken(token);
+        // Si el token es válido, proceder con la lógica normal
         const pdfBuffer = Buffer.from(pdf.split(",")[1], "base64");
-        uploadCV(user_ID, pdfBuffer).then(url => {
-            res.status(200).send({data: url, status:true, message: "ok"})
-        }).catch(error => {res.status(400).send({error, status: false})})
-    }else{
-        res.status(401).send({message: "Missing data in the body", status: false})
+        const url = await uploadCV(user_ID, pdfBuffer);
+        res.status(200).send({ data: url, status: true, message: "ok" });
+    } catch (error) {
+        if (error.name === 'TokenExpiredError' && refreshToken) {
+            try {
+                // Intentar actualizar el token de acceso usando el refresh token
+                const newAccessToken = await refreshAccessToken(user_ID, refreshToken);
+                // Proceder con la lógica normal después de refrescar el token
+                const pdfBuffer = Buffer.from(pdf.split(",")[1], "base64");
+                const url = await uploadCV(user_ID, pdfBuffer);
+                res.status(200).send({ data: url, newAccessToken: newAccessToken, status: true, message: "Token refreshed and upload successful" });
+            } catch (refreshError) {
+                res.status(401).send({ message: refreshError.message, status: false });
+            }
+        } else {
+            res.status(401).send({ message: 'Invalid or expired token', status: false });
+        }
     }
-})
+});
 
-router.post("/edit-info-user", (req, res) => {
-    const user_ID = req.body.user_ID;
-    const name = req.body.name;
-    const lastName = req.body.lastName;
-    const birth = req.body.birth;
-    const postal_code  = req.body.postal_code;
-    const city = req.body.city;
-    const province = req.body.province;
-    const country = req.body.country;
-    const street_name = req.body.street_name;
- //   const interests = req.body.interests;
-    const academic = req.body.academic;
-    if(country && user_ID && name && lastName && birth && postal_code && city && province && street_name && academic){
-        getUser2(user_ID).then(user => {
-            editInfoUser(user.id, name, lastName, birth, postal_code, city, province, street_name, academic, country).then(user => {
-            
-                res.status(200).send({data: user, status: true, message: "sucefull"})
-            }).catch(error => {res.status(400).send({error, status: false})})
-        }).catch(error => {res.status(400).send({error, status: false})})
-        
-    }else{
-        res.status(401).send({message: "Missing data in the body", status: false}) 
+
+router.post("/edit-info-user", async (req, res) => {
+    const { user_ID, name, lastName, birth, postal_code, city, province, country, street_name, academic, token, refreshToken } = req.body;
+
+    if (!user_ID || !name || !lastName || !birth || !postal_code || !city || !province || !country || !street_name || !academic || !token) {
+        return res.status(401).send({ message: "Missing data in the body", status: false });
     }
-})
+
+    try {
+        const tokenPayload = verifyToken(token);
+        // Si el token es válido, proceder con la lógica normal
+        const user = await getUser2(user_ID);
+        const updatedUser = await editInfoUser(user.id, name, lastName, birth, postal_code, city, province, street_name, academic, country);
+        res.status(200).send({ data: updatedUser, status: true, message: "Update successful" });
+    } catch (error) {
+        if (error.name === 'TokenExpiredError' && refreshToken) {
+            try {
+                // Intentar actualizar el token de acceso usando el refresh token
+                const newAccessToken = await refreshAccessToken(user_ID, refreshToken);
+                // Proceder con la lógica normal después de refrescar el token
+                const user = await getUser2(user_ID);
+                const updatedUser = await editInfoUser(user.id, name, lastName, birth, postal_code, city, province, street_name, academic, country);
+                res.status(200).send({ data: updatedUser, newAccessToken: newAccessToken, status: true, message: "Token refreshed and update successful" });
+            } catch (refreshError) {
+                res.status(401).send({ message: refreshError.message, status: false });
+            }
+        } else {
+            res.status(401).send({ message: 'Invalid or expired token', status: false });
+        }
+    }
+});
+
 
 
 module.exports = router;

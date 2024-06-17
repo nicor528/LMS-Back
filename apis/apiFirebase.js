@@ -24,6 +24,43 @@ async function saveTokensInFirebase(userID, accessToken, refreshToken, refreshTo
     });
 }
 
+function verifyToken(token) {
+    try {
+        const payload = jwt.verify(token, process.env.JWT_SECRET);
+        return payload;
+    } catch (error) {
+        throw new Error('Invalid or expired token');
+    }
+}
+
+async function refreshAccessToken(userID, providedRefreshToken) {
+    const userRef = doc(DB, 'users-data', userID);
+    const userSnap = await getDoc(userRef);
+
+    if (!userSnap.exists()) {
+        throw new Error('User not found');
+    }
+
+    const userData = userSnap.data();
+
+    if (userData.refreshToken !== providedRefreshToken) {
+        throw new Error('Invalid refresh token');
+    }
+
+    const refreshTokenExpiry = new Date(userData.refreshTokenExpiry);
+
+    if (refreshTokenExpiry <= new Date()) {
+        throw new Error('Refresh token expired');
+    }
+
+    const newAccessToken = createToken({ userID }, '1h'); // Crear nuevo token de acceso con validez de 1 hora
+
+    // Actualizar el token de acceso en Firebase
+    await saveTokensInFirebase(userID, newAccessToken, userData.refreshToken, refreshTokenExpiry);
+
+    return newAccessToken;
+}
+
 async function generateAndSaveTokens(userID) {
     const payload = { userID };
 
@@ -327,6 +364,8 @@ module.exports = {
     getScore,
     generateAndSaveTokens,
     uploadCV,
-    getCV
+    getCV,
+    verifyToken,
+    refreshAccessToken
     
 }

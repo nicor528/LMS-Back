@@ -48,52 +48,101 @@ router.get("/get-user-notifications", (req, res) => {
     }
 })
 
-router.get("/user-notifications", (req, res) => {
-    const user_ID = req.query.user_ID;
-    if(user_ID){
-        getAllUserCourses().then(async (data) => {
-            console.log("test1")
-            const allCourses = await data.data.filter(data => data.attributes.user_ID === user_ID && data.attributes.finish === false)
-            console.log(allCourses)
-            //console.log(allCourses[0].attributes.lms_course.data.attributes)
-            if(allCourses.length == 0){
-                console.log(allCourses.length)
-                res.status(200).send({data: [], status: true, message: "sucefull"})
-            }
-            const annoucments = allCourses.map(data => {
-                console.log("test2")
-                let data1 = {};
-                data1.courseID = data.attributes.lms_course.data.id;
-                data1.announcements = data.attributes.lms_course.data.attributes.announcements;
-                //data1.read = 
-                return data1;
-            })
-            console.log(annoucments)
-            const notis = annoucments.map(async data => {
-                const toReturn = await Promise.all(data.announcements.data.map(async item => {
-                    let localDate = new Date();
-                    const announcementData = await getAnnoucnment(item.id);
-                    console.log(announcementData.data)
-                    const users = announcementData.data.attributes.lms_users.data;
-                    if (!users.length || !users.some(user => user.attributes.user_ID === user_ID)) {
-                        // Devolver el dato que necesitas si no se encuentra el user_ID o el array está vacío
-                        return { date: announcementData.data.attributes.createdAt ,type: "announcement", announcement_ID: announcementData.data.id, title: announcementData.data.attributes.title, courseID: announcementData.data.attributes.lms_course.data.id, description: "your course have a new announcement" };
-                    }
-                }));
-                return toReturn.filter(Boolean); // Eliminar elementos undefined del array
-            });
-            
-            Promise.all(notis).then(result => {
-                console.log("test1")
-                console.log(result);
-                res.status(200).send({data: result[0], status: true, message: "sucefull"})
-            });
+router.get("/user-notifications", async (req, res) => {
+    const { user_ID, token, refreshToken } = req.query;
 
-        }).catch(error => {res.status(400).send({error, status: false})})
-    }else{
-        res.status(401).send({message: "Missing data", status: false}) 
+    if (!user_ID || !token) {
+        return res.status(401).send({ message: "Missing data", status: false });
     }
-})
+
+    try {
+        const tokenPayload = verifyToken(token);
+
+        const data = await getAllUserCourses();
+        const allCourses = data.data.filter(course => course.attributes.user_ID === user_ID && !course.attributes.finish);
+
+        if (allCourses.length === 0) {
+            return res.status(200).send({ data: [], status: true, message: "Successful" });
+        }
+
+        const annoucments = allCourses.map(course => {
+            return {
+                courseID: course.attributes.lms_course.data.id,
+                announcements: course.attributes.lms_course.data.attributes.announcements
+            };
+        });
+
+        const notis = annoucments.map(async data => {
+            const toReturn = await Promise.all(data.announcements.data.map(async item => {
+                const announcementData = await getAnnoucnment(item.id);
+                const users = announcementData.data.attributes.lms_users.data;
+
+                if (!users.length || !users.some(user => user.attributes.user_ID === user_ID)) {
+                    return {
+                        date: announcementData.data.attributes.createdAt,
+                        type: "announcement",
+                        announcement_ID: announcementData.data.id,
+                        title: announcementData.data.attributes.title,
+                        courseID: announcementData.data.attributes.lms_course.data.id,
+                        description: "Your course has a new announcement"
+                    };
+                }
+            }));
+            return toReturn.filter(Boolean);
+        });
+
+        const result = await Promise.all(notis);
+        res.status(200).send({ data: result.flat(), status: true, message: "Successful" });
+    } catch (error) {
+        if (error.name === 'TokenExpiredError' && refreshToken) {
+            try {
+                const newAccessToken = await refreshAccessToken(user_ID, refreshToken);
+                res.setHeader('new-access-token', newAccessToken);
+
+                const data = await getAllUserCourses();
+                const allCourses = data.data.filter(course => course.attributes.user_ID === user_ID && !course.attributes.finish);
+
+                if (allCourses.length === 0) {
+                    return res.status(200).send({ data: [], status: true, message: "Successful" });
+                }
+
+                const annoucments = allCourses.map(course => {
+                    return {
+                        courseID: course.attributes.lms_course.data.id,
+                        announcements: course.attributes.lms_course.data.attributes.announcements
+                    };
+                });
+
+                const notis = annoucments.map(async data => {
+                    const toReturn = await Promise.all(data.announcements.data.map(async item => {
+                        const announcementData = await getAnnoucnment(item.id);
+                        const users = announcementData.data.attributes.lms_users.data;
+
+                        if (!users.length || !users.some(user => user.attributes.user_ID === user_ID)) {
+                            return {
+                                date: announcementData.data.attributes.createdAt,
+                                type: "announcement",
+                                announcement_ID: announcementData.data.id,
+                                title: announcementData.data.attributes.title,
+                                courseID: announcementData.data.attributes.lms_course.data.id,
+                                description: "Your course has a new announcement"
+                            };
+                        }
+                    }));
+                    return toReturn.filter(Boolean);
+                });
+
+                const result = await Promise.all(notis);
+                res.status(200).send({ data: result.flat(), newAccessToken: newAccessToken, status: true, message: "Successful" });
+            } catch (refreshError) {
+                res.status(401).send({ message: refreshError.message, status: false });
+            }
+        } else {
+            res.status(401).send({ message: 'Invalid or expired token', status: false });
+        }
+    }
+});
+
 
 // router.get("/get-notifications", function (req, res) {
 //     // console.log(req)

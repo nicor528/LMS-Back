@@ -1,18 +1,47 @@
 const express = require('express');
 const { addMessage, getUser2, createConversation, getAllConversations, getConversation, readMessage, getConversation2, getAllUsers } = require('../apis/apiStrapi');
+const { verifyToken, refreshAccessToken } = require('../apis/apiFirebase');
 const router = express.Router();
 
-router.post("/add-message", (req, res) => {
+router.post("/add-message", async (req, res) => {
     const user_ID = req.body.from_user_ID;
     const user_ID2 = req.body.to_user_ID2;
     const message = req.body.message;
     const conversation_id = req.body.conversation_id;
+    const refreshToken = req.body.refreshToken;
+    const token = req.body.token;
     if(user_ID && user_ID2 && message && conversation_id){
-        addMessage(user_ID, user_ID2, message, conversation_id).then(result => {
-            getConversation2(conversation_id).then(conver => {
-                res.status(200).send({data: conver, status: true, message: "sucefull"})
-            }).catch(error => {res.status(400).send({error, status: false})})
-        }).catch(error => {res.status(400).send({error, status: false})})
+        try {
+            // Verificar el token
+            const tokenPayload = verifyToken(token);
+    
+            // Procede con la lógica normal de agregar mensaje
+            const result = await addMessage(user_ID, user_ID2, message, conversation_id);
+            const conversation = await getConversation2(conversation_id);
+    
+            res.status(200).send({ data: conversation, status: true, message: "Successful" });
+    
+        } catch (error) {
+            // Manejo de errores relacionados con el token
+            if (error.name === 'TokenExpiredError') {
+                // Token expirado, intentar refrescarlo
+               
+                if (refreshToken) {
+                    try {
+                        const newAccessToken = await refreshAccessToken(user_ID, refreshToken);
+                        // Proceder con la lógica normal después de refrescar el token
+                        const result = await addMessage(user_ID, user_ID2, message, conversation_id);
+                        const conversation = await getConversation2(conversation_id);
+    
+                        res.status(200).send({ data: conversation,  newAccessToken: newAccessToken, status: true, message: "Token refreshed and message added successfully" });
+                    } catch (refreshError) {
+                        res.status(401).send({ message: refreshError.message, status: false });
+                    }
+                } else {
+                    res.status(401).send({ message: 'Missing refresh token', status: false });
+                }
+            }
+        }
     }else{
         res.status(400).send({message: "missing data in the body", status: false})
     }
@@ -69,74 +98,129 @@ router.post("/create-conversation", (req, res) => {
     }
 })
 
-router.get("/get-user-conversations", (req, res) => {
-    const user_ID = req.query.user_ID;
-    if(user_ID){
-        getUser2(user_ID).then(user => {
-            getAllConversations(user.attributes.lms_conversations.data).then(conversations => {
-                res.status(200).send({data: conversations, status: true, message: "sucefull"})
-            }).catch(error => {res.status(400).send({error, status: false})})
-        }).catch(error => {res.status(400).send({error, status: false})})
-    }else{
-        res.status(400).send({message: "missing data", status: false}) 
-    }
-})
+router.get("/get-user-conversations", async (req, res) => {
+    const { user_ID, token, refreshToken } = req.query;
 
-router.get("/get-one-user-conversations", (req, res) => {
-    const user_ID = req.query.user_ID;
-    const user_ID2 = req.query.user_ID2;
-    if(user_ID && user_ID2){
-        getUser2(user_ID).then(user => {
-            getUser2(user_ID2).then(user2 => {
-                getAllConversations(user.attributes.lms_conversations.data).then(conversations => {
-                    const theConver = conversations.filter(convers => {
-                        // Verifica que convers y los atributos necesarios no sean null
+    if (!user_ID || !token) {
+        return res.status(401).send({ message: "Missing data in the body", status: false });
+    }
+
+    try {
+        const tokenPayload = verifyToken(token);
+        // Si el token es válido, proceder con la lógica normal
+        const user = await getUser2(user_ID);
+        const conversations = await getAllConversations(user.attributes.lms_conversations.data);
+        res.status(200).send({ data: conversations, status: true, message: "Successful" });
+    } catch (error) {
+        if (error.name === 'TokenExpiredError' && refreshToken) {
+            try {
+                // Intentar actualizar el token de acceso usando el refresh token
+                const newAccessToken = await refreshAccessToken(user_ID, refreshToken);
+                // Proceder con la lógica normal después de refrescar el token
+                const user = await getUser2(user_ID);
+                const conversations = await getAllConversations(user.attributes.lms_conversations.data);
+                res.status(200).send({ data: conversations,  newAccessToken: newAccessToken, status: true, message: "Token refreshed and conversations retrieved successfully" });
+            } catch (refreshError) {
+                res.status(401).send({ message: refreshError.message, status: false });
+            }
+        } else {
+            res.status(401).send({ message: 'Invalid or expired token', status: false });
+        }
+    }
+});
+
+
+router.get("/get-one-user-conversations", async (req, res) => {
+    const { user_ID, user_ID2, token, refreshToken } = req.query;
+
+    if (!user_ID || !user_ID2 || !token) {
+        return res.status(401).send({ message: "Missing data in the body", status: false });
+    }
+
+    try {
+        const tokenPayload = verifyToken(token);
+        // Si el token es válido, proceder con la lógica normal
+        const user = await getUser2(user_ID);
+        const user2 = await getUser2(user_ID2);
+        const conversations = await getAllConversations(user.attributes.lms_conversations.data);
+        
+        const theConver = conversations.filter(convers => {
+            if (convers && convers.data && convers.data.attributes.lms_users && convers.data.attributes.lms_users.data.length >= 2) {
+                const user1 = convers.data.attributes.lms_users.data[0].attributes.user_ID;
+                const user2 = convers.data.attributes.lms_users.data[1].attributes.user_ID;
+                if ((user1 === user_ID && user2 === user_ID2) || (user2 === user_ID && user1 === user_ID2)) {
+                    return true;
+                }
+            }
+            return false;
+        });
+
+        if (theConver.length === 0) {
+            const result = await createConversation(user.id, user2.id);
+            const updatedUser = await getUser2(user_ID);
+            const updatedConversations = await getAllConversations(updatedUser.attributes.lms_conversations.data);
+            const newConver = updatedConversations.filter(convers => {
+                if (convers && convers.data && convers.data.attributes.lms_users && convers.data.attributes.lms_users.data.length >= 2) {
+                    const user1 = convers.data.attributes.lms_users.data[0].attributes.user_ID;
+                    const user2 = convers.data.attributes.lms_users.data[1].attributes.user_ID;
+                    if ((user1 === user_ID && user2 === user_ID2) || (user2 === user_ID && user1 === user_ID2)) {
+                        return true;
+                    }
+                }
+                return false;
+            });
+            res.status(200).send({ data: newConver[0], status: true, message: "Successful" });
+        } else {
+            res.status(200).send({ data: theConver[0], status: true, message: "Successful" });
+        }
+    } catch (error) {
+        if (error.name === 'TokenExpiredError' && refreshToken) {
+            try {
+                // Intentar actualizar el token de acceso usando el refresh token
+                const newAccessToken = await refreshAccessToken(user_ID, refreshToken);
+                // Proceder con la lógica normal después de refrescar el token
+                const user = await getUser2(user_ID);
+                const user2 = await getUser2(user_ID2);
+                const conversations = await getAllConversations(user.attributes.lms_conversations.data);
+
+                const theConver = conversations.filter(convers => {
+                    if (convers && convers.data && convers.data.attributes.lms_users && convers.data.attributes.lms_users.data.length >= 2) {
+                        const user1 = convers.data.attributes.lms_users.data[0].attributes.user_ID;
+                        const user2 = convers.data.attributes.lms_users.data[1].attributes.user_ID;
+                        if ((user1 === user_ID && user2 === user_ID2) || (user2 === user_ID && user1 === user_ID2)) {
+                            return true;
+                        }
+                    }
+                    return false;
+                });
+
+                if (theConver.length === 0) {
+                    const result = await createConversation(user.id, user2.id);
+                    const updatedUser = await getUser2(user_ID);
+                    const updatedConversations = await getAllConversations(updatedUser.attributes.lms_conversations.data);
+                    const newConver = updatedConversations.filter(convers => {
                         if (convers && convers.data && convers.data.attributes.lms_users && convers.data.attributes.lms_users.data.length >= 2) {
                             const user1 = convers.data.attributes.lms_users.data[0].attributes.user_ID;
                             const user2 = convers.data.attributes.lms_users.data[1].attributes.user_ID;
-                    
-                            // Verifica si el primer usuario coincide con user_ID y el segundo usuario con user_ID2
                             if ((user1 === user_ID && user2 === user_ID2) || (user2 === user_ID && user1 === user_ID2)) {
                                 return true;
                             }
                         }
                         return false;
                     });
-                    
-                    console.log(theConver);
-                    
-                    if(theConver.length === 0){
-                        createConversation(user.id, user2.id).then(result => {
-                            getUser2(user_ID).then(user => {
-                                getAllConversations(user.attributes.lms_conversations.data).then(conversations => {
-                                    const theConver = conversations.filter(convers => {
-                                        // Verifica que convers y los atributos necesarios no sean null
-                                        if (convers && convers.data && convers.data.attributes.lms_users && convers.data.attributes.lms_users.data.length >= 2) {
-                                            const user1 = convers.data.attributes.lms_users.data[0].attributes.user_ID;
-                                            const user2 = convers.data.attributes.lms_users.data[1].attributes.user_ID;
-                                    
-                                            // Verifica si el primer usuario coincide con user_ID y el segundo usuario con user_ID2
-                                            if ((user1 === user_ID && user2 === user_ID2) || (user2 === user_ID && user1 === user_ID2)) {
-                                                return true;
-                                            }
-                                        }
-                                        return false;
-                                    });
-    
-                                    res.status(200).send({data: theConver[0], status: true, message: "sucefull"})
-                                }).catch(error => {res.status(400).send({error, status: false})})
-                            }).catch(error => {res.status(400).send({error, status: false})})
-                        }).catch(error => {res.status(400).send({error, status: false})})
-                    }else{
-                        res.status(200).send({data: theConver[0], status: true, message: "sucefull"})  
-                    }
-                }).catch(error => {res.status(400).send({error, status: false})})
-            }).catch(error => {res.status(400).send({error, status: false})})
-        }).catch(error => {res.status(400).send({error, status: false})})
-    }else{
-        res.status(400).send({message: "missing data", status: false}) 
+                    res.status(200).send({ data: newConver[0],  newAccessToken: newAccessToken, status: true, message: "Token refreshed and conversations retrieved successfully" });
+                } else {
+                    res.status(200).send({ data: theConver[0],  newAccessToken: newAccessToken, status: true, message: "Token refreshed and conversations retrieved successfully" });
+                }
+            } catch (refreshError) {
+                res.status(401).send({ message: refreshError.message, status: false });
+            }
+        } else {
+            res.status(401).send({ message: 'Invalid or expired token', status: false });
+        }
     }
-})
+});
+
 
 router.get("/get-conversation-messages", (req, res) => {
     const conversation_id = req.query.conversation_id;
@@ -149,18 +233,47 @@ router.get("/get-conversation-messages", (req, res) => {
     }
 })
 
-router.post("/read-message", (req, res) => {
+router.post("/read-message", async (req, res) => {
     const user_ID = req.body.user_ID;
     const message_id = req.body.message_id;
-    if(user_ID && message_id){
-        getUser2(user_ID).then(user => {
-            readMessage(user.id, message_id).then(messsasge => {
-                res.status(200).send({data: messsasge, status: true, message: "sucefull"})
-            }).catch(error => {res.status(400).send({error, status: false})})
-        }).catch(error => {res.status(400).send({error, status: false})})
-    }else{
-        res.status(400).send({message: "missing data in the body", status: false})
+    const token = req.body.token;
+    const refreshToken = req.body.refreshToken;
+
+    if (!user_ID || !message_id || !token) {
+        return res.status(400).send({ message: "Missing user ID, message ID, or token in the body", status: false });
     }
-})
+
+    try {
+        // Verificar el token
+        const tokenPayload = verifyToken(token);
+
+        // Procede con la lógica normal de leer el mensaje
+        const user = await getUser2(user_ID);
+        const message = await readMessage(user.id, message_id);
+
+        res.status(200).send({ data: message, status: true, message: "Successful" });
+
+    } catch (error) {
+        // Manejo de errores relacionados con el token
+        if (error.name === 'TokenExpiredError' && refreshToken) {
+            try {
+                // Intentar refrescar el token de acceso usando el refresh token
+                const newAccessToken = await refreshAccessToken(user_ID, refreshToken);
+
+                // Proceder con la lógica normal después de refrescar el token
+                const user = await getUser2(user_ID);
+                const message = await readMessage(user.id, message_id);
+
+                res.status(200).send({ data: message,  newAccessToken: newAccessToken, status: true, message: "Token refreshed and message read successfully" });
+            } catch (refreshError) {
+                res.status(401).send({ message: refreshError.message, status: false });
+            }
+        } else {
+            // Otro tipo de error relacionado con el token
+            res.status(401).send({ message: 'Invalid or expired token', status: false });
+        }
+    }
+});
+
 
 module.exports = router;

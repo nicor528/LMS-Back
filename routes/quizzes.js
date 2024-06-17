@@ -5,44 +5,56 @@ const router = express.Router();
 
 
 router.post("/get-quizz", async (req, res) => {
-    const user_ID = req.body.user_ID;
-    const quiz_ID = req.body.quiz_ID;
-    if(quiz_ID && user_ID){
-        getQuiz1(parseInt(quiz_ID)).then(quizz => {
-            console.log("test1")
-            let quizz1 = quizz.data;
-            let n = 0;
-            quizz.data.attributes.lms_questions.data.map(question => {
-                let newquestion = {}; 
-                newquestion.attributes = {}
-                newquestion.attributes.question = question.attributes.question;
-                newquestion.attributes.options = [question.attributes.wrong_answer_1, question.attributes.wrong_answer_2, question.attributes.wrong_answer_3, question.attributes.correct_answer_1]
-                quizz1.attributes.lms_questions.data[n] = newquestion;
-                quizz1.attributes.max_tries = quizz.data.attributes.max_tries;
-                n ++;
-            })
-            res.status(200).send({data: quizz1, status: true})
-    /*        getTries().then(tries => {
-                console.log("test1")
-                console.log(tries)
-                const filteredObjects = tries.data.filter(item => 
-                    item.attributes.lms_user.data.attributes.user_ID === user_ID &&
-                    item.attributes.lms_quiz.data.id === parseInt(quiz_ID)
-                );
-                const count = filteredObjects.length;
-                if(count < quizz1.attributes.max_tries || count == undefined){
-                    console.log("test1")
-                    res.status(200).send({data: quizz1, status: true})
-                }else{
-                    console.log("test1")
-                    res.status(200).send({message: "You have reached the maximum tries", status: true})
-                }
-            }).catch(error => {res.status(400).send({error, status: false})})*/
-        }).catch(error => {res.status(400).send({error, status: false})})
-    }else{
-        res.status(401).send({message: "Missing data in the body", status: false})
+    const { user_ID, quiz_ID, token, refreshToken } = req.body;
+
+    if (!quiz_ID || !user_ID || !token) {
+        return res.status(401).send({ message: "Missing data in the body", status: false });
     }
-})
+
+    try {
+        const tokenPayload = verifyToken(token);
+
+        const quizz = await getQuiz1(parseInt(quiz_ID));
+        let quizz1 = quizz.data;
+        let n = 0;
+        quizz.data.attributes.lms_questions.data.map(question => {
+            let newquestion = {};
+            newquestion.attributes = {};
+            newquestion.attributes.question = question.attributes.question;
+            newquestion.attributes.options = [question.attributes.wrong_answer_1, question.attributes.wrong_answer_2, question.attributes.wrong_answer_3, question.attributes.correct_answer_1];
+            quizz1.attributes.lms_questions.data[n] = newquestion;
+            quizz1.attributes.max_tries = quizz.data.attributes.max_tries;
+            n++;
+        });
+        res.status(200).send({ data: quizz1, status: true });
+    } catch (error) {
+        if (error.name === 'TokenExpiredError' && refreshToken) {
+            try {
+                const newAccessToken = await refreshAccessToken(user_ID, refreshToken);
+                res.setHeader('new-access-token', newAccessToken);
+
+                const quizz = await getQuiz1(parseInt(quiz_ID));
+                let quizz1 = quizz.data;
+                let n = 0;
+                quizz.data.attributes.lms_questions.data.map(question => {
+                    let newquestion = {};
+                    newquestion.attributes = {};
+                    newquestion.attributes.question = question.attributes.question;
+                    newquestion.attributes.options = [question.attributes.wrong_answer_1, question.attributes.wrong_answer_2, question.attributes.wrong_answer_3, question.attributes.correct_answer_1];
+                    quizz1.attributes.lms_questions.data[n] = newquestion;
+                    quizz1.attributes.max_tries = quizz.data.attributes.max_tries;
+                    n++;
+                });
+                res.status(200).send({ data: quizz1,   newAccessToken: newAccessToken, status: true });
+            } catch (refreshError) {
+                res.status(401).send({ message: refreshError.message, status: false });
+            }
+        } else {
+            res.status(401).send({ message: 'Invalid or expired token', status: false });
+        }
+    }
+});
+
 
 router.get("/quizz-attemps", (req, res) => {
     const quiz_ID = req.query.quiz_ID;
@@ -61,103 +73,175 @@ router.get("/quizz-attemps", (req, res) => {
     }
 })
 
-router.post("/get-quizz-module-result", (req, res) => {
-    const answers = req.body.answers;
-    const quiz_ID = req.body.quizz_ID;
-    const user_ID = req.body.user_ID;
-    if(answers && quiz_ID && user_ID){
-        getUser2(user_ID).then(user => {
-            getQuiz1(quiz_ID).then(quizz => {
+router.post("/get-quizz-module-result", async (req, res) => {
+    const { answers, quiz_ID, user_ID, token, refreshToken } = req.body;
+
+    if (!answers || !quiz_ID || !user_ID || !token) {
+        return res.status(400).send({ message: "Missing data in the body", status: false });
+    }
+
+    try {
+        const tokenPayload = verifyToken(token);
+
+        const user = await getUser2(user_ID);
+        const quizz = await getQuiz1(quiz_ID);
+        const right_answers = quizz.data.attributes.lms_questions.data.map(question => {
+            return { correct_answer: question.attributes.correct_answer_1, question: question.attributes.question };
+        });
+
+        const questions_N = quizz.data.attributes.lms_questions.data.length;
+        let correct_answers = 0;
+        answers.map(answer => {
+            const correct = right_answers.find(data => data.question === answer.question && data.correct_answer === answer.answer);
+            if (correct) {
+                correct_answers++;
+            }
+        });
+
+        const total_score = (correct_answers * 100) / questions_N;
+        const pass = total_score >= 50;
+
+        await createNewScore(user_ID, quizz.data.attributes.lms_module.data.id, total_score, pass);
+
+        if (pass) {
+            await vinculateModule(user.id, quizz.data.attributes.lms_module.data.id);
+        }
+
+        res.status(200).send({ data: { score: total_score, aproved: pass }, status: true });
+    } catch (error) {
+        if (error.name === 'TokenExpiredError' && refreshToken) {
+            try {
+                const newAccessToken = await refreshAccessToken(user_ID, refreshToken);
+                res.setHeader('new-access-token', newAccessToken);
+
+                const user = await getUser2(user_ID);
+                const quizz = await getQuiz1(quiz_ID);
                 const right_answers = quizz.data.attributes.lms_questions.data.map(question => {
-                    return {correct_answer: question.attributes.correct_answer_1, question: question.attributes.question}
-                }) 
-                const questions_N = quizz.data.attributes.lms_questions.data.length
+                    return { correct_answer: question.attributes.correct_answer_1, question: question.attributes.question };
+                });
+
+                const questions_N = quizz.data.attributes.lms_questions.data.length;
                 let correct_answers = 0;
                 answers.map(answer => {
-                    const correct = right_answers.find(data => data.question === answer.question && data.correct_answer === answer.answer)
-                    if(correct){
-                        correct_answers ++
+                    const correct = right_answers.find(data => data.question === answer.question && data.correct_answer === answer.answer);
+                    if (correct) {
+                        correct_answers++;
                     }
-                })
-                const total_score = (correct_answers * 100)/questions_N
-                console.log(total_score)
-                const pass = total_score >= 50 ? true : false
-                createNewScore(user_ID, quizz.data.attributes.lms_module.data.id, total_score, pass).then(() => {
-                    if(pass){
-                        vinculateModule(user.id, quizz.data.attributes.lms_module.data.id).then(response => {
-                            res.status(200).send({data: {score: total_score, aproved: pass}, status: true})
-                        }).catch(error => {res.status(400).send({error, status: false})})
-                    }else{
-                        res.status(200).send({data: {score: total_score, aproved: pass}, status: true})
-                    }
-                }).catch(error => {res.status(400).send({error, status: false})})
-            }).catch(error => {res.status(400).send({error, status: false})})
-        }).catch(error => {res.status(400).send({error, status: false})})
-    }else{
+                });
 
+                const total_score = (correct_answers * 100) / questions_N;
+                const pass = total_score >= 50;
+
+                await createNewScore(user_ID, quizz.data.attributes.lms_module.data.id, total_score, pass);
+
+                if (pass) {
+                    await vinculateModule(user.id, quizz.data.attributes.lms_module.data.id);
+                }
+
+                res.status(200).send({ data: { score: total_score, aproved: pass },  newAccessToken: newAccessToken, status: true });
+            } catch (refreshError) {
+                res.status(401).send({ message: refreshError.message, status: false });
+            }
+        } else {
+            res.status(401).send({ message: 'Invalid or expired token', status: false });
+        }
     }
-})
+});
 
-router.post("/get-quizz-result", (req, res) => {
-    const answers = req.body.answers;
-    const quiz_ID = req.body.quizz_ID;
-    const user_ID = req.body.user_ID;
-    if(answers && quiz_ID && user_ID){
-        getUser2(user_ID).then(user => {
-            getQuiz1(quiz_ID).then(quizz => {
-                //const answers = [{question: "what is a variable?", answer: "i dont know"}, {question: "what is a function", answer: "asdsad"}]
-                console.log(quizz.data.attributes.lms_questions.data[0])
+
+router.post("/get-quizz-result", async (req, res) => {
+    const { answers, quiz_ID, user_ID, token, refreshToken } = req.body;
+
+    if (!answers || !quiz_ID || !user_ID || !token) {
+        return res.status(400).send({ message: "Missing data in the body", status: false });
+    }
+
+    try {
+        const tokenPayload = verifyToken(token);
+
+        const user = await getUser2(user_ID);
+        const quizz = await getQuiz1(quiz_ID);
+        const right_answers = quizz.data.attributes.lms_questions.data.map(question => {
+            return { correct_answer: question.attributes.correct_answer_1, question: question.attributes.question };
+        });
+
+        const questions_N = quizz.data.attributes.lms_questions.data.length;
+        let correct_answers = 0;
+        answers.map(answer => {
+            const correct = right_answers.find(data => data.question === answer.question && data.correct_answer === answer.answer);
+            if (correct) {
+                correct_answers++;
+            }
+        });
+
+        const total_score = (correct_answers * 100) / questions_N;
+        const pass = total_score >= 50;
+
+        await saveScore(user.id, quiz_ID, total_score);
+        await vinculateQuizzWithUser(user_ID, quiz_ID);
+
+        if (pass) {
+            const data = await getAllUserCourses();
+            const allCourses = data.data.filter(course => course.attributes.user_ID === user_ID && (course.attributes.lms_course.data.id === quizz.data.attributes.lms_course.data.id || course.id === quizz.data.attributes.lms_course.data.id));
+
+            if (allCourses.length > 0) {
+                await finishLesson(allCourses[0].id, "finish", total_score);
+
+                const course = await getOneCourse(quizz.data.attributes.lms_course.data.id);
+                await vinculateCertificate(user.id, course.data.attributes.lms_certificate.data.id);
+            }
+        }
+
+        res.status(200).send({ data: { score: total_score, aproved: pass }, status: true });
+    } catch (error) {
+        if (error.name === 'TokenExpiredError' && refreshToken) {
+            try {
+                const newAccessToken = await refreshAccessToken(user_ID, refreshToken);
+                res.setHeader('new-access-token', newAccessToken);
+
+                const user = await getUser2(user_ID);
+                const quizz = await getQuiz1(quiz_ID);
                 const right_answers = quizz.data.attributes.lms_questions.data.map(question => {
-                    return {correct_answer: question.attributes.correct_answer_1, question: question.attributes.question}
-                })
-                const questions_N = quizz.data.attributes.lms_questions.data.length
+                    return { correct_answer: question.attributes.correct_answer_1, question: question.attributes.question };
+                });
+
+                const questions_N = quizz.data.attributes.lms_questions.data.length;
                 let correct_answers = 0;
                 answers.map(answer => {
-                    const correct = right_answers.find(data => data.question === answer.question && data.correct_answer === answer.answer)
-                    if(correct){
-                        correct_answers ++
+                    const correct = right_answers.find(data => data.question === answer.question && data.correct_answer === answer.answer);
+                    if (correct) {
+                        correct_answers++;
                     }
-                })
-                const total_score = (correct_answers * 100)/questions_N
-                console.log(total_score)
-                const pass = total_score >= 50 ? true : false
-                saveScore(user.id, quiz_ID, total_score).then((score) => { // to do
-                    console.log("test1")
-                    vinculateQuizzWithUser(user_ID, quiz_ID).then(result => { //to do
-                        console.log("test1")
-                        console.log(quiz_ID + "this is it")
-                        //createTries(user_ID, quiz_ID).then(result => {
-                            if(pass){
-                                getAllUserCourses().then(async (data) => {
-                                    console.log("test4")
-                                    const allCourses = await data.data.filter(data => data.attributes.user_ID === user_ID && (data.attributes.lms_course.data.id == quizz.data.attributes.lms_course.data.id || data.id === quizz.data.attributes.lms_course.data.id ));
-                                    console.log(allCourses)
-                                    finishLesson(allCourses[0].id, "finish", total_score).then(data => {
-                                        console.log("test3")
-                                        console.log(quizz.data.attributes.lms_course.data.id)
-                                        getOneCourse(quizz.data.attributes.lms_course.data.id).then(course => {
-                                            console.log("test2")
-                                            console.log(user.id)
-                                            console.log(course)
-                                            vinculateCertificate(user.id, course.data.attributes.lms_certificate.data.id).then(data => {
-                                                console.log("a ver ahora")
-                                                res.status(200).send({data: {score: total_score, aproved: pass}, status: true})
-                                            }).catch(error => {res.status(400).send({error, status: false})}) 
-                                        }).catch(error => {res.status(400).send({error, status: false})}) 
-                                    }).catch(error => {res.status(400).send({error, status: false})})  
-                                }).catch(error => {res.status(400).send({error, status: false})})                       
-                            }else{
-                                res.status(200).send({data: {score: total_score, aproved: pass}, status: true})
-                            }
-                        //}).catch(error => {res.status(400).send({error, status: false})})
-                    }).catch(error => {res.status(400).send({error, status: false})})
-                }).catch(error => {res.status(400).send({error, status: false})})
-            }).catch(error => {res.status(400).send({error, status: false})})
-        }).catch(error => {res.status(400).send({error, status: false})})
-    }else{
-        res.status(400).send({message: "Missing data in the body", status: false})
+                });
+
+                const total_score = (correct_answers * 100) / questions_N;
+                const pass = total_score >= 50;
+
+                await saveScore(user.id, quiz_ID, total_score);
+                await vinculateQuizzWithUser(user_ID, quiz_ID);
+
+                if (pass) {
+                    const data = await getAllUserCourses();
+                    const allCourses = data.data.filter(course => course.attributes.user_ID === user_ID && (course.attributes.lms_course.data.id === quizz.data.attributes.lms_course.data.id || course.id === quizz.data.attributes.lms_course.data.id));
+
+                    if (allCourses.length > 0) {
+                        await finishLesson(allCourses[0].id, "finish", total_score);
+
+                        const course = await getOneCourse(quizz.data.attributes.lms_course.data.id);
+                        await vinculateCertificate(user.id, course.data.attributes.lms_certificate.data.id);
+                    }
+                }
+
+                res.status(200).send({ data: { score: total_score, aproved: pass },  newAccessToken: newAccessToken, status: true });
+            } catch (refreshError) {
+                res.status(401).send({ message: refreshError.message, status: false });
+            }
+        } else {
+            res.status(401).send({ message: 'Invalid or expired token', status: false });
+        }
     }
-})
+});
+
 
 
 module.exports = router;

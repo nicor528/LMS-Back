@@ -1,6 +1,6 @@
 const express = require('express');
 const { getCourseLessons, getCourses, vinculateLesson, vinculateModule, getModule, getLesson, getOneUserCourse, updatePercentage, getUser2, getAllUserCourses, addPoints, unVinculateLesson, getTextLesson } = require('../apis/apiStrapi');
-const { getPDF, getScore } = require('../apis/apiFirebase');
+const { getPDF, getScore, refreshAccessToken, verifyToken } = require('../apis/apiFirebase');
 const router = express.Router();
 
 /*
@@ -21,208 +21,323 @@ router.get("/getCourseLessons", async (req,res) => {
     }
 })*/
 
-router.get("/get-module", (req, res) => {
-    const module_ID = parseInt(req.query.module_ID);
-    const user_ID = req.query.user_ID;
-    if(module_ID && user_ID){
-        getModule(module_ID).then(async (module) => {
-            let module1 = module;
-            const finish = await module1.data.attributes.lms_users.data.find(user => user.attributes.user_ID == user_ID)
-            if(finish !== undefined){
-                module1.data.attributes.finish = true;
-                module1.data.attributes.lms_users = [];
-                getScore(user_ID, module_ID).then(score => {
-                    module1.data.attributes.score = score;
-                    res.status(200).send({data: module1.data, status: true})
-                }).catch(error => {res.status(400).send({error, status: false})})
-            }else{
-                module1.data.attributes.finish = false;
-                module1.data.attributes.lms_users = [];
-                res.status(200).send({data: module1.data, status: true})
-            }
-        }).catch(error => {res.status(400).send({error, status: false})})
-    }else{
-        res.status(401).send({message: "Missing data", status: false})
-    }
-})
+router.get("/get-module", async (req, res) => {
+    const { module_ID, user_ID, token, refreshToken } = req.query;
 
-router.post("/finish-module", (req, res) => {
-    const user_ID = req.body.user_ID;
-    const module_ID = parseInt(req.body.module_ID);
-    if(user_ID && module_ID){
-        getUser2(user_ID).then(user => {
-            vinculateModule(user.id, module_ID).then(response => {
-                getModule(module_ID).then(async (module) => {
-                    let module1 = module;
+    if (!module_ID || !user_ID || !token) {
+        return res.status(401).send({ message: "Missing data", status: false });
+    }
+
+    try {
+        const tokenPayload = verifyToken(token);
+
+        // Si el token es válido, continuar con la lógica normal
+        const module = await getModule(parseInt(module_ID));
+        let module1 = module;
+        const finish = module1.data.attributes.lms_users.data.find(user => user.attributes.user_ID == user_ID);
+
+        if (finish !== undefined) {
+            module1.data.attributes.finish = true;
+            module1.data.attributes.lms_users = [];
+            const score = await getScore(user_ID, parseInt(module_ID));
+            module1.data.attributes.score = score;
+            res.status(200).send({ data: module1.data, status: true });
+        } else {
+            module1.data.attributes.finish = false;
+            module1.data.attributes.lms_users = [];
+            res.status(200).send({ data: module1.data, status: true });
+        }
+    } catch (error) {
+        if (error.name === 'TokenExpiredError' && refreshToken) {
+            try {
+                const newAccessToken = await refreshAccessToken(user_ID, refreshToken);
+                res.setHeader('new-access-token', newAccessToken);
+                const module = await getModule(parseInt(module_ID));
+                let module1 = module;
+                const finish = module1.data.attributes.lms_users.data.find(user => user.attributes.user_ID == user_ID);
+
+                if (finish !== undefined) {
                     module1.data.attributes.finish = true;
                     module1.data.attributes.lms_users = [];
-                    res.status(200).send({data: module1.data, status: true})
-                }).catch(error => {res.status(400).send({error, status: false})})
-            }).catch(error => {res.status(400).send({error, status: false})})
-        }).catch(error => {res.status(400).send({error, status: false})})
-    }else{
-        res.status(400).send({message: "Missing data", status: false})
-    }
-})
-
-router.post("/un-finish-lesson", (req, res) => {
-    const user_ID = req.body.user_ID;
-    const lesson_ID = req.body.lesson_ID;
-    if(user_ID && lesson_ID) {
-        getUser2(user_ID).then(user => {
-            getLesson(lesson_ID).then(async (lesson) => {
-                let lesson1 = lesson;
-                console.log(lesson1)
-                const finish = await lesson1.data.attributes.lms_users.data.find(user => user.attributes.user_ID == user_ID);
-                console.log(finish)
-                if(finish !== undefined){
-                    unVinculateLesson(user.id, lesson_ID).then(response => {
-                        console.log("1");
-                        getAllUserCourses().then(async (data) => {
-                            console.log("2")
-                            console.log(data)
-                            const allCourses = await data.data.filter(data => data.attributes.user_ID === user_ID && (data.attributes.lms_course.data.id === course_ID || data.id === course_ID ));
-                            const course = allCourses[0]
-                            console.log(course)
-                            let completed_porcent = 100/course.attributes.total_lessons;
-                            completed_porcent = course.attributes.percentage - completed_porcent;
-                            updatePercentage(completed_porcent, course.id).then(response => {
-                                getLesson(lesson_ID).then(async (lesson) => {
-                                    console.log("3");
-                                    let lesson1 = lesson;
-                                    lesson1.data.attributes.finish = false;
-                                    lesson1.data.attributes.lms_users = [];
-                                    res.status(200).send({data: lesson1.data, status: true})
-                                }).catch(error => {res.status(400).send({error, status: false})})
-                            }).catch(error => {res.status(400).send({error, status: false})})
-                        }).catch(error => {res.status(400).send({error, status: false})})
-                    })
-                }else{
-                    lesson1.data.attributes.finish = false;
-                    lesson1.data.attributes.lms_users = [];
-                    res.status(200).send({data: lesson1.data, status: true})
+                    const score = await getScore(user_ID, parseInt(module_ID));
+                    module1.data.attributes.score = score;
+                    res.status(200).send({ data: module1.data, status: true });
+                } else {
+                    module1.data.attributes.finish = false;
+                    module1.data.attributes.lms_users = [];
+                    res.status(200).send({ data: module1.data, newAccessToken: newAccessToken, status: true });
                 }
-            }).catch(error => {res.status(400).send({error, status: false})})
-        }).catch(error => {res.status(400).send({error, status: false})})
-    }else{
-        res.status(400).send({message: "Missing data", status: false})
-    }
-})
-
-router.get("/get-lesson", (req, res) => {
-    const lesson_ID = parseInt(req.query.lesson_ID);
-    const user_ID = req.query.user_ID;
-    if(lesson_ID || user_ID){
-        getLesson(lesson_ID).then(async (lesson) => {
-            let lesson1 = lesson;
-            console.log(lesson1)
-            const finish = await lesson1.data.attributes.lms_users.data.find(user => user.attributes.user_ID == user_ID);
-            console.log(finish)
-            if(lesson1.data.attributes.type == "pdf"){
-                getPDF(lesson1.data.attributes.description).then(url => {
-                    lesson1.data.attributes.pdfUrl = url;
-                    if(finish !== undefined){
-                        lesson1.data.attributes.finish = true;
-                        lesson1.data.attributes.lms_users = [];
-                        res.status(200).send({data: lesson1.data, status: true})
-                    }else{
-                        lesson1.data.attributes.finish = false;
-                        lesson1.data.attributes.lms_users = [];
-                        res.status(200).send({data: lesson1.data, status: true})
-                    }
-                }).catch(error => {res.status(400).send({error, status: false})})
-            }if(lesson1.data.attributes.type == "text"){
-                getTextLesson(lesson1.data.attributes.title).then(lesson => {
-                    console.log(lesson)
-                    lesson1.data.attributes.lesson = lesson.data[0]
-                    if(finish !== undefined){
-                        lesson1.data.attributes.finish = true;
-                        lesson1.data.attributes.lms_users = [];
-                        res.status(200).send({data: lesson1.data, status: true})
-                    }else{
-                        lesson1.data.attributes.finish = false;
-                        lesson1.data.attributes.lms_users = [];
-                        res.status(200).send({data: lesson1.data, status: true})
-                    }
-                }).catch(error => {res.status(400).send({error, status: false})})
-            }else{
-                if(finish !== undefined){
-                    lesson1.data.attributes.finish = true;
-                    lesson1.data.attributes.lms_users = [];
-                    res.status(200).send({data: lesson1.data, status: true})
-                }else{
-                    lesson1.data.attributes.finish = false;
-                    lesson1.data.attributes.lms_users = [];
-                    res.status(200).send({data: lesson1.data, status: true})
-                }
+            } catch (refreshError) {
+                res.status(401).send({ message: refreshError.message, status: false });
             }
-        }).catch(error => {res.status(400).send({error, status: false})})
-    }else{
-        res.status(400).send({message: "Missing data", status: false})
+        } else {
+            res.status(401).send({ message: 'Invalid or expired token', status: false });
+        }
     }
-})
+});
 
-router.post("/finish-lesson", (req, res) => {
-    const course_ID = parseInt(req.body.course_ID);
-    const user_ID = req.body.user_ID;
-    const lesson_ID = parseInt(req.body.lesson_ID);
-    if(user_ID && lesson_ID && course_ID){
-        getUser2(user_ID).then(user => {
-            getLesson(lesson_ID).then(async (lesson) => {
+
+router.post("/finish-module", async (req, res) => {
+    const { user_ID, module_ID, token, refreshToken } = req.body;
+
+    if (!user_ID || !module_ID || !token) {
+        return res.status(400).send({ message: "Missing data", status: false });
+    }
+
+    try {
+        const tokenPayload = verifyToken(token);
+
+        const user = await getUser2(user_ID);
+        await vinculateModule(user.id, parseInt(module_ID));
+        const module = await getModule(parseInt(module_ID));
+        let module1 = module;
+        module1.data.attributes.finish = true;
+        module1.data.attributes.lms_users = [];
+        res.status(200).send({ data: module1.data, status: true });
+    } catch (error) {
+        if (error.name === 'TokenExpiredError' && refreshToken) {
+            try {
+                const newAccessToken = await refreshAccessToken(user_ID, refreshToken);
+                res.setHeader('new-access-token', newAccessToken);
+
+                const user = await getUser2(user_ID);
+                await vinculateModule(user.id, parseInt(module_ID));
+                const module = await getModule(parseInt(module_ID));
+                let module1 = module;
+                module1.data.attributes.finish = true;
+                module1.data.attributes.lms_users = [];
+                res.status(200).send({ data: module1.data, newAccessToken: newAccessToken, status: true });
+            } catch (refreshError) {
+                res.status(401).send({ message: refreshError.message, status: false });
+            }
+        } else {
+            res.status(401).send({ message: 'Invalid or expired token', status: false });
+        }
+    }
+});
+
+
+router.post("/un-finish-lesson", async (req, res) => {
+    const { user_ID, lesson_ID, course_ID, token, refreshToken } = req.body;
+
+    if (!user_ID || !lesson_ID || !token) {
+        return res.status(400).send({ message: "Missing data", status: false });
+    }
+
+    try {
+        const tokenPayload = verifyToken(token);
+
+        const user = await getUser2(user_ID);
+        const lesson = await getLesson(lesson_ID);
+        let lesson1 = lesson;
+        const finish = lesson1.data.attributes.lms_users.data.find(user => user.attributes.user_ID == user_ID);
+
+        if (finish !== undefined) {
+            await unVinculateLesson(user.id, lesson_ID);
+            const allCourses = (await getAllUserCourses()).data.filter(data => data.attributes.user_ID === user_ID && (data.attributes.lms_course.data.id === course_ID || data.id === course_ID));
+            const course = allCourses[0];
+            let completed_porcent = 100 / course.attributes.total_lessons;
+            completed_porcent = course.attributes.percentage - completed_porcent;
+            await updatePercentage(completed_porcent, course.id);
+
+            const updatedLesson = await getLesson(lesson_ID);
+            let lesson1 = updatedLesson;
+            lesson1.data.attributes.finish = false;
+            lesson1.data.attributes.lms_users = [];
+            res.status(200).send({ data: lesson1.data, status: true });
+        } else {
+            lesson1.data.attributes.finish = false;
+            lesson1.data.attributes.lms_users = [];
+            res.status(200).send({ data: lesson1.data, status: true });
+        }
+    } catch (error) {
+        if (error.name === 'TokenExpiredError' && refreshToken) {
+            try {
+                const newAccessToken = await refreshAccessToken(user_ID, refreshToken);
+                res.setHeader('new-access-token', newAccessToken);
+
+                const user = await getUser2(user_ID);
+                const lesson = await getLesson(lesson_ID);
                 let lesson1 = lesson;
-                console.log(lesson1)
-                const finish = await lesson1.data.attributes.lms_users.data.find(user => user.attributes.user_ID == user_ID);
-                console.log(finish)
-                if(finish !== undefined){
+                const finish = lesson1.data.attributes.lms_users.data.find(user => user.attributes.user_ID == user_ID);
+
+                if (finish !== undefined) {
+                    await unVinculateLesson(user.id, lesson_ID);
+                    const allCourses = (await getAllUserCourses()).data.filter(data => data.attributes.user_ID === user_ID && (data.attributes.lms_course.data.id === course_ID || data.id === course_ID));
+                    const course = allCourses[0];
+                    let completed_porcent = 100 / course.attributes.total_lessons;
+                    completed_porcent = course.attributes.percentage - completed_porcent;
+                    await updatePercentage(completed_porcent, course.id);
+
+                    const updatedLesson = await getLesson(lesson_ID);
+                    let lesson1 = updatedLesson;
+                    lesson1.data.attributes.finish = false;
+                    lesson1.data.attributes.lms_users = [];
+                    res.status(200).send({ data: lesson1.data, newAccessToken: newAccessToken, status: true });
+                } else {
+                    lesson1.data.attributes.finish = false;
+                    lesson1.data.attributes.lms_users = [];
+                    res.status(200).send({ data: lesson1.data, newAccessToken: newAccessToken, status: true });
+                }
+            } catch (refreshError) {
+                res.status(401).send({ message: refreshError.message, status: false });
+            }
+        } else {
+            res.status(401).send({ message: 'Invalid or expired token', status: false });
+        }
+    }
+});
+
+
+router.get("/get-lesson", async (req, res) => {
+    const { lesson_ID, user_ID, token, refreshToken } = req.query;
+
+    if (!lesson_ID || !user_ID || !token) {
+        return res.status(400).send({ message: "Missing data", status: false });
+    }
+
+    try {
+        const tokenPayload = verifyToken(token);
+
+        const lesson = await getLesson(parseInt(lesson_ID));
+        let lesson1 = lesson;
+        const finish = lesson1.data.attributes.lms_users.data.find(user => user.attributes.user_ID == user_ID);
+
+        if (lesson1.data.attributes.type === "pdf") {
+            const url = await getPDF(lesson1.data.attributes.description);
+            lesson1.data.attributes.pdfUrl = url;
+        } else if (lesson1.data.attributes.type === "text") {
+            const textLesson = await getTextLesson(lesson1.data.attributes.title);
+            lesson1.data.attributes.lesson = textLesson.data[0];
+        }
+
+        lesson1.data.attributes.finish = finish !== undefined;
+        lesson1.data.attributes.lms_users = [];
+        res.status(200).send({ data: lesson1.data, status: true });
+    } catch (error) {
+        if (error.name === 'TokenExpiredError' && refreshToken) {
+            try {
+                const newAccessToken = await refreshAccessToken(user_ID, refreshToken);
+                res.setHeader('new-access-token', newAccessToken);
+
+                const lesson = await getLesson(parseInt(lesson_ID));
+                let lesson1 = lesson;
+                const finish = lesson1.data.attributes.lms_users.data.find(user => user.attributes.user_ID == user_ID);
+
+                if (lesson1.data.attributes.type === "pdf") {
+                    const url = await getPDF(lesson1.data.attributes.description);
+                    lesson1.data.attributes.pdfUrl = url;
+                } else if (lesson1.data.attributes.type === "text") {
+                    const textLesson = await getTextLesson(lesson1.data.attributes.title);
+                    lesson1.data.attributes.lesson = textLesson.data[0];
+                }
+
+                lesson1.data.attributes.finish = finish !== undefined;
+                lesson1.data.attributes.lms_users = [];
+                res.status(200).send({ data: lesson1.data, newAccessToken: newAccessToken, status: true });
+            } catch (refreshError) {
+                res.status(401).send({ message: refreshError.message, status: false });
+            }
+        } else {
+            res.status(401).send({ message: 'Invalid or expired token', status: false });
+        }
+    }
+});
+
+
+router.post("/finish-lesson", async (req, res) => {
+    const { course_ID, user_ID, lesson_ID, token, refreshToken } = req.body;
+
+    if (!user_ID || !lesson_ID || !course_ID || !token) {
+        return res.status(400).send({ message: "Missing data", status: false });
+    }
+
+    try {
+        const tokenPayload = verifyToken(token);
+
+        const user = await getUser2(user_ID);
+        const lesson = await getLesson(lesson_ID);
+        let lesson1 = lesson;
+        const finish = lesson1.data.attributes.lms_users.data.find(user => user.attributes.user_ID == user_ID);
+
+        if (finish !== undefined) {
+            lesson1.data.attributes.finish = true;
+            lesson1.data.attributes.lms_users = [];
+            if (lesson1.data.attributes.type === "pdf") {
+                const url = await getPDF(lesson1.data.attributes.description);
+                lesson1.data.attributes.pdfUrl = url;
+            }
+            res.status(200).send({ data: lesson1.data, status: true });
+        } else {
+            await vinculateLesson(user.id, lesson_ID);
+            const allCourses = (await getAllUserCourses()).data.filter(data => data.attributes.user_ID === user_ID && (data.attributes.lms_course.data.id === course_ID || data.id === course_ID));
+            const course = allCourses[0];
+            let completed_porcent = 100 / course.attributes.total_lessons;
+            completed_porcent = completed_porcent + course.attributes.percentage;
+            await updatePercentage(completed_porcent, course.id);
+
+            const updatedLesson = await getLesson(lesson_ID);
+            const newPoints = parseInt(user.attributes.points) + 10;
+            await addPoints(user.id, newPoints);
+            let lesson1 = updatedLesson;
+            lesson1.data.attributes.finish = true;
+            lesson1.data.attributes.lms_users = [];
+
+            if (lesson1.data.attributes.type === "pdf") {
+                const url = await getPDF(lesson1.data.attributes.description);
+                lesson1.data.attributes.pdfUrl = url;
+            }
+            res.status(200).send({ data: lesson1.data, status: true });
+        }
+    } catch (error) {
+        if (error.name === 'TokenExpiredError' && refreshToken) {
+            try {
+                const newAccessToken = await refreshAccessToken(user_ID, refreshToken);
+                res.setHeader('new-access-token', newAccessToken);
+
+                const user = await getUser2(user_ID);
+                const lesson = await getLesson(lesson_ID);
+                let lesson1 = lesson;
+                const finish = lesson1.data.attributes.lms_users.data.find(user => user.attributes.user_ID == user_ID);
+
+                if (finish !== undefined) {
                     lesson1.data.attributes.finish = true;
                     lesson1.data.attributes.lms_users = [];
-                    if(lesson1.data.attributes.type == "pdf"){
-                        getPDF(lesson1.data.attributes.description).then(url => {
-                            lesson1.data.attributes.pdfUrl = url;
-                            res.status(200).send({data: lesson1.data, status: true})
-                        }).catch(error => {res.status(400).send({error, status: false})})
-                    }else{
-                        res.status(200).send({data: lesson1.data, status: true})
+                    if (lesson1.data.attributes.type === "pdf") {
+                        const url = await getPDF(lesson1.data.attributes.description);
+                        lesson1.data.attributes.pdfUrl = url;
                     }
-                }else{
-                    vinculateLesson(user.id, lesson_ID).then(response => {
-                        console.log("1")
-                        getAllUserCourses().then(async (data) => {
-                            console.log("2")
-                            console.log(data)
-                            const allCourses = await data.data.filter(data => data.attributes.user_ID === user_ID && (data.attributes.lms_course.data.id === course_ID || data.id === course_ID ));
-                            const course = allCourses[0]
-                            console.log(course)
-                            let completed_porcent = 100/course.attributes.total_lessons;
-                            completed_porcent = completed_porcent + course.attributes.percentage;
-                            updatePercentage(completed_porcent, course.id).then(response => {
-                                getLesson(lesson_ID).then(async (lesson) => {
-                                    const newPoints = parseInt(user.attributes.points) + 10
-                                    console.log("3");
-                                    let lesson1 = lesson;
-                                    lesson1.data.attributes.finish = true;
-                                    lesson1.data.attributes.lms_users = [];
-                                    addPoints(user.id, newPoints).then(data => {
-                                        if(lesson1.data.attributes.type == "pdf"){
-                                            getPDF(lesson1.data.attributes.description).then(url => {
-                                                lesson1.data.attributes.pdfUrl = url;
-                                                res.status(200).send({data: lesson1.data, status: true})
-                                            }).catch(error => {res.status(400).send({error, status: false})})
-                                        }else{
-                                            res.status(200).send({data: lesson1.data, status: true})
-                                        }
-                                    }).catch(error => {res.status(400).send({error, status: false})})
-                                }).catch(error => {res.status(400).send({error, status: false})})
-                            }).catch(error => {res.status(400).send({error, status: false})})
-                        }).catch(error => {res.status(400).send({error, status: false})})
-                    }).catch(error => {res.status(400).send({error, status: false})})
+                    res.status(200).send({ data: lesson1.data, status: true });
+                } else {
+                    await vinculateLesson(user.id, lesson_ID);
+                    const allCourses = (await getAllUserCourses()).data.filter(data => data.attributes.user_ID === user_ID && (data.attributes.lms_course.data.id === course_ID || data.id === course_ID));
+                    const course = allCourses[0];
+                    let completed_porcent = 100 / course.attributes.total_lessons;
+                    completed_porcent = completed_porcent + course.attributes.percentage;
+                    await updatePercentage(completed_porcent, course.id);
+
+                    const updatedLesson = await getLesson(lesson_ID);
+                    const newPoints = parseInt(user.attributes.points) + 10;
+                    await addPoints(user.id, newPoints);
+                    let lesson1 = updatedLesson;
+                    lesson1.data.attributes.finish = true;
+                    lesson1.data.attributes.lms_users = [];
+
+                    if (lesson1.data.attributes.type === "pdf") {
+                        const url = await getPDF(lesson1.data.attributes.description);
+                        lesson1.data.attributes.pdfUrl = url;
+                    }
+                    res.status(200).send({ data: lesson1.data, newAccessToken: newAccessToken, status: true });
                 }
-            }).catch(error => {res.status(400).send({error, status: false})})
-        }).catch(error => {res.status(400).send({error, status: false})})
-    }else{
-        res.status(400).send({message: "Missing data", status: false})
+            } catch (refreshError) {
+                res.status(401).send({ message: refreshError.message, status: false });
+            }
+        } else {
+            res.status(401).send({ message: 'Invalid or expired token', status: false });
+        }
     }
-})
+});
+
 
 /*
 router.post("/finish-lesson", (req, res) => {
