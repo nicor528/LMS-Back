@@ -107,22 +107,24 @@ router.get("/get-one-user-conversations", (req, res) => {
                     
                     if(theConver.length === 0){
                         createConversation(user.id, user2.id).then(result => {
-                            getAllConversations(user.attributes.lms_conversations.data).then(conversations => {
-                                const theConver = conversations.filter(convers => {
-                                    // Verifica que convers y los atributos necesarios no sean null
-                                    if (convers && convers.data && convers.data.attributes.lms_users && convers.data.attributes.lms_users.data.length >= 2) {
-                                        const user1 = convers.data.attributes.lms_users.data[0].attributes.user_ID;
-                                        const user2 = convers.data.attributes.lms_users.data[1].attributes.user_ID;
-                                
-                                        // Verifica si el primer usuario coincide con user_ID y el segundo usuario con user_ID2
-                                        if ((user1 === user_ID && user2 === user_ID2) || (user2 === user_ID && user1 === user_ID2)) {
-                                            return true;
+                            getUser2(user_ID).then(user => {
+                                getAllConversations(user.attributes.lms_conversations.data).then(conversations => {
+                                    const theConver = conversations.filter(convers => {
+                                        // Verifica que convers y los atributos necesarios no sean null
+                                        if (convers && convers.data && convers.data.attributes.lms_users && convers.data.attributes.lms_users.data.length >= 2) {
+                                            const user1 = convers.data.attributes.lms_users.data[0].attributes.user_ID;
+                                            const user2 = convers.data.attributes.lms_users.data[1].attributes.user_ID;
+                                    
+                                            // Verifica si el primer usuario coincide con user_ID y el segundo usuario con user_ID2
+                                            if ((user1 === user_ID && user2 === user_ID2) || (user2 === user_ID && user1 === user_ID2)) {
+                                                return true;
+                                            }
                                         }
-                                    }
-                                    return false;
-                                });
-
-                                res.status(200).send({data: theConver, status: true, message: "sucefull"})
+                                        return false;
+                                    });
+    
+                                    res.status(200).send({data: theConver[0], status: true, message: "sucefull"})
+                                }).catch(error => {res.status(400).send({error, status: false})})
                             }).catch(error => {res.status(400).send({error, status: false})})
                         }).catch(error => {res.status(400).send({error, status: false})})
                     }else{
