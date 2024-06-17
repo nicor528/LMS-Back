@@ -246,7 +246,7 @@ router.post("/edit-profile-picture", (req, res) => {
     }
 })
 
-router.post("upload-CV", (req, res) => {
+router.post("/upload-CV", (req, res) => {
     const user_ID = req.body.user_ID;
     const pdf = req.body.pdf;
     if(user_ID && pdf){
