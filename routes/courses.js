@@ -324,49 +324,40 @@ router.post("/finishCourse", async (req, res) => {
     }
 })*/
 
-router.get("/get-oneuser-allcourses", (req, res) => {
+router.get("/get-oneuser-allcourses", async (req, res) => {
     const { user_ID } = req.query;
     const token = req.headers['authorization'] && req.headers['authorization'].split(' ')[1];
     const refreshToken = req.headers['refresh-token'];
-    if(user_ID && token){
-        verifyToken(token).then(() => {
-            getAllUserCourses().then(data => {
-                const allCourses = data.data.filter(data => data.attributes.user_ID === user_ID)
-                    /*let newCourses = []
-                    const courses = data.data;
-                    allCourses.map(item => {
-                        const course = courses.find(course => course.id === item.attributes.lms_course.data.attributes.)
-                        item.attributes.course_name = course.attributes.technology;
-                        item.attributes.level = course.attributes.level;
-                        newCourses.push(item);
-                    })*/
-                res.status(200).send({data: allCourses, status: true})
-            }).catch(error => {res.status(400).send({error, status: false})})
-        }).catch(async (error) => {
-            if (error.name === 'TokenExpiredError' && refreshToken) {
-                refreshAccessToken(user_ID, refreshToken).then((refreshToken) => {
-                    getAllUserCourses().then(data => {
-                        const allCourses = data.data.filter(data => data.attributes.user_ID === user_ID)
-                            /*let newCourses = []
-                            const courses = data.data;
-                            allCourses.map(item => {
-                                const course = courses.find(course => course.id === item.attributes.lms_course.data.attributes.)
-                                item.attributes.course_name = course.attributes.technology;
-                                item.attributes.level = course.attributes.level;
-                                newCourses.push(item);
-                            })*/
-                        res.status(200).send({data: allCourses,  newAccessToken: refreshToken, status: true})
-                    }).catch(error => {res.status(400).send({error, status: false})})
-                }).catch(error => {res.status(401).send({ message: error.message, status: false })});
-            } else {
-                // Otro tipo de error relacionado con el token
-                res.status(401).send({ message: 'Invalid or expired token', status: false });
-            }
-        })  
-    }else{
-        res.status(401).send({message: "Missing ID", status: false})
+
+    if (!user_ID || !token) {
+        return res.status(401).send({ message: "Missing ID or token", status: false });
     }
-})
+
+    try {
+        await verifyToken(token);
+
+        const data = await getAllUserCourses();
+        const allCourses = data.data.filter(data => data.attributes.user_ID === user_ID);
+
+        res.status(200).send({ data: allCourses, status: true });
+    } catch (error) {
+        if (error.name === 'TokenExpiredError' && refreshToken) {
+            try {
+                const newAccessToken = await refreshAccessToken(user_ID, refreshToken);
+
+                const data = await getAllUserCourses();
+                const allCourses = data.data.filter(data => data.attributes.user_ID === user_ID);
+
+                res.status(200).send({ data: allCourses, newAccessToken: newAccessToken, status: true });
+            } catch (refreshError) {
+                res.status(401).send({ message: refreshError.message, status: false });
+            }
+        } else {
+            res.status(401).send({ message: 'Invalid or expired token', status: false });
+        }
+    }
+});
+
 
 /*
 router.get("/get-oneuser-onecourse", (req, res) => {

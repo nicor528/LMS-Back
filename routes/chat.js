@@ -132,7 +132,7 @@ router.get("/get-user-conversations", async (req, res) => {
 });
 
 
-router.get("/get-one-user-conversations", async (req, res) => {
+router.get("/create-a-new-conversation", async (req, res) => {
     const { user_ID, user_ID2 } = req.query;
     const token = req.headers['authorization'] && req.headers['authorization'].split(' ')[1];
     const refreshToken = req.headers['refresh-token'];
