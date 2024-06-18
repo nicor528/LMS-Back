@@ -229,63 +229,52 @@ router.get("/get-single-course", async (req, res) => {
     }
 });
 
-router.post("/create-user-course-request", (req, res) => {
-    const user_ID = req.body.user_ID;
-    const course_ID = req.body.course_ID;
+router.post("/create-user-course-request", async (req, res) => {
+    const { user_ID, course_ID } = req.body;
     const token = req.headers['authorization'] && req.headers['authorization'].split(' ')[1];
     const refreshToken = req.headers['refresh-token'];
-    if(user_ID && course_ID && token){
-        verifyToken(token).then(() => {
-            getUser2(user_ID).then(user => {
-                getCourses().then(courses => {
-                    console.log("1")
-                    const course = courses.data.filter(item => item.id === parseInt(course_ID));
-                        console.log("2")
-                        console.log(course)
-                        createNewCourseRequest(user_ID, course[0].id, course[0].attributes, user.attributes).then(data => {
-                            console.log("3")
-                            if(data == "on going request"){
-                                res.status(200).send({message: "on going request", status: false}) 
-                            }else{
-                                res.status(200).send({message: "request send", status: true})
-                            }
-                        }).catch(error => {res.status(400).send({error, status: false})})
-                }).catch(error => {res.status(400).send({error, status: false})})
-            }).catch(error => {res.status(400).send({error, status: false})})
-        }).catch(async (error) => {
-            if (error.name === 'TokenExpiredError' && refreshToken) {
-                if (error.name === 'TokenExpiredError' && refreshToken) {
-                    refreshAccessToken(user_ID, refreshToken).then((refreshToken) => {
-                        getUser2(user_ID).then(user => {
-                            getCourses().then(courses => {
-                                console.log("1")
-                                const course = courses.data.filter(item => item.id === parseInt(course_ID));
-                                    console.log("2")
-                                    console.log(course)
-                                    createNewCourseRequest(user_ID, course[0].id, course[0].attributes, user.attributes).then(data => {
-                                        console.log("3")
-                                        if(data == "on going request"){
-                                            res.status(200).send({message: "on going request",  newAccessToken: refreshToken, status: false}) 
-                                        }else{
-                                            res.status(200).send({message: "request send",  newAccessToken: refreshToken, status: true})
-                                        }
-                                    }).catch(error => {res.status(400).send({error, status: false})})
-                            }).catch(error => {res.status(400).send({error, status: false})})
-                        }).catch(error => {res.status(400).send({error, status: false})})
-                    }).catch(error => {res.status(401).send({ message: error.message, status: false })});
-                } else {
-                    // Otro tipo de error relacionado con el token
-                    res.status(401).send({ message: 'Invalid or expired token', status: false });
-                }
-            } else {
-                // Otro tipo de error relacionado con el token
-                res.status(401).send({ message: 'Invalid or expired token', status: false });
-            }
-        })
-    }else{
-        res.status(401).send({message: "Missing data in the body", status: false})
+
+    if (!user_ID || !course_ID || !token) {
+        return res.status(401).send({ message: "Missing data in the body", status: false });
     }
-})
+
+    try {
+        await verifyToken(token);
+
+        const user = await getUser2(user_ID);
+        const courses = await getCourses();
+        const course = courses.data.filter(item => item.id === parseInt(course_ID));
+
+        const data = await createNewCourseRequest(user_ID, course[0].id, course[0].attributes, user.attributes);
+        if (data === "on going request") {
+            res.status(200).send({ message: "on going request", status: false });
+        } else {
+            res.status(200).send({ message: "request send", status: true });
+        }
+    } catch (error) {
+        if (error.name === 'TokenExpiredError' && refreshToken) {
+            try {
+                const newAccessToken = await refreshAccessToken(user_ID, refreshToken);
+
+                const user = await getUser2(user_ID);
+                const courses = await getCourses();
+                const course = courses.data.filter(item => item.id === parseInt(course_ID));
+
+                const data = await createNewCourseRequest(user_ID, course[0].id, course[0].attributes, user.attributes);
+                if (data === "on going request") {
+                    res.status(200).send({ message: "on going request", newAccessToken: newAccessToken, status: false });
+                } else {
+                    res.status(200).send({ message: "request send", newAccessToken: newAccessToken, status: true });
+                }
+            } catch (refreshError) {
+                res.status(401).send({ message: refreshError.message, status: false });
+            }
+        } else {
+            res.status(401).send({ message: 'Invalid or expired token', status: false });
+        }
+    }
+});
+
 
 /*
 router.post("/add-course-user", async (req, res) => {
