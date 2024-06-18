@@ -5,7 +5,9 @@ const router = express.Router();
 
 
 router.post("/get-quizz", async (req, res) => {
-    const { user_ID, quiz_ID, token, refreshToken } = req.body;
+    const { user_ID, quiz_ID } = req.body;
+    const token = req.headers['authorization'] && req.headers['authorization'].split(' ')[1];
+    const refreshToken = req.headers['refresh-token'];
 
     if (!quiz_ID || !user_ID || !token) {
         return res.status(401).send({ message: "Missing data in the body", status: false });
@@ -74,7 +76,9 @@ router.get("/quizz-attemps", (req, res) => {
 })
 
 router.post("/get-quizz-module-result", async (req, res) => {
-    const { answers, quiz_ID, user_ID, token, refreshToken } = req.body;
+    const { answers, quiz_ID, user_ID } = req.body;
+    const token = req.headers['authorization'] && req.headers['authorization'].split(' ')[1];
+    const refreshToken = req.headers['refresh-token'];
 
     if (!answers || !quiz_ID || !user_ID || !token) {
         return res.status(400).send({ message: "Missing data in the body", status: false });
@@ -150,7 +154,9 @@ router.post("/get-quizz-module-result", async (req, res) => {
 
 
 router.post("/get-quizz-result", async (req, res) => {
-    const { answers, quiz_ID, user_ID, token, refreshToken } = req.body;
+    const { answers, quiz_ID, user_ID } = req.body;
+    const token = req.headers['authorization'] && req.headers['authorization'].split(' ')[1];
+    const refreshToken = req.headers['refresh-token'];
 
     if (!answers || !quiz_ID || !user_ID || !token) {
         return res.status(400).send({ message: "Missing data in the body", status: false });

@@ -4,7 +4,8 @@ const { getAllUsers, getCourses, getOneCourse1, vinculateCourse } = require('../
 const router = express.Router();
 
 router.get("/get-open-user-courses-requests", async (req, res) => {
-    const { token, refreshToken } = req.query;
+    const token = req.headers['authorization'] && req.headers['authorization'].split(' ')[1];
+    const refreshToken = req.headers['refresh-token'];
 
     if (!token) {
         return res.status(400).send({ message: "Missing data", status: false });
@@ -33,7 +34,8 @@ router.get("/get-open-user-courses-requests", async (req, res) => {
 });
 
 router.get("/get-closed-user-course-request", async (req, res) => {
-    const { token, refreshToken } = req.query;
+    const token = req.headers['authorization'] && req.headers['authorization'].split(' ')[1];
+    const refreshToken = req.headers['refresh-token'];
 
     if (!token) {
         return res.status(400).send({ message: "Missing data", status: false });
@@ -62,7 +64,9 @@ router.get("/get-closed-user-course-request", async (req, res) => {
 });
 
 router.post("/aprove-or-denied-user-course-request", async (req, res) => {
-    const { user_ID, course_ID, aproved, token, refreshToken } = req.body;
+    const { user_ID, course_ID, aproved } = req.body;
+    const token = req.headers['authorization'] && req.headers['authorization'].split(' ')[1];
+    const refreshToken = req.headers['refresh-token'];
 
     if (!user_ID || !course_ID || (aproved == null) || !token) {
         return res.status(400).send({ message: "Missing data", status: false });
@@ -125,7 +129,8 @@ router.post("/aprove-or-denied-user-course-request", async (req, res) => {
 });
 
 router.get("/get-all-users", async (req, res) => {
-    const { token, refreshToken } = req.query;
+    const token = req.headers['authorization'] && req.headers['authorization'].split(' ')[1];
+    const refreshToken = req.headers['refresh-token'];
 
     if (!token) {
         return res.status(400).send({ message: "Missing data", status: false });

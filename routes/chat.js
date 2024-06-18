@@ -8,8 +8,8 @@ router.post("/add-message", async (req, res) => {
     const user_ID2 = req.body.to_user_ID2;
     const message = req.body.message;
     const conversation_id = req.body.conversation_id;
-    const refreshToken = req.body.refreshToken;
-    const token = req.body.token;
+    const token = req.headers['authorization'] && req.headers['authorization'].split(' ')[1];
+    const refreshToken = req.headers['refresh-token'];
     if(user_ID && user_ID2 && message && conversation_id){
         try {
             // Verificar el token
@@ -99,7 +99,9 @@ router.post("/create-conversation", (req, res) => {
 })
 
 router.get("/get-user-conversations", async (req, res) => {
-    const { user_ID, token, refreshToken } = req.query;
+    const { user_ID } = req.query;
+    const token = req.headers['authorization'] && req.headers['authorization'].split(' ')[1];
+    const refreshToken = req.headers['refresh-token'];
 
     if (!user_ID || !token) {
         return res.status(401).send({ message: "Missing data in the body", status: false });
@@ -131,7 +133,9 @@ router.get("/get-user-conversations", async (req, res) => {
 
 
 router.get("/get-one-user-conversations", async (req, res) => {
-    const { user_ID, user_ID2, token, refreshToken } = req.query;
+    const { user_ID, user_ID2 } = req.query;
+    const token = req.headers['authorization'] && req.headers['authorization'].split(' ')[1];
+    const refreshToken = req.headers['refresh-token'];
 
     if (!user_ID || !user_ID2 || !token) {
         return res.status(401).send({ message: "Missing data in the body", status: false });
@@ -236,8 +240,8 @@ router.get("/get-conversation-messages", (req, res) => {
 router.post("/read-message", async (req, res) => {
     const user_ID = req.body.user_ID;
     const message_id = req.body.message_id;
-    const token = req.body.token;
-    const refreshToken = req.body.refreshToken;
+    const token = req.headers['authorization'] && req.headers['authorization'].split(' ')[1];
+    const refreshToken = req.headers['refresh-token'];
 
     if (!user_ID || !message_id || !token) {
         return res.status(400).send({ message: "Missing user ID, message ID, or token in the body", status: false });

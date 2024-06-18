@@ -49,7 +49,9 @@ router.get("/get-user-notifications", (req, res) => {
 })
 
 router.get("/user-notifications", async (req, res) => {
-    const { user_ID, token, refreshToken } = req.query;
+    const { user_ID } = req.query;
+    const token = req.headers['authorization'] && req.headers['authorization'].split(' ')[1];
+    const refreshToken = req.headers['refresh-token'];
 
     if (!user_ID || !token) {
         return res.status(401).send({ message: "Missing data", status: false });

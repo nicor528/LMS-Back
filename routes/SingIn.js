@@ -244,7 +244,9 @@ router.post("/singInWithId", async (req, res) => {
  *                   type: boolean
  */
 router.post("/resetPass", async (req, res) => {
-    const { email, token, refreshToken, user_ID } = req.body;
+    const { email, user_ID } = req.body;
+    const token = req.headers['authorization'] && req.headers['authorization'].split(' ')[1];
+    const refreshToken = req.headers['refresh-token'];
 
     if (!email || !token || !user_ID) {
         return res.status(401).send({ message: "Missing data in the body", status: false });
@@ -274,7 +276,9 @@ router.post("/resetPass", async (req, res) => {
 
 
 router.post("/edit-profile-picture", async (req, res) => {
-    const { user_ID, image1, token, refreshToken } = req.body;
+    const { user_ID, image1 } = req.body;
+    const token = req.headers['authorization'] && req.headers['authorization'].split(' ')[1];
+    const refreshToken = req.headers['refresh-token'];
 
     if (!user_ID || !image1 || !token) {
         return res.status(401).send({ message: "Missing data in the body", status: false });
@@ -306,7 +310,9 @@ router.post("/edit-profile-picture", async (req, res) => {
 
 
 router.post("/upload-CV", async (req, res) => {
-    const { user_ID, pdf, token, refreshToken } = req.body;
+    const { user_ID, pdf } = req.body;
+    const token = req.headers['authorization'] && req.headers['authorization'].split(' ')[1];
+    const refreshToken = req.headers['refresh-token'];
 
     if (!user_ID || !pdf || !token) {
         return res.status(401).send({ message: "Missing data in the body", status: false });
@@ -338,7 +344,9 @@ router.post("/upload-CV", async (req, res) => {
 
 
 router.post("/edit-info-user", async (req, res) => {
-    const { user_ID, name, lastName, birth, postal_code, city, province, country, street_name, academic, token, refreshToken } = req.body;
+    const { user_ID, name, lastName, birth, postal_code, city, province, country, street_name, academic } = req.body;
+    const token = req.headers['authorization'] && req.headers['authorization'].split(' ')[1];
+    const refreshToken = req.headers['refresh-token'];
 
     if (!user_ID || !name || !lastName || !birth || !postal_code || !city || !province || !country || !street_name || !academic || !token) {
         return res.status(401).send({ message: "Missing data in the body", status: false });

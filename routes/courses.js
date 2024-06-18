@@ -16,7 +16,9 @@ router.get("/get-instructor-data", (req, res) => {
 })
 
 router.get("/get-all-courses", async (req, res) => {
-    const { token, refreshToken, user_ID } = req.query;
+    const { user_ID } = req.query;
+    const token = req.headers['authorization'] && req.headers['authorization'].split(' ')[1];
+    const refreshToken = req.headers['refresh-token'];
 
     if (!token && !user_ID) {
         return res.status(401).send({ message: "Missing data", status: false });
@@ -94,7 +96,8 @@ router.get("/get-single-course", async (req, res) => {
 router.get("/get-single-course", async (req, res) => {
     const course_ID = parseInt(req.query.course_ID);
     const user_ID = req.query.user_ID;
-    const { token, refreshToken } = req.query;
+    const token = req.headers['authorization'] && req.headers['authorization'].split(' ')[1];
+    const refreshToken = req.headers['refresh-token'];
     
     if (!course_ID || !user_ID || !token) {
         return res.status(401).send({ message: "Missing data in the body", status: false });
@@ -228,8 +231,8 @@ router.get("/get-single-course", async (req, res) => {
 router.post("/create-user-course-request", (req, res) => {
     const user_ID = req.body.user_ID;
     const course_ID = req.body.course_ID;
-    const token = req.body.token;
-    const refreshToken = req.body.refreshToken;
+    const token = req.headers['authorization'] && req.headers['authorization'].split(' ')[1];
+    const refreshToken = req.headers['refresh-token'];
     if(user_ID && course_ID && token){
         verifyToken(token).then(() => {
             getUser2(user_ID).then(user => {
@@ -332,7 +335,9 @@ router.post("/finishCourse", async (req, res) => {
 })*/
 
 router.get("/get-oneuser-allcourses", (req, res) => {
-    const { user_ID, token, refreshToken } = req.query;
+    const { user_ID } = req.query;
+    const token = req.headers['authorization'] && req.headers['authorization'].split(' ')[1];
+    const refreshToken = req.headers['refresh-token'];
     if(user_ID && token){
         verifyToken(token).then(() => {
             getAllUserCourses().then(data => {
@@ -389,8 +394,8 @@ router.get("/get-oneuser-onecourse", (req, res) => {
 
 router.get("/get-ongoing-courses", (req, res) => {
     const user_ID = req.query.user_ID;
-    const refreshToken = req.query.refreshToken;
-    const token = req.query.token;
+    const token = req.headers['authorization'] && req.headers['authorization'].split(' ')[1];
+    const refreshToken = req.headers['refresh-token'];
     if(user_ID && token){
         verifyToken(token).then(() => {
             getAllUserCourses().then(async (data) => {
@@ -423,8 +428,8 @@ router.get("/get-ongoing-courses", (req, res) => {
 router.post("/read-annoucement", (req, res) => {
     const user_ID = req.body.user_ID;
     const annoucement_ID = req.body.annoucement_ID;
-    const refreshToken = req.body.refreshToken;
-    const token = req.body.token;
+    const token = req.headers['authorization'] && req.headers['authorization'].split(' ')[1];
+    const refreshToken = req.headers['refresh-token'];
     if(user_ID && annoucement_ID && token){
         verifyToken(token).then(() => {
             getUser2(user_ID).then(user => {
@@ -462,7 +467,9 @@ router.post("/read-annoucement", (req, res) => {
 })
 
 router.get("/get-finished-courses", (req, res) => {
-    const { token, refreshToken, user_ID } = req.query;
+    const { user_ID } = req.query;
+    const token = req.headers['authorization'] && req.headers['authorization'].split(' ')[1];
+    const refreshToken = req.headers['refresh-token'];
     if(user_ID && token){
         verifyToken(token).then(() => {
             getAllUserCourses().then(async (data) => {

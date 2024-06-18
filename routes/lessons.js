@@ -22,7 +22,9 @@ router.get("/getCourseLessons", async (req,res) => {
 })*/
 
 router.get("/get-module", async (req, res) => {
-    const { module_ID, user_ID, token, refreshToken } = req.query;
+    const { module_ID, user_ID } = req.query;
+    const token = req.headers['authorization'] && req.headers['authorization'].split(' ')[1];
+    const refreshToken = req.headers['refresh-token'];
 
     if (!module_ID || !user_ID || !token) {
         return res.status(401).send({ message: "Missing data", status: false });
@@ -78,7 +80,9 @@ router.get("/get-module", async (req, res) => {
 
 
 router.post("/finish-module", async (req, res) => {
-    const { user_ID, module_ID, token, refreshToken } = req.body;
+    const { user_ID, module_ID } = req.body;
+    const token = req.headers['authorization'] && req.headers['authorization'].split(' ')[1];
+    const refreshToken = req.headers['refresh-token'];
 
     if (!user_ID || !module_ID || !token) {
         return res.status(400).send({ message: "Missing data", status: false });
@@ -118,7 +122,9 @@ router.post("/finish-module", async (req, res) => {
 
 
 router.post("/un-finish-lesson", async (req, res) => {
-    const { user_ID, lesson_ID, course_ID, token, refreshToken } = req.body;
+    const { user_ID, lesson_ID, course_ID } = req.body;
+    const token = req.headers['authorization'] && req.headers['authorization'].split(' ')[1];
+    const refreshToken = req.headers['refresh-token'];
 
     if (!user_ID || !lesson_ID || !token) {
         return res.status(400).send({ message: "Missing data", status: false });
@@ -190,7 +196,9 @@ router.post("/un-finish-lesson", async (req, res) => {
 
 
 router.get("/get-lesson", async (req, res) => {
-    const { lesson_ID, user_ID, token, refreshToken } = req.query;
+    const { lesson_ID, user_ID } = req.query;
+    const token = req.headers['authorization'] && req.headers['authorization'].split(' ')[1];
+    const refreshToken = req.headers['refresh-token'];
 
     if (!lesson_ID || !user_ID || !token) {
         return res.status(400).send({ message: "Missing data", status: false });
@@ -246,7 +254,9 @@ router.get("/get-lesson", async (req, res) => {
 
 
 router.post("/finish-lesson", async (req, res) => {
-    const { course_ID, user_ID, lesson_ID, token, refreshToken } = req.body;
+    const { course_ID, user_ID, lesson_ID } = req.body;
+    const token = req.headers['authorization'] && req.headers['authorization'].split(' ')[1];
+    const refreshToken = req.headers['refresh-token'];
 
     if (!user_ID || !lesson_ID || !course_ID || !token) {
         return res.status(400).send({ message: "Missing data", status: false });

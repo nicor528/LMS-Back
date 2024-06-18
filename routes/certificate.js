@@ -1,5 +1,6 @@
 const express = require('express');
 const { getCertificate, getUser2 } = require('../apis/apiStrapi');
+const { verifyToken, refreshAccessToken } = require('../apis/apiFirebase');
 const router = express.Router();
 
 router.get("/get-certificate", (req, res) => {
@@ -14,7 +15,9 @@ router.get("/get-certificate", (req, res) => {
 })
 
 router.get("/user-certificates", async (req, res) => {
-    const { user_ID, token, refreshToken } = req.query;
+    const { user_ID } = req.query;
+    const token = req.headers['authorization'] && req.headers['authorization'].split(' ')[1];
+    const refreshToken = req.headers['refresh-token'];
 
     if (!user_ID || !token) {
         return res.status(400).send({ message: "Missing data", status: false });
