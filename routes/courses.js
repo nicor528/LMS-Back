@@ -20,7 +20,7 @@ router.get("/get-all-courses", async (req, res) => {
     const token = req.headers['authorization'] && req.headers['authorization'].split(' ')[1];
     const refreshToken = req.headers['refresh-token'];
 
-    if (!token || !user_ID) {
+    if (!token) {
         return res.status(401).send({ message: "Missing data", status: false });
     }
 
@@ -31,7 +31,7 @@ router.get("/get-all-courses", async (req, res) => {
     } catch (error) {
         if (error.name === 'TokenExpiredError' && refreshToken) {
             try {
-                const newAccessToken = await refreshAccessToken(user_ID, refreshToken);
+                const newAccessToken = await refreshAccessToken("test", refreshToken);
                 const courses = await getCourses();
                 res.status(200).send({ data: courses.data, newAccessToken: newAccessToken, status: true });
             } catch (refreshError) {
