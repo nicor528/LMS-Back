@@ -1,62 +1,157 @@
 const express = require('express');
-const { getOpenRequests, aproveUserCourseRequest, getCloseRequests } = require('../apis/apiFirebase');
+const { getOpenRequests, aproveUserCourseRequest, getCloseRequests, verifyToken, refreshAccessToken } = require('../apis/apiFirebase');
 const { getAllUsers, getCourses, getOneCourse1, vinculateCourse } = require('../apis/apiStrapi');
 const router = express.Router();
 
-router.get("/get-open-user-courses-requests", (req, res) => {
-    getOpenRequests().then(data => {
-        res.status(200).send({data: data, status: true})
-    }).catch(error => {res.status(400).send({error, status: false})})
-})
+router.get("/get-open-user-courses-requests", async (req, res) => {
+    const { token, refreshToken } = req.query;
 
-router.get("/get-cloed-user-course-request", (req, res) => {
-    getCloseRequests().then(data => {
-        res.status(200).send({data: data, status: true})
-    }).catch(error => {res.status(400).send({error, status: false})})
-})
-
-router.post("/aprove-or-denied-user-course-request", (req, res) => {
-    const user_ID = req.body.user_ID;
-    const course_ID = req.body.course_ID;
-    const aproved = req.body.aproved;
-    if(course_ID && user_ID && (aproved == true || aproved == false)){
-        aproveUserCourseRequest(user_ID + course_ID, aproved).then(data => {
-            if(aproved == true) {
-                getCourses().then(courses => {
-                    const Course = courses.data.filter(item => item.id === parseInt(course_ID));
-                    let n_lessons = 0; 
-                    getOneCourse1(Course[0].id).then(course => {
-                        console.log(course)
-                        course.data.attributes.lms_modules.data.map(item => {
-                            console.log(item)
-                            item.attributes.lms_lessons.data.map(item => {
-                                n_lessons ++;
-                            })
-                        })
-                        console.log(n_lessons)
-                        vinculateCourse(user_ID, course_ID, Course[0], n_lessons).then(data => {
-                            getOpenRequests().then(data => {
-                                res.status(200).send({data: data, status: true})
-                            }).catch(error => {res.status(400).send({error, status: false})})
-                        }).catch(error => {res.status(400).send({error, status: false})})
-                    }).catch(error => {res.status(400).send({error, status: false})})
-                }).catch(error => {res.status(400).send({error, status: false})})
-            }else{
-                getOpenRequests().then(data => {
-                    res.status(200).send({data: data, status: true})
-                }).catch(error => {res.status(400).send({error, status: false})})
-            }
-        })
-    }else{
-        res.status(401).send({message: "Missing data", status: false})
+    if (!token) {
+        return res.status(400).send({ message: "Missing data", status: false });
     }
-})
 
-router.get("/get-all-users", (req, res) => {
-    getAllUsers().then(users => {
-        res.status(200).send({data: users.data, status: true})
-    }).catch(error => {res.status(400).send({error, status: false})})
-})
+    try {
+        const tokenPayload = verifyToken(token);
+
+        const openRequests = await getOpenRequests();
+        res.status(200).send({ data: openRequests, status: true });
+    } catch (error) {
+        if (error.name === 'TokenExpiredError' && refreshToken) {
+            try {
+                const newAccessToken = await refreshAccessToken("admin", refreshToken);
+                res.setHeader('new-access-token', newAccessToken);
+
+                const openRequests = await getOpenRequests();
+                res.status(200).send({ data: openRequests, newAccessToken, status: true });
+            } catch (refreshError) {
+                res.status(401).send({ message: refreshError.message, status: false });
+            }
+        } else {
+            res.status(401).send({ message: 'Invalid or expired token', status: false });
+        }
+    }
+});
+
+router.get("/get-closed-user-course-request", async (req, res) => {
+    const { token, refreshToken } = req.query;
+
+    if (!token) {
+        return res.status(400).send({ message: "Missing data", status: false });
+    }
+
+    try {
+        const tokenPayload = verifyToken(token);
+
+        const closedRequests = await getCloseRequests();
+        res.status(200).send({ data: closedRequests, status: true });
+    } catch (error) {
+        if (error.name === 'TokenExpiredError' && refreshToken) {
+            try {
+                const newAccessToken = await refreshAccessToken("admin", refreshToken);
+                res.setHeader('new-access-token', newAccessToken);
+
+                const closedRequests = await getCloseRequests();
+                res.status(200).send({ data: closedRequests, newAccessToken, status: true });
+            } catch (refreshError) {
+                res.status(401).send({ message: refreshError.message, status: false });
+            }
+        } else {
+            res.status(401).send({ message: 'Invalid or expired token', status: false });
+        }
+    }
+});
+
+router.post("/aprove-or-denied-user-course-request", async (req, res) => {
+    const { user_ID, course_ID, aproved, token, refreshToken } = req.body;
+
+    if (!user_ID || !course_ID || (aproved == null) || !token) {
+        return res.status(400).send({ message: "Missing data", status: false });
+    }
+
+    try {
+        const tokenPayload = verifyToken(token);
+
+        await aproveUserCourseRequest(user_ID + course_ID, aproved);
+
+        if (aproved) {
+            const courses = await getCourses();
+            const course = courses.data.find(item => item.id === parseInt(course_ID));
+            const fullCourse = await getOneCourse1(course.id);
+            let n_lessons = 0;
+
+            fullCourse.data.attributes.lms_modules.data.forEach(module => {
+                module.attributes.lms_lessons.data.forEach(() => {
+                    n_lessons++;
+                });
+            });
+
+            await vinculateCourse(user_ID, course_ID, course, n_lessons);
+        }
+
+        const openRequests = await getOpenRequests();
+        res.status(200).send({ data: openRequests, status: true });
+    } catch (error) {
+        if (error.name === 'TokenExpiredError' && refreshToken) {
+            try {
+                const newAccessToken = await refreshAccessToken("admin", refreshToken);
+                res.setHeader('new-access-token', newAccessToken);
+
+                await aproveUserCourseRequest(user_ID + course_ID, aproved);
+
+                if (aproved) {
+                    const courses = await getCourses();
+                    const course = courses.data.find(item => item.id === parseInt(course_ID));
+                    const fullCourse = await getOneCourse1(course.id);
+                    let n_lessons = 0;
+
+                    fullCourse.data.attributes.lms_modules.data.forEach(module => {
+                        module.attributes.lms_lessons.data.forEach(() => {
+                            n_lessons++;
+                        });
+                    });
+
+                    await vinculateCourse(user_ID, course_ID, course, n_lessons);
+                }
+
+                const openRequests = await getOpenRequests();
+                res.status(200).send({ data: openRequests, newAccessToken, status: true });
+            } catch (refreshError) {
+                res.status(401).send({ message: refreshError.message, status: false });
+            }
+        } else {
+            res.status(401).send({ message: 'Invalid or expired token', status: false });
+        }
+    }
+});
+
+router.get("/get-all-users", async (req, res) => {
+    const { token, refreshToken } = req.query;
+
+    if (!token) {
+        return res.status(400).send({ message: "Missing data", status: false });
+    }
+
+    try {
+        const tokenPayload = verifyToken(token);
+
+        const users = await getAllUsers();
+        res.status(200).send({ data: users.data, status: true });
+    } catch (error) {
+        if (error.name === 'TokenExpiredError' && refreshToken) {
+            try {
+                const newAccessToken = await refreshAccessToken("admin", refreshToken);
+                res.setHeader('new-access-token', newAccessToken);
+
+                const users = await getAllUsers();
+                res.status(200).send({ data: users.data, newAccessToken: newAccessToken, status: true });
+            } catch (refreshError) {
+                res.status(401).send({ message: refreshError.message, status: false });
+            }
+        } else {
+            res.status(401).send({ message: 'Invalid or expired token', status: false });
+        }
+    }
+});
 
 
 

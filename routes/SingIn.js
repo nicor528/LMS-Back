@@ -101,12 +101,12 @@ router.post("/singInEmail", async (req, res) => {
     } else {
       res.status(401).send({ message: "Missing data in the body", status: false });
     }
-  });
+});
 
 router.get("/getUserInfo", async (req, res) => {
     const user_ID = req.query.user_ID;
-    const token = req.query.token;
-    const refreshToken = req.query.refreshToken;
+    const token = req.headers['authorization'] && req.headers['authorization'].split(' ')[1];
+    const refreshToken = req.headers['refresh-token'];
 
     if (!user_ID || !token) {
         return res.status(401).send({ message: "Missing data in the body", status: false });

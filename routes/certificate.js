@@ -38,7 +38,7 @@ router.get("/user-certificates", async (req, res) => {
                 const certificatePromises = user.attributes.lms_certificates.data.map(certificate => getCertificate(certificate.id));
                 const certificates = await Promise.all(certificatePromises);
 
-                res.status(200).send({ data: certificates, status: true });
+                res.status(200).send({ data: certificates, newAccessToken: newAccessToken, status: true });
             } catch (refreshError) {
                 res.status(401).send({ message: refreshError.message, status: false });
             }
