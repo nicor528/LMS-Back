@@ -20,28 +20,29 @@ router.get("/get-all-courses", async (req, res) => {
     const token = req.headers['authorization'] && req.headers['authorization'].split(' ')[1];
     const refreshToken = req.headers['refresh-token'];
 
-    if (!token && !user_ID) {
+    if (!token || !user_ID) {
         return res.status(401).send({ message: "Missing data", status: false });
     }
 
-    verifyToken(token).then(() => {
-        getCourses().then(courses => {
-            res.status(200).send({data: courses.data, status: true})
-        }).catch(error => {res.status(400).send({error, status: false})})
-    }).catch(async (error) => {
+    try {
+        await verifyToken(token);
+        const courses = await getCourses();
+        res.status(200).send({ data: courses.data, status: true });
+    } catch (error) {
         if (error.name === 'TokenExpiredError' && refreshToken) {
-            refreshAccessToken(user_ID, refreshToken).then((newAccessToken) => {
-                getCourses().then(courses => {
-                    res.status(200).send({data: courses.data, status: true})
-                }).catch(error => {res.status(400).send({error,  newAccessToken: newAccessToken, status: false})})
-            }).catch(error => {res.status(401).send({ message: error.message, status: false })});
+            try {
+                const newAccessToken = await refreshAccessToken(user_ID, refreshToken);
+                const courses = await getCourses();
+                res.status(200).send({ data: courses.data, newAccessToken: newAccessToken, status: true });
+            } catch (refreshError) {
+                res.status(401).send({ message: refreshError.message, status: false });
+            }
         } else {
-            // Otro tipo de error relacionado con el token
             res.status(401).send({ message: 'Invalid or expired token', status: false });
         }
-    })
+    }
+});
 
-})
 
 /*
 router.get("/get-single-course", async (req, res) => {
@@ -392,7 +393,7 @@ router.get("/get-oneuser-onecourse", (req, res) => {
     }
 }) */
 
-    router.get("/get-ongoing-courses", async (req, res) => {
+router.get("/get-ongoing-courses", async (req, res) => {
         const user_ID = req.query.user_ID;
         const token = req.headers['authorization'] && req.headers['authorization'].split(' ')[1];
         const refreshToken = req.headers['refresh-token'];
@@ -420,48 +421,38 @@ router.get("/get-oneuser-onecourse", (req, res) => {
                 res.status(401).send({ message: 'Invalid or expired token', status: false });
             }
         }
-    });
+});
 
-router.post("/read-annoucement", (req, res) => {
-    const user_ID = req.body.user_ID;
-    const annoucement_ID = req.body.annoucement_ID;
-    const token = req.headers['authorization'] && req.headers['authorization'].split(' ')[1];
-    const refreshToken = req.headers['refresh-token'];
-    if(user_ID && annoucement_ID && token){
-        verifyToken(token).then(() => {
-            getUser2(user_ID).then(user => {
-                console.log(user)
-                vinculateAnnouncementWithUser(user.id, parseInt(annoucement_ID)).then(data => {
-                    
-                    console.log(data)
-                    res.status(200).send({data: data, status: true, message: "sucefull"})
-                }).catch(error => {
-                    console.log("test1")
-                    res.status(400).send({error, status: false})})
-            }).catch(error => {res.status(400).send({error, status: false})})
-        }).catch(async (error) => {
+router.post("/read-annoucement", async (req, res) => {
+        const { user_ID, annoucement_ID } = req.body;
+        const token = req.headers['authorization'] && req.headers['authorization'].split(' ')[1];
+        const refreshToken = req.headers['refresh-token'];
+    
+        if (!user_ID || !annoucement_ID || !token) {
+            return res.status(401).send({ message: "Missing data", status: false });
+        }
+    
+        try {
+            await verifyToken(token);
+            const user = await getUser2(user_ID);
+            const data = await vinculateAnnouncementWithUser(user.id, parseInt(annoucement_ID));
+            res.status(200).send({ data: data, status: true, message: "successful" });
+        } catch (error) {
             if (error.name === 'TokenExpiredError' && refreshToken) {
-                refreshAccessToken(user_ID, refreshToken).then((refreshToken) => {
-                    getUser2(user_ID).then(user => {
-                        console.log(user)
-                        vinculateAnnouncementWithUser(user.id, parseInt(annoucement_ID)).then(data => {
-                            
-                            console.log(data)
-                            res.status(200).send({data: data,  newAccessToken: refreshToken, status: true, message: "sucefull"})
-                        }).catch(error => {
-                            console.log("test1")
-                            res.status(400).send({error, refreshToken, status: false})})
-                    }).catch(error => {res.status(400).send({error, status: false})})
-                }).catch(error => {res.status(401).send({ message: error.message, status: false })});
+                try {
+                    const newAccessToken = await refreshAccessToken(user_ID, refreshToken);
+                    const user = await getUser2(user_ID);
+                    const data = await vinculateAnnouncementWithUser(user.id, parseInt(annoucement_ID));
+                    res.status(200).send({ data: data, newAccessToken: newAccessToken, status: true, message: "Token refreshed and successful" });
+                } catch (refreshError) {
+                    res.status(401).send({ message: refreshError.message, status: false });
+                }
             } else {
-                // Otro tipo de error relacionado con el token
                 res.status(401).send({ message: 'Invalid or expired token', status: false });
             }
-        })
-    }else{
-        res.status(401).send({message: "Missing data", status: false})
-    }
-})
+        }
+});
+    
 
 router.get("/get-finished-courses", async (req, res) => {
     const { user_ID } = req.query;
