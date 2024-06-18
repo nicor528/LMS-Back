@@ -1,6 +1,7 @@
 const express = require('express');
 const { getQuizz, getQuiz1, saveScore, vinculateQuizzWithUser, createTries, getTries, getUser2, getAllUserCourses, finishLesson, getOneCourse, vinculateCertificate, vinculateModule } = require('../apis/apiStrapi');
 const { createNewScore } = require('../apis/apiFirebase');
+const { verifyToken, refreshAccessToken } = require('../apis/apiFirebase');
 const router = express.Router();
 
 
