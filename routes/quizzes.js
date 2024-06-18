@@ -30,6 +30,7 @@ router.post("/get-quizz", async (req, res) => {
         });
         res.status(200).send({ data: quizz1, status: true });
     } catch (error) {
+        console.log(refreshToken)
         if (error.name === 'TokenExpiredError' && refreshToken) {
             try {
                 const newAccessToken = await refreshAccessToken(user_ID, refreshToken);
