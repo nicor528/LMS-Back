@@ -126,6 +126,7 @@ router.get("/get-user-conversations", async (req, res) => {
         const conversations = await getAllConversations(user.attributes.lms_conversations.data);
         const sortedConversations = sortConversationsByRecentMessage(conversations.data);
         console.log(sortedConversations)
+        console.log("test1")
         res.status(200).send({ data: sortedConversations, status: true, message: "Successful" });
     } catch (error) {
         if (error.name === 'TokenExpiredError' && refreshToken) {
@@ -136,6 +137,7 @@ router.get("/get-user-conversations", async (req, res) => {
                 const user = await getUser2(user_ID);
                 const sortedConversations = sortConversationsByRecentMessage(conversations.data);
                 console.log(sortedConversations)
+                console.log("test1")
                 res.status(200).send({ data: sortedConversations,  newAccessToken: newAccessToken, status: true, message: "Token refreshed and conversations retrieved successfully" });
             } catch (refreshError) {
                 res.status(401).send({ message: refreshError.message, status: false });
