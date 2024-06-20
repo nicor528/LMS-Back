@@ -98,6 +98,18 @@ router.post("/create-conversation", (req, res) => {
     }
 })
 
+function sortConversationsByRecentMessage(conversations) {
+    return conversations.sort((a, b) => {
+        const aMessages = a.data.attributes.lms_messages.data;
+        const bMessages = b.data.attributes.lms_messages.data;
+
+        const aRecentMessageDate = aMessages.length > 0 ? new Date(aMessages[0].attributes.createdAt) : new Date(a.data.attributes.createdAt);
+        const bRecentMessageDate = bMessages.length > 0 ? new Date(bMessages[0].attributes.createdAt) : new Date(b.data.attributes.createdAt);
+
+        return bRecentMessageDate - aRecentMessageDate;
+    });
+}
+
 router.get("/get-user-conversations", async (req, res) => {
     const { user_ID } = req.query;
     const token = req.headers['authorization'] && req.headers['authorization'].split(' ')[1];
@@ -112,7 +124,9 @@ router.get("/get-user-conversations", async (req, res) => {
         // Si el token es válido, proceder con la lógica normal
         const user = await getUser2(user_ID);
         const conversations = await getAllConversations(user.attributes.lms_conversations.data);
-        res.status(200).send({ data: conversations, status: true, message: "Successful" });
+        const sortedConversations = sortConversationsByRecentMessage(conversations.data);
+        console.log(sortedConversations)
+        res.status(200).send({ data: sortedConversations, status: true, message: "Successful" });
     } catch (error) {
         if (error.name === 'TokenExpiredError' && refreshToken) {
             try {
@@ -120,8 +134,9 @@ router.get("/get-user-conversations", async (req, res) => {
                 const newAccessToken = await refreshAccessToken(user_ID, refreshToken);
                 // Proceder con la lógica normal después de refrescar el token
                 const user = await getUser2(user_ID);
-                const conversations = await getAllConversations(user.attributes.lms_conversations.data);
-                res.status(200).send({ data: conversations,  newAccessToken: newAccessToken, status: true, message: "Token refreshed and conversations retrieved successfully" });
+                const sortedConversations = sortConversationsByRecentMessage(conversations.data);
+                console.log(sortedConversations)
+                res.status(200).send({ data: sortedConversations,  newAccessToken: newAccessToken, status: true, message: "Token refreshed and conversations retrieved successfully" });
             } catch (refreshError) {
                 res.status(401).send({ message: refreshError.message, status: false });
             }

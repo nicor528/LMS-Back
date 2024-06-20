@@ -254,25 +254,12 @@ test()*/
 getProfilePicture("iGaPnJK0qVRWt6I5ik7PFIR6lg73").then(data => {
     console.log(data)
 }).catch(error => console.log(error))*/
-getUser2("iGaPnJK0qVRWt6I5ik7PFIR6lg73").then(user => {
-    getAllConversations(user.attributes.lms_conversations.data).then(conversations => {
-        //console.log(conversations[0].data.attributes.lms_users)
-        const theConver = conversations.map(convers => {
-            console.log(convers)
-            console.log("1")
-            console.log(convers.data.attributes.lms_users)
-            if(convers.data.attributes.lms_users.data[0].attributes.user_ID == user_ID && convers.data.attributes.lms_users.data[1].attributes.user_ID){
-                return convers
-            }
-            //if(convers.data.id.attributes.lms_users)
-        })
-        const filteredConver = theConver.filter(convers => convers !== null);
-        if(filteredConver.lenght < 1){
-            createConversation(user.id, user2.is).then(result => {
-                res.status(200).send({data: result, status: true, message: "sucefull"})
-            })
-        }else{
-            res.status(200).send({data: filteredConver, status: true, message: "sucefull"})  
-        }
-    })
-})
+
+
+async function test () {
+    const user = await getUser2("K2J99EWNpvZLOWcgqF1HG0xdDNA3");
+        const conversations = await getAllConversations(user.attributes.lms_conversations.data);
+        console.log(conversations)
+}
+
+test()
