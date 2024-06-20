@@ -118,31 +118,43 @@ router.get("/get-user-conversations", async (req, res) => {
     if (!user_ID || !token) {
         return res.status(401).send({ message: "Missing data in the body", status: false });
     }
-    console.log(token)
-    console.log(refreshToken)
+
+    console.log("Token:", token);
+    console.log("Refresh Token:", refreshToken);
+
     try {
-        const tokenPayload = verifyToken(token);
-        console.log("token ok")
-        // Si el token es válido, proceder con la lógica normal
+        const tokenPayload = await verifyToken(token); // Asegúrate de que verifyToken es una función asincrónica
+        console.log("Token verificado:", tokenPayload);
+
         const user = await getUser2(user_ID);
+        console.log("Usuario obtenido:", user);
+
         const conversations = await getAllConversations(user.attributes.lms_conversations.data);
+        console.log("Conversaciones obtenidas:", conversations);
+
         const sortedConversations = await sortConversationsByRecentMessage(conversations.data);
-        console.log(sortedConversations)
-        console.log("test1")
+        console.log("Conversaciones ordenadas:", sortedConversations);
+
         res.status(200).send({ data: sortedConversations, status: true, message: "Successful" });
     } catch (error) {
+        console.error("Error:", error);
         if (error.name === 'TokenExpiredError' && refreshToken) {
             try {
-                // Intentar actualizar el token de acceso usando el refresh token
                 const newAccessToken = await refreshAccessToken(user_ID, refreshToken);
-                // Proceder con la lógica normal después de refrescar el token
+                console.log("Token renovado:", newAccessToken);
+
                 const user = await getUser2(user_ID);
+                console.log("Usuario obtenido después de renovar el token:", user);
+
                 const conversations = await getAllConversations(user.attributes.lms_conversations.data);
+                console.log("Conversaciones obtenidas después de renovar el token:", conversations);
+
                 const sortedConversations = await sortConversationsByRecentMessage(conversations.data);
-                console.log(sortedConversations)
-                console.log("test1")
-                res.status(200).send({ data: sortedConversations,  newAccessToken: newAccessToken, status: true, message: "Token refreshed and conversations retrieved successfully" });
+                console.log("Conversaciones ordenadas después de renovar el token:", sortedConversations);
+
+                res.status(200).send({ data: sortedConversations, newAccessToken: newAccessToken, status: true, message: "Token refreshed and conversations retrieved successfully" });
             } catch (refreshError) {
+                console.error("Error al renovar el token:", refreshError);
                 res.status(401).send({ message: refreshError.message, status: false });
             }
         } else {
