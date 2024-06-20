@@ -122,6 +122,7 @@ router.get("/get-user-conversations", async (req, res) => {
     console.log(refreshToken)
     try {
         const tokenPayload = verifyToken(token);
+        console.log("token ok")
         // Si el token es válido, proceder con la lógica normal
         const user = await getUser2(user_ID);
         const conversations = await getAllConversations(user.attributes.lms_conversations.data);
