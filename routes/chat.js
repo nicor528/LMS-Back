@@ -132,7 +132,7 @@ router.get("/get-user-conversations", async (req, res) => {
         const conversations = await getAllConversations(user.attributes.lms_conversations.data);
         console.log("Conversaciones obtenidas:", conversations);
 
-        const sortedConversations = await sortConversationsByRecentMessage(conversations.data);
+        const sortedConversations = await sortConversationsByRecentMessage(conversations);
         console.log("Conversaciones ordenadas:", sortedConversations);
 
         res.status(200).send({ data: sortedConversations, status: true, message: "Successful" });
