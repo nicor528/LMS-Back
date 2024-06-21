@@ -103,9 +103,9 @@ function sortConversationsByRecentMessage(conversations) {
         const aMessages = a.data.attributes.lms_messages.data;
         const bMessages = b.data.attributes.lms_messages.data;
 
-        const aRecentMessageDate = aMessages.length > 0 ? new Date(aMessages[0].attributes.createdAt) : new Date(a.data.attributes.createdAt);
-        const bRecentMessageDate = bMessages.length > 0 ? new Date(bMessages[0].attributes.createdAt) : new Date(b.data.attributes.createdAt);
-
+        const aRecentMessageDate = aMessages.length > 0 ? new Date(aMessages[aMessages.length - 1].attributes.createdAt) : new Date(a.data.attributes.createdAt);
+        const bRecentMessageDate = bMessages.length > 0 ? new Date(bMessages[bMessages.length - 1].attributes.createdAt) : new Date(b.data.attributes.createdAt);
+        
         return bRecentMessageDate - aRecentMessageDate;
     });
 }
