@@ -169,7 +169,7 @@ router.get("/create-a-new-conversation", async (req, res) => {
     const token = req.headers['authorization'] && req.headers['authorization'].split(' ')[1];
     const refreshToken = req.headers['refresh-token'];
 
-    if (!user_ID || !user_ID2 || !token) {
+    if (!user_ID || !user_ID2 || !token || user_ID.trim() === "" || user_ID2.trim() === "") {
         return res.status(401).send({ message: "Missing data in the body", status: false });
     }
 
