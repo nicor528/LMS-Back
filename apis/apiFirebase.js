@@ -29,7 +29,10 @@ function verifyToken(token) {
         const payload = jwt.verify(token, process.env.JWT_SECRET);
         return payload;
     } catch (error) {
-        throw new Error('Invalid or expired token');
+        if (error instanceof jwt.TokenExpiredError) {
+            error.name = 'TokenExpiredError';
+        }
+        throw error;
     }
 }
 
