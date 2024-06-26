@@ -348,7 +348,7 @@ router.post("/edit-info-user", async (req, res) => {
     const token = req.headers['authorization'] && req.headers['authorization'].split(' ')[1];
     const refreshToken = req.headers['refresh-token'];
 
-    if (!user_ID || !name || !lastName || !birth || !postal_code || !city || !province || !country || !street_name || !academic || phone || !token) {
+    if (!user_ID || !name || !lastName || !birth || !postal_code || !city || !province || !country || !street_name || !academic || !phone || !token) {
         return res.status(401).send({ message: "Missing data in the body", status: false });
     }
 
