@@ -80,6 +80,7 @@ router.get("/search-user", (req, res) => {
     }
 })
 
+/*
 router.post("/create-conversation", (req, res) => {
     const user_ID = req.body.user_ID;
     const user_ID2 = req.body.user_ID2;
@@ -96,7 +97,7 @@ router.post("/create-conversation", (req, res) => {
     }else{
         res.status(400).send({message: "missing data in the body", status: false})  
     }
-})
+})*/
 
 function sortConversationsByRecentMessage(conversations) {
     return conversations.sort((a, b) => {
