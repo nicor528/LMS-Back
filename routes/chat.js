@@ -122,6 +122,10 @@ function filterConversations(conversations, user_ID) {
     });
 }
 
+function removeSingleUserConversations(conversations) {
+    return conversations.filter(conversation => conversation.data.attributes.lms_users.data.length > 1);
+}
+
 router.get("/get-user-conversations", async (req, res) => {
     const { user_ID } = req.query;
     const token = req.headers['authorization'] && req.headers['authorization'].split(' ')[1];
@@ -147,7 +151,9 @@ router.get("/get-user-conversations", async (req, res) => {
         const sortedConversations = await sortConversationsByRecentMessage(conversations);
         console.log("Conversaciones ordenadas:", sortedConversations);
 
-        const filteredConversations = await filterConversations(sortedConversations, user_ID);
+        const cleanedConversations = await removeSingleUserConversations(sortedConversations);
+
+        const filteredConversations = await filterConversations(cleanedConversations, user_ID);
 
         res.status(200).send({ data: filteredConversations, status: true, message: "Successful" });
     } catch (error) {
