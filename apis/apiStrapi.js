@@ -850,7 +850,7 @@ function getTries () {
     )
 }
 
-function editInfoUser(user_ID, name, lastName, birth, postal_code, city, province, street_name, academic, country) {
+function editInfoUser(user_ID, name, lastName, birth, postal_code, city, province, street_name, academic, country, phone) {
     return(
         new Promise (async (res, rej) => {
             fetch(`${process.env.url}/lms-users/${user_ID}`, {
@@ -869,7 +869,8 @@ function editInfoUser(user_ID, name, lastName, birth, postal_code, city, provinc
                         country: country,
                         province: province,
                         street_name: street_name,
-                        academic_qualifications: academic
+                        academic_qualifications: academic,
+                        phone: phone
                     }
                 })
             }).then(async (result) => {

@@ -344,11 +344,11 @@ router.post("/upload-CV", async (req, res) => {
 
 
 router.post("/edit-info-user", async (req, res) => {
-    const { user_ID, name, lastName, birth, postal_code, city, province, country, street_name, academic } = req.body;
+    const { user_ID, name, lastName, birth, postal_code, city, province, country, street_name, academic, phone } = req.body;
     const token = req.headers['authorization'] && req.headers['authorization'].split(' ')[1];
     const refreshToken = req.headers['refresh-token'];
 
-    if (!user_ID || !name || !lastName || !birth || !postal_code || !city || !province || !country || !street_name || !academic || !token) {
+    if (!user_ID || !name || !lastName || !birth || !postal_code || !city || !province || !country || !street_name || !academic || phone || !token) {
         return res.status(401).send({ message: "Missing data in the body", status: false });
     }
 
@@ -356,7 +356,7 @@ router.post("/edit-info-user", async (req, res) => {
         const tokenPayload = verifyToken(token);
         // Si el token es válido, proceder con la lógica normal
         const user = await getUser2(user_ID);
-        const updatedUser = await editInfoUser(user.id, name, lastName, birth, postal_code, city, province, street_name, academic, country);
+        const updatedUser = await editInfoUser(user.id, name, lastName, birth, postal_code, city, province, street_name, academic, country, phone);
         res.status(200).send({ data: updatedUser, status: true, message: "Update successful" });
     } catch (error) {
         if (error.name === 'TokenExpiredError' && refreshToken) {
@@ -365,7 +365,7 @@ router.post("/edit-info-user", async (req, res) => {
                 const newAccessToken = await refreshAccessToken(user_ID, refreshToken);
                 // Proceder con la lógica normal después de refrescar el token
                 const user = await getUser2(user_ID);
-                const updatedUser = await editInfoUser(user.id, name, lastName, birth, postal_code, city, province, street_name, academic, country);
+                const updatedUser = await editInfoUser(user.id, name, lastName, birth, postal_code, city, province, street_name, academic, country, phone);
                 res.status(200).send({ data: updatedUser, newAccessToken: newAccessToken, status: true, message: "Token refreshed and update successful" });
             } catch (refreshError) {
                 res.status(401).send({ message: refreshError.message, status: false });
