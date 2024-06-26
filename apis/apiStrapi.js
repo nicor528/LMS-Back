@@ -870,7 +870,7 @@ function editInfoUser(user_ID, name, lastName, birth, postal_code, city, provinc
                         province: province,
                         street_name: street_name,
                         academic_qualifications: academic,
-                        phone: parseInt(phone)
+                        phone: phone
                     }
                 })
             }).then(async (result) => {
