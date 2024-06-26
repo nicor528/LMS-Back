@@ -144,8 +144,10 @@ router.get("/getUserInfo", async (req, res) => {
             } catch (refreshError) {
                 res.status(401).send({ message: refreshError.message, status: false });
             }
-        } else {
+        }  if (error.name === 'TokenExpiredError' && refreshToken) {
             res.status(401).send({ message: 'Invalid or expired token', status: false });
+        }else {
+            res.status(400).send({ message: error.name, status: false });
         }
     }
 });
@@ -268,8 +270,10 @@ router.post("/resetPass", async (req, res) => {
             } catch (refreshError) {
                 res.status(401).send({ message: refreshError.message, status: false });
             }
-        } else {
+        } if (error.name === 'TokenExpiredError' && refreshToken) {
             res.status(401).send({ message: 'Invalid or expired token', status: false });
+        }else {
+            res.status(400).send({ message: error.name, status: false });
         }
     }
 });
@@ -302,8 +306,10 @@ router.post("/edit-profile-picture", async (req, res) => {
             } catch (refreshError) {
                 res.status(401).send({ message: refreshError.message, status: false });
             }
-        } else {
+        } if (error.name === 'TokenExpiredError' && refreshToken) {
             res.status(401).send({ message: 'Invalid or expired token', status: false });
+        }else {
+            res.status(400).send({ message: error.name, status: false });
         }
     }
 });
@@ -336,8 +342,10 @@ router.post("/upload-CV", async (req, res) => {
             } catch (refreshError) {
                 res.status(401).send({ message: refreshError.message, status: false });
             }
-        } else {
+        } if (error.name === 'TokenExpiredError' && refreshToken) {
             res.status(401).send({ message: 'Invalid or expired token', status: false });
+        }else {
+            res.status(400).send({ message: error.name, status: false });
         }
     }
 });
@@ -370,8 +378,10 @@ router.post("/edit-info-user", async (req, res) => {
             } catch (refreshError) {
                 res.status(401).send({ message: refreshError.message, status: false });
             }
-        } else {
+        } if (error.name === 'TokenExpiredError' && refreshToken) {
             res.status(401).send({ message: 'Invalid or expired token', status: false });
+        }else {
+            res.status(400).send({ message: error.name, status: false });
         }
     }
 });
