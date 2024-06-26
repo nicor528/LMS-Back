@@ -65,7 +65,8 @@ async function generateAndSaveTokens(userID) {
     const payload = { userID };
 
     // Crear tokens
-    const accessToken = createToken(payload, '1h');  // Token de acceso con validez de 1 hora
+    //const accessToken = createToken(payload, '1h');  // Token de acceso con validez de 1 hora
+    const accessToken = createToken(payload, '10s');
     const refreshToken = createToken(payload, '7d');  // Token de actualización con validez de 7 días
 
     // Calcular fecha de expiración del token de actualización
