@@ -62,7 +62,7 @@ function filterUsersBySearchParam(users, searchParam) {
     });
   
     return filteredUsers;
-  }
+}
 
 router.get("/search-user", (req, res) => {
     const search = req.query.search;
@@ -111,6 +111,17 @@ function sortConversationsByRecentMessage(conversations) {
     });
 }
 
+function filterConversations(conversations, user_ID) {
+    return conversations.map(conversation => {
+        const lms_users = conversation.data.attributes.lms_users.data;
+        // Filtrar los usuarios que no coinciden con el user_ID dado
+        const filteredUsers = lms_users.filter(user => user.attributes.user_ID !== user_ID);
+        // Actualizar la conversación con los usuarios filtrados
+        conversation.data.attributes.lms_users.data = filteredUsers;
+        return conversation;
+    });
+}
+
 router.get("/get-user-conversations", async (req, res) => {
     const { user_ID } = req.query;
     const token = req.headers['authorization'] && req.headers['authorization'].split(' ')[1];
@@ -136,7 +147,9 @@ router.get("/get-user-conversations", async (req, res) => {
         const sortedConversations = await sortConversationsByRecentMessage(conversations);
         console.log("Conversaciones ordenadas:", sortedConversations);
 
-        res.status(200).send({ data: sortedConversations, status: true, message: "Successful" });
+        const filteredConversations = await filterConversations(sortedConversations, user_ID);
+
+        res.status(200).send({ data: filteredConversations, status: true, message: "Successful" });
     } catch (error) {
         console.error("Error:", error);
         if (error.name === 'TokenExpiredError' && refreshToken) {
@@ -311,6 +324,7 @@ router.post("/read-message", async (req, res) => {
         }
     }
 });
+
 
 
 module.exports = router;

@@ -257,9 +257,10 @@ getProfilePicture("iGaPnJK0qVRWt6I5ik7PFIR6lg73").then(data => {
 
 
 async function test () {
-    const user = await getUser2("K2J99EWNpvZLOWcgqF1HG0xdDNA3");
+    const user = await getUser2("iGaPnJK0qVRWt6I5ik7PFIR6lg73");
         const conversations = await getAllConversations(user.attributes.lms_conversations.data);
-        console.log(conversations)
+        console.log(conversations[0].data.attributes.lms_users.data)
+
 }
 
 test()
