@@ -27,7 +27,7 @@ router.get("/get-open-user-courses-requests", async (req, res) => {
             } catch (refreshError) {
                 res.status(401).send({ message: refreshError.message, status: false });
             }
-        }  if (error.name === 'TokenExpiredError' && refreshToken) {
+        }  if (error.name === 'TokenExpiredError') {
             res.status(401).send({ message: 'Invalid or expired token', status: false });
         }else {
             res.status(400).send({ message: error.name, status: false });
@@ -59,7 +59,7 @@ router.get("/get-closed-user-course-request", async (req, res) => {
             } catch (refreshError) {
                 res.status(401).send({ message: refreshError.message, status: false });
             }
-        }  if (error.name === 'TokenExpiredError' && refreshToken) {
+        } if (error.name === 'TokenExpiredError') {
             res.status(401).send({ message: 'Invalid or expired token', status: false });
         }else {
             res.status(400).send({ message: error.name, status: false });
@@ -126,7 +126,7 @@ router.post("/aprove-or-denied-user-course-request", async (req, res) => {
             } catch (refreshError) {
                 res.status(401).send({ message: refreshError.message, status: false });
             }
-        } if (error.name === 'TokenExpiredError' && refreshToken) {
+        } if (error.name === 'TokenExpiredError') {
             res.status(401).send({ message: 'Invalid or expired token', status: false });
         }else {
             res.status(400).send({ message: error.name, status: false });
@@ -158,7 +158,7 @@ router.get("/get-all-users", async (req, res) => {
             } catch (refreshError) {
                 res.status(401).send({ message: refreshError.message, status: false });
             }
-        }  if (error.name === 'TokenExpiredError' && refreshToken) {
+        } if (error.name === 'TokenExpiredError') {
             res.status(401).send({ message: 'Invalid or expired token', status: false });
         }else {
             res.status(400).send({ message: error.name, status: false });

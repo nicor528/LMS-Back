@@ -42,7 +42,7 @@ router.post("/add-message", async (req, res) => {
                 }
             }
         }
-    } if (error.name === 'TokenExpiredError' && refreshToken) {
+    } if (error.name === 'TokenExpiredError') {
         res.status(401).send({ message: 'Invalid or expired token', status: false });
     }else {
         res.status(400).send({ message: error.name, status: false });
@@ -179,7 +179,7 @@ router.get("/get-user-conversations", async (req, res) => {
                 console.error("Error al renovar el token:", refreshError);
                 res.status(401).send({ message: refreshError.message, status: false });
             }
-        }  if (error.name === 'TokenExpiredError' && refreshToken) {
+        } if (error.name === 'TokenExpiredError') {
             res.status(401).send({ message: 'Invalid or expired token', status: false });
         }else {
             res.status(400).send({ message: error.name, status: false });
@@ -275,7 +275,7 @@ router.get("/create-a-new-conversation", async (req, res) => {
             } catch (refreshError) {
                 res.status(401).send({ message: refreshError.message, status: false });
             }
-        } if (error.name === 'TokenExpiredError' && refreshToken) {
+        } if (error.name === 'TokenExpiredError') {
             res.status(401).send({ message: 'Invalid or expired token', status: false });
         }else {
             res.status(400).send({ message: error.name, status: false });
@@ -330,7 +330,7 @@ router.post("/read-message", async (req, res) => {
             } catch (refreshError) {
                 res.status(401).send({ message: refreshError.message, status: false });
             }
-        } if (error.name === 'TokenExpiredError' && refreshToken) {
+        } if (error.name === 'TokenExpiredError') {
             res.status(401).send({ message: 'Invalid or expired token', status: false });
         }else {
             res.status(400).send({ message: error.name, status: false });

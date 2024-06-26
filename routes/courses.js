@@ -37,7 +37,7 @@ router.get("/get-all-courses", async (req, res) => {
             } catch (refreshError) {
                 res.status(401).send({ message: refreshError.message, status: false });
             }
-        } if (error.name === 'TokenExpiredError' && refreshToken) {
+        } if (error.name === 'TokenExpiredError') {
             res.status(401).send({ message: 'Invalid or expired token', status: false });
         }else {
             res.status(400).send({ message: error.name, status: false });
@@ -223,7 +223,7 @@ router.get("/get-single-course", async (req, res) => {
             } catch (refreshError) {
                 res.status(401).send({ message: refreshError.message, status: false });
             }
-        }  if (error.name === 'TokenExpiredError' && refreshToken) {
+        } if (error.name === 'TokenExpiredError') {
             res.status(401).send({ message: 'Invalid or expired token', status: false });
         }else {
             res.status(400).send({ message: error.name, status: false });
@@ -272,7 +272,7 @@ router.post("/create-user-course-request", async (req, res) => {
             } catch (refreshError) {
                 res.status(401).send({ message: refreshError.message, status: false });
             }
-        }  if (error.name === 'TokenExpiredError' && refreshToken) {
+        } if (error.name === 'TokenExpiredError') {
             res.status(401).send({ message: 'Invalid or expired token', status: false });
         }else {
             res.status(400).send({ message: error.name, status: false });
@@ -357,7 +357,7 @@ router.get("/get-oneuser-allcourses", async (req, res) => {
             } catch (refreshError) {
                 res.status(401).send({ message: refreshError.message, status: false });
             }
-        }  if (error.name === 'TokenExpiredError' && refreshToken) {
+        } if (error.name === 'TokenExpiredError') {
             res.status(401).send({ message: 'Invalid or expired token', status: false });
         }else {
             res.status(400).send({ message: error.name, status: false });
@@ -404,7 +404,7 @@ router.get("/get-ongoing-courses", async (req, res) => {
                 } catch (refreshError) {
                     res.status(401).send({ message: refreshError.message, status: false });
                 }
-            } if (error.name === 'TokenExpiredError' && refreshToken) {
+            } if (error.name === 'TokenExpiredError') {
                 res.status(401).send({ message: 'Invalid or expired token', status: false });
             }else {
                 res.status(400).send({ message: error.name, status: false });
@@ -436,7 +436,7 @@ router.post("/read-annoucement", async (req, res) => {
                 } catch (refreshError) {
                     res.status(401).send({ message: refreshError.message, status: false });
                 }
-            }  if (error.name === 'TokenExpiredError' && refreshToken) {
+            } if (error.name === 'TokenExpiredError') {
                 res.status(401).send({ message: 'Invalid or expired token', status: false });
             }else {
                 res.status(400).send({ message: error.name, status: false });
@@ -469,7 +469,7 @@ router.get("/get-finished-courses", async (req, res) => {
             } catch (refreshError) {
                 res.status(401).send({ message: refreshError.message, status: false });
             }
-        }  if (error.name === 'TokenExpiredError' && refreshToken) {
+        } if (error.name === 'TokenExpiredError') {
             res.status(401).send({ message: 'Invalid or expired token', status: false });
         }else {
             res.status(400).send({ message: error.name, status: false });
