@@ -5,19 +5,13 @@ const swaggerUi = require('swagger-ui-express');
 const fs = require('fs');
 const path = require('path');
 const https = require('https');
-/*
-const singUp = require("./routes/SingUp");
-const singIn = require("./routes/SingIn");
-const edits = require("./routes/edits");
-const pay = require("./routes/payments");
-const secu = require("./routes/security");*/
 
 const app = express();
-/*
-const privateKey = fs.readFileSync('clave-privada.pem', 'utf8');
-const certificate = fs.readFileSync('certificado-autofirmado.pem', 'utf8');
+
+const privateKey = fs.readFileSync('ssl/clave-privada.pem', 'utf8');
+const certificate = fs.readFileSync('ssl/certificado-autofirmado.pem', 'utf8');
 const credentials = { key: privateKey, cert: certificate };
-const httpsServer = https.createServer(credentials, app);*/
+const httpsServer = https.createServer(credentials, app);
 
 const options = {
     swaggerDefinition: {
@@ -43,16 +37,10 @@ const options = {
 const specs = swaggerJsdoc(options);
 app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(specs));
 
-
 app.use(express.static('public'));
 app.use(cors());
 app.use(express.json({ limit: '10mb' }));
 app.use(express.urlencoded({limit: '10mb',  extended: false }));
-/*app.use(singUp);
-app.use(singIn);
-app.use(edits);
-app.use(pay);
-app.use(secu);*/
 
 app.use('/api/singup', require('./routes/SingUp'));
 app.use('/api/singin', require('./routes/SingIn'));
@@ -78,10 +66,11 @@ function getRouteFiles() {
     .filter(file => file.endsWith('.js'))
     .map(file => path.join(routeDir, file));
 }
-/*
-httpsServer.listen(4242, () => {
-  console.log('Servidor HTTPS en ejecución en el puerto 4242');
-});*/
 
-const PORT = process.env.PORT || 4243;
-app.listen(PORT, () => console.log("server up en", PORT));
+const HTTPS_PORT = process.env.HTTPS_PORT || 4242;
+httpsServer.listen(HTTPS_PORT, () => {
+  console.log(`Servidor HTTPS en ejecución en el puerto ${HTTPS_PORT}`);
+});
+
+const HTTP_PORT = process.env.HTTP_PORT || 4243;
+app.listen(HTTP_PORT, () => console.log(`Servidor HTTP en ejecución en el puerto ${HTTP_PORT}`));
