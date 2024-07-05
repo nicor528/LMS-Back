@@ -8,10 +8,11 @@ const https = require('https');
 
 const app = express();
 
+/*
 const privateKey = fs.readFileSync('ssl/clave-privada.pem', 'utf8');
 const certificate = fs.readFileSync('ssl/certificado-autofirmado.pem', 'utf8');
 const credentials = { key: privateKey, cert: certificate };
-const httpsServer = https.createServer(credentials, app);
+const httpsServer = https.createServer(credentials, app);*/
 
 const options = {
     swaggerDefinition: {
@@ -67,10 +68,11 @@ function getRouteFiles() {
     .map(file => path.join(routeDir, file));
 }
 
+/*
 const HTTPS_PORT = process.env.HTTPS_PORT || 4242;
 httpsServer.listen(HTTPS_PORT, () => {
   console.log(`Servidor HTTPS en ejecución en el puerto ${HTTPS_PORT}`);
-});
+});*/
 
 const HTTP_PORT = process.env.HTTP_PORT || 4243;
 app.listen(HTTP_PORT, () => console.log(`Servidor HTTP en ejecución en el puerto ${HTTP_PORT}`));

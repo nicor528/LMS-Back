@@ -1,4 +1,6 @@
 .env
+
+app.yaml
 node_modules/
 
 # Logs
