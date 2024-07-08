@@ -246,21 +246,21 @@ router.post("/singInWithId", async (req, res) => {
  *                   type: boolean
  */
 router.post("/resetPass", async (req, res) => {
-    const { email, user_ID } = req.body;
+    const { email } = req.body; /*
     const token = req.headers['authorization'] && req.headers['authorization'].split(' ')[1];
-    const refreshToken = req.headers['refresh-token'];
+    const refreshToken = req.headers['refresh-token'];*/
 
-    if (!email || !token || !user_ID) {
+    if (!email) {
         return res.status(401).send({ message: "Missing data in the body", status: false });
     }
 
     try {
-        const tokenPayload = verifyToken(token);
+      // const tokenPayload = verifyToken(token);
         // Si el token es válido, proceder con la lógica normal
         await resetPass(email);
         res.status(200).send({ status: true, message: "ok" });
     } catch (error) {
-        if (error.name === 'TokenExpiredError' && refreshToken) {
+       /* if (error.name === 'TokenExpiredError' && refreshToken) {
             try {
                 // Intentar actualizar el token de acceso usando el refresh token
                 const newAccessToken = await refreshAccessToken(user_ID, refreshToken);
@@ -272,9 +272,9 @@ router.post("/resetPass", async (req, res) => {
             }
         } if (error.name === 'TokenExpiredError') {
             res.status(401).send({ message: 'Invalid or expired token', status: false });
-        }else {
+        }else { */
             res.status(400).send({ message: error.name, status: false });
-        }
+       // }
     }
 });
 
