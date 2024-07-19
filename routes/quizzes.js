@@ -25,6 +25,7 @@ router.post("/get-quizz", async (req, res) => {
             newquestion.attributes = {};
             newquestion.attributes.question = question.attributes.question;
             newquestion.attributes.options = [question.attributes.wrong_answer_1, question.attributes.wrong_answer_2, question.attributes.wrong_answer_3, question.attributes.correct_answer_1];
+            newquestion.attributes.options.sort(() => Math.random() - 0.5); // Ordenar aleatoriamente
             quizz1.attributes.lms_questions.data[n] = newquestion;
             quizz1.attributes.max_tries = quizz.data.attributes.max_tries;
             n++;
@@ -46,17 +47,18 @@ router.post("/get-quizz", async (req, res) => {
                     newquestion.attributes = {};
                     newquestion.attributes.question = question.attributes.question;
                     newquestion.attributes.options = [question.attributes.wrong_answer_1, question.attributes.wrong_answer_2, question.attributes.wrong_answer_3, question.attributes.correct_answer_1];
+                    newquestion.attributes.options.sort(() => Math.random() - 0.5); // Ordenar aleatoriamente
                     quizz1.attributes.lms_questions.data[n] = newquestion;
                     quizz1.attributes.max_tries = quizz.data.attributes.max_tries;
                     n++;
                 });
-                res.status(200).send({ data: quizz1,   newAccessToken: newAccessToken, status: true });
+                res.status(200).send({ data: quizz1, newAccessToken: newAccessToken, status: true });
             } catch (refreshError) {
                 res.status(401).send({ message: refreshError.message, status: false });
             }
-        } if (error.name === 'TokenExpiredError') {
+        } else if (error.name === 'TokenExpiredError') {
             res.status(401).send({ message: 'Invalid or expired token', status: false });
-        }else {
+        } else {
             res.status(400).send({ message: error.name, status: false });
         }
     }
