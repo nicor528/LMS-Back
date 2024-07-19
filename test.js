@@ -257,9 +257,21 @@ getProfilePicture("iGaPnJK0qVRWt6I5ik7PFIR6lg73").then(data => {
 
 
 async function test () {
-    const user = await getUser2("iGaPnJK0qVRWt6I5ik7PFIR6lg73");
-        const conversations = await getAllConversations(user.attributes.lms_conversations.data);
-        console.log(conversations[0].data.attributes.lms_users.data)
+    const quizz = await getQuiz1(parseInt(5));
+        let quizz1 = quizz.data;
+        let n = 0;
+        quizz.data.attributes.lms_questions.data.map(question => {
+            let newquestion = {};
+            newquestion.attributes = {};
+            newquestion.attributes.question = question.attributes.question;
+            newquestion.attributes.options = [question.attributes.wrong_answer_1, question.attributes.wrong_answer_2, question.attributes.wrong_answer_3, question.attributes.correct_answer_1];
+            newquestion.attributes.options.sort(() => Math.random() - 0.5); // Ordenar aleatoriamente
+            quizz1.attributes.lms_questions.data[n] = newquestion;
+            quizz1.attributes.max_tries = quizz.data.attributes.max_tries;
+            n++;
+        });
+
+        console.log(quizz1.attributes.lms_questions.data[0].attributes)
 
 }
 
