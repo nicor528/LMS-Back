@@ -139,11 +139,13 @@ router.get("/get-single-course", async (req, res) => {
 
         let mentors = await Promise.all(mentorPromises);
         course[0].attributes.lms_mentors.data = mentors;
-
         
         const allCourses = await getAllUserCourses();
         const isEnrolled = allCourses.data.find(data => data.attributes.user_ID === user_ID && (data.attributes.lms_course.data.id === course_ID || data.id === course_ID ));
         console.log(isEnrolled)
+
+        course[0].attributes.lms_quiz = course[0].attributes.lms_quizs;
+
         if(isEnrolled != undefined){
             course[0].attributes.quiz_score = isEnrolled.attributes.finish ? isEnrolled.attributes.total_lessons : 0
             course[0].attributes.finishDate = isEnrolled.attributes.finish ? isEnrolled.attributes.end_date : null;
